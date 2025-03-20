@@ -1,0 +1,10 @@
+*.pth
+*.pt
+*.zip
+*.tar
+*.mp4
+*.ipynb
+result/
+debugging/
+.vscode/
+*.pyc
