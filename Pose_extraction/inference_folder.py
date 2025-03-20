@@ -64,6 +64,8 @@ if __name__ == "__main__":
                         help='save image results')
     parser.add_argument('--save-json', default=False, action='store_true',
                         help='save json results')
+    parser.add_argument('--class_folders', default=False, action='store_true',
+                        help='video 폴더안에 class_folder들이 따로 있는 경우')
 
     args = parser.parse_args()
 
@@ -75,132 +77,227 @@ if __name__ == "__main__":
     yolo = args.yolo
     if yolo is None:
         yolo = 'easy_ViTPose/' + ('yolov8s' + ('.onnx' if has_onnx and not (use_mps or use_cuda) else '.pt'))
-    input_path = args.input
+    # input_path = args.input
 
-    # Load the image / video reader
-    try:  # Check if is webcam
-        int(input_path)
-        is_video = True
-    except ValueError:
-        assert os.path.isfile(input_path), 'The input file does not exist'
-        is_video = input_path[input_path.rfind('.') + 1:].lower() in ['mp4', 'mov']
 
+    is_video = True
     ext = '.mp4' if is_video else '.png'
     assert not (args.save_img or args.save_json) or args.output_path, \
         'Specify an output path if using save-img or save-json flags'
-    output_path = args.output_path
+    # output_path = args.output_path #! log 파일
     
     
-    
-    src_dir = '/local_datasets/Penn_Action/videos'
-    output_path = '/local_datasets/Penn_Action/skeleton'
-    json_path = '/local_datasets/Penn_Action/skeleton_json'
-    class_names = os.listdir(src_dir)
-                # Initialize model
+    src_dir = '/local_datasets/Penn_Action/videos'#! 비디오 폴더 
+    output_path = '/local_datasets/Penn_Action/skeleton'#! skeleton 합쳐진 영상 저장되는경로
+    json_path = '/local_datasets/Penn_Action/skeleton_json' #! skeleton 값들 json으로
     model = VitInference(args.model, yolo, args.model_name,
                         args.det_class, args.dataset,
                         args.yolo_size, is_video=is_video,
                         single_pose=args.single_pose,
                         yolo_step=args.yolo_step)  # type: ignore
     print(f">>> Model loaded: {args.model}")
-    for class_name in class_names:
-        print(f"****************Class {class_name} ****************")
-        class_folder = os.path.join(src_dir,class_name)
-        os.makedirs(os.path.join(output_path,class_name), exist_ok=True)
-        os.makedirs(os.path.join(json_path,class_name), exist_ok=True)
-        input_files = [os.path.join(class_folder, f) for f in os.listdir(class_folder) if f.endswith(('.avi','.mp4', '.jpg', '.png'))]
-        for (i,input_path) in enumerate(input_files):
-            print(f"****************{i}/{len(input_files)} ****************")
-            
-            if os.path.isdir(output_path):
-                og_ext = input_path[input_path.rfind('.'):]
-                save_name_img = os.path.basename(input_path).replace(og_ext, f"_result{ext}")
-                save_name_json = os.path.basename(input_path).replace(og_ext, "_result.json")
-                output_path_img = os.path.join(output_path,class_name, save_name_img)
-                output_path_json = os.path.join(json_path, class_name, save_name_json)
-            else:
-                output_path_img = output_path + f'{ext}'
-                output_path_json = output_path + '.json'
+    
+    if args.class_folders:
+        class_names = os.listdir(src_dir)
+                # Initialize model
 
-            wait = 0
-            total_frames = 1
-            if is_video:
-                reader = VideoReader(input_path, args.rotate)
-                cap = cv2.VideoCapture(input_path)  # type: ignore
-                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-                cap.release()
-                wait = 15
-                if args.save_img:
+        for class_name in class_names:
+            print(f"****************Class {class_name} ****************")
+            class_folder = os.path.join(src_dir,class_name)
+            os.makedirs(os.path.join(output_path,class_name), exist_ok=True)
+            os.makedirs(os.path.join(json_path,class_name), exist_ok=True)
+            input_files = [os.path.join(class_folder, f) for f in os.listdir(class_folder) if f.endswith(('.avi','.mp4', '.jpg', '.png'))]
+            for (i,input_path) in enumerate(input_files):
+                print(f"****************{i}/{len(input_files)} ****************")
+                
+                if os.path.isdir(output_path):
+                    og_ext = input_path[input_path.rfind('.'):]
+                    save_name_img = os.path.basename(input_path).replace(og_ext, f"_result{ext}")
+                    save_name_json = os.path.basename(input_path).replace(og_ext, "_result.json")
+                    output_path_img = os.path.join(output_path,class_name, save_name_img)
+                    output_path_json = os.path.join(json_path, class_name, save_name_json)
+                else:
+                    output_path_img = output_path + f'{ext}'
+                    output_path_json = output_path + '.json'
+
+                wait = 0
+                total_frames = 1
+                if is_video:
+                    reader = VideoReader(input_path, args.rotate)
                     cap = cv2.VideoCapture(input_path)  # type: ignore
-                    fps = cap.get(cv2.CAP_PROP_FPS)
-                    ret, frame = cap.read()
+                    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
                     cap.release()
-                    assert ret
-                    assert fps > 0
-                    output_size = frame.shape[:2][::-1]
-
-                    # Check if we have X264 otherwise use default MJPG
-                    try:
-                        temp_video = cv2.VideoWriter('/tmp/checkcodec.mp4',
-                                                    cv2.VideoWriter_fourcc(*'h264'), 30, (32, 32))
-                        opened = temp_video.isOpened()
-                    except Exception:
-                        opened = False
-                    codec = 'h264' if opened else 'MJPG'
-                    out_writer = cv2.VideoWriter(output_path_img,
-                                                cv2.VideoWriter_fourcc(*codec),  # More efficient codec
-                                                fps, output_size)  # type: ignore
-            else:
-                reader = [np.array(Image.open(input_path).rotate(args.rotate))]  # type: ignore
-
-
-
-            print(f'>>> Running inference on {input_path}')
-            keypoints = []
-            fps = []
-            tot_time = 0.
-            for (ith, img) in enumerate(reader):
-                t0 = time.time()
-
-                # Run inference
-                frame_keypoints = model.inference(img)
-                keypoints.append(frame_keypoints)
-
-                delta = time.time() - t0
-                tot_time += delta
-                fps.append(delta)
-
-                # Draw the poses and save the output img
-                if args.show or args.save_img:
-                    # Draw result and transform to BGR
-                    img = model.draw(args.show_yolo, args.show_raw_yolo, args.conf_threshold)[..., ::-1]
-
+                    wait = 15
                     if args.save_img:
-                        # TODO: If exists add (1), (2), ...
-                        if is_video:
-                            out_writer.write(img)
-                        else:
-                            print('>>> Saving output image')
-                            cv2.imwrite(output_path_img, img)
+                        cap = cv2.VideoCapture(input_path)  # type: ignore
+                        fps = cap.get(cv2.CAP_PROP_FPS)
+                        ret, frame = cap.read()
+                        cap.release()
+                        assert ret
+                        assert fps > 0
+                        output_size = frame.shape[:2][::-1]
 
-                    if args.show:
-                        cv2.imshow('preview', img)
-                        cv2.waitKey(wait)
+                        # Check if we have X264 otherwise use default MJPG
+                        try:
+                            temp_video = cv2.VideoWriter('/tmp/checkcodec.mp4',
+                                                        cv2.VideoWriter_fourcc(*'h264'), 30, (32, 32))
+                            opened = temp_video.isOpened()
+                        except Exception:
+                            opened = False
+                        codec = 'h264' if opened else 'MJPG'
+                        out_writer = cv2.VideoWriter(output_path_img,
+                                                    cv2.VideoWriter_fourcc(*codec),  # More efficient codec
+                                                    fps, output_size)  # type: ignore
+                else:
+                    reader = [np.array(Image.open(input_path).rotate(args.rotate))]  # type: ignore
 
-            if is_video:
-                tot_poses = sum(len(k) for k in keypoints)
-                print(f'>>> Mean inference FPS: {1 / np.mean(fps):.2f}')
-                print(f'>>> Total poses predicted: {tot_poses} mean per frame: '
-                    f'{(tot_poses / (ith + 1)):.2f}')
-                print(f'>>> Mean FPS per pose: {(tot_poses / tot_time):.2f}')
 
-            if args.save_json:
-                print('>>> Saving output json')
-                with open(output_path_json, 'w') as f:
-                    out = {'keypoints': keypoints,
-                        'skeleton': joints_dict()[model.dataset]['keypoints']}
-                    json.dump(out, f, cls=NumpyEncoder)
 
-            if is_video and args.save_img:
-                out_writer.release()
-            cv2.destroyAllWindows()
+                print(f'>>> Running inference on {input_path}')
+                keypoints = []
+                fps = []
+                tot_time = 0.
+                for (ith, img) in enumerate(reader):
+                    t0 = time.time()
+
+                    # Run inference
+                    frame_keypoints = model.inference(img)
+                    keypoints.append(frame_keypoints)
+
+                    delta = time.time() - t0
+                    tot_time += delta
+                    fps.append(delta)
+
+                    # Draw the poses and save the output img
+                    if args.show or args.save_img:
+                        # Draw result and transform to BGR
+                        img = model.draw(args.show_yolo, args.show_raw_yolo, args.conf_threshold)[..., ::-1]
+
+                        if args.save_img:
+                            # TODO: If exists add (1), (2), ...
+                            if is_video:
+                                out_writer.write(img)
+                            else:
+                                print('>>> Saving output image')
+                                cv2.imwrite(output_path_img, img)
+
+                        if args.show:
+                            cv2.imshow('preview', img)
+                            cv2.waitKey(wait)
+
+                if is_video:
+                    tot_poses = sum(len(k) for k in keypoints)
+                    print(f'>>> Mean inference FPS: {1 / np.mean(fps):.2f}')
+                    print(f'>>> Total poses predicted: {tot_poses} mean per frame: '
+                        f'{(tot_poses / (ith + 1)):.2f}')
+                    print(f'>>> Mean FPS per pose: {(tot_poses / tot_time):.2f}')
+
+                if args.save_json:
+                    print('>>> Saving output json')
+                    with open(output_path_json, 'w') as f:
+                        out = {'keypoints': keypoints,
+                            'skeleton': joints_dict()[model.dataset]['keypoints']}
+                        json.dump(out, f, cls=NumpyEncoder)
+
+                if is_video and args.save_img:
+                    out_writer.release()
+                cv2.destroyAllWindows()
+    else:
+            os.makedirs(output_path,exist_ok=True)
+            os.makedirs(json_path,exist_ok=True)
+            input_files = [os.path.join(src_dir, f) for f in os.listdir(src_dir) if f.endswith(('.avi','.mp4', '.jpg', '.png'))]
+            for (i,input_path) in enumerate(input_files):
+                print(f"****************{i}/{len(input_files)} ****************")
+                
+                if os.path.isdir(output_path):
+                    og_ext = input_path[input_path.rfind('.'):]
+                    save_name_img = os.path.basename(input_path).replace(og_ext, f"_result{ext}")
+                    save_name_json = os.path.basename(input_path).replace(og_ext, "_result.json")
+                    output_path_img = os.path.join(output_path, save_name_img)
+                    output_path_json = os.path.join(json_path, save_name_json)
+                else:
+                    output_path_img = output_path + f'{ext}'
+                    output_path_json = output_path + '.json'
+
+                wait = 0
+                total_frames = 1
+                if is_video:
+                    reader = VideoReader(input_path, args.rotate)
+                    cap = cv2.VideoCapture(input_path)  # type: ignore
+                    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                    cap.release()
+                    wait = 15
+                    if args.save_img:
+                        cap = cv2.VideoCapture(input_path)  # type: ignore
+                        fps = cap.get(cv2.CAP_PROP_FPS)
+                        ret, frame = cap.read()
+                        cap.release()
+                        assert ret
+                        assert fps > 0
+                        output_size = frame.shape[:2][::-1]
+
+                        # Check if we have X264 otherwise use default MJPG
+                        try:
+                            temp_video = cv2.VideoWriter('/tmp/checkcodec.mp4',
+                                                        cv2.VideoWriter_fourcc(*'h264'), 30, (32, 32))
+                            opened = temp_video.isOpened()
+                        except Exception:
+                            opened = False
+                        codec = 'h264' if opened else 'MJPG'
+                        out_writer = cv2.VideoWriter(output_path_img,
+                                                    cv2.VideoWriter_fourcc(*codec),  # More efficient codec
+                                                    fps, output_size)  # type: ignore
+                else:
+                    reader = [np.array(Image.open(input_path).rotate(args.rotate))]  # type: ignore
+
+
+
+                print(f'>>> Running inference on {input_path}')
+                keypoints = []
+                fps = []
+                tot_time = 0.
+                for (ith, img) in enumerate(reader):
+                    t0 = time.time()
+
+                    # Run inference
+                    frame_keypoints = model.inference(img)
+                    keypoints.append(frame_keypoints)
+
+                    delta = time.time() - t0
+                    tot_time += delta
+                    fps.append(delta)
+
+                    # Draw the poses and save the output img
+                    if args.show or args.save_img:
+                        # Draw result and transform to BGR
+                        img = model.draw(args.show_yolo, args.show_raw_yolo, args.conf_threshold)[..., ::-1]
+
+                        if args.save_img:
+                            # TODO: If exists add (1), (2), ...
+                            if is_video:
+                                out_writer.write(img)
+                            else:
+                                print('>>> Saving output image')
+                                cv2.imwrite(output_path_img, img)
+
+                        if args.show:
+                            cv2.imshow('preview', img)
+                            cv2.waitKey(wait)
+
+                if is_video:
+                    tot_poses = sum(len(k) for k in keypoints)
+                    print(f'>>> Mean inference FPS: {1 / np.mean(fps):.2f}')
+                    print(f'>>> Total poses predicted: {tot_poses} mean per frame: '
+                        f'{(tot_poses / (ith + 1)):.2f}')
+                    print(f'>>> Mean FPS per pose: {(tot_poses / tot_time):.2f}')
+
+                if args.save_json:
+                    print('>>> Saving output json')
+                    with open(output_path_json, 'w') as f:
+                        out = {'keypoints': keypoints,
+                            'skeleton': joints_dict()[model.dataset]['keypoints']}
+                        json.dump(out, f, cls=NumpyEncoder)
+
+                if is_video and args.save_img:
+                    out_writer.release()
+                cv2.destroyAllWindows()
