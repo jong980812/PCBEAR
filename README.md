@@ -35,15 +35,15 @@ PCEBEAR works by first extracting pose sequences using a pre-trained pose estima
 2. **Concept Discovery:** Pose sequences are clustered into static and dynamic pose concepts using unsupervised clustering.
 3. **Action Recognition:** These pose-based concepts are used to classify actions in the video.
 
-## Installation and Usage
+<!-- ## Installation and Usage
 
 ### Requirements
 
 - Python 3.6+
 - PyTorch 1.8+
-- Other dependencies listed in `requirements.txt`
+- Other dependencies listed in `requirements.txt` -->
 
-### Usage
+<!-- ### Usage
 
 ```bash
 # Clone the repository
@@ -54,4 +54,4 @@ cd your-repository
 pip install -r requirements.txt
 
 # To run the model
-python run_model.py --dataset <dataset_name> --input <video_input_path> --output <output_path>
+python run_model.py --dataset <dataset_name> --input <video_input_path> --output <output_path> -->
