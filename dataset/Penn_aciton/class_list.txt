@@ -1,0 +1,15 @@
+baseball_pitch
+clean_and_jerk
+pullup
+strum_guitar
+baseball_swing
+golf_swing
+pushup
+tennis_forehand
+bench_press
+jumping_jacks
+situp
+tennis_serve
+bowl
+jump_rope
+squat
