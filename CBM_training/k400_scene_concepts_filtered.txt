@@ -1,0 +1,120 @@
+aquarium
+arcade
+ballroom
+bar
+barber shop
+barn
+basketball court
+bathroom
+beach
+bedroom
+blank
+bleachers
+blind spot
+blue wall
+bookshelf
+boxing ring
+brick wall
+bridge
+building
+car show
+carnival
+casino
+ceiling
+christmas
+church
+circus
+city
+classroom
+concert
+conference
+congress
+congressional hearing
+construction
+counter
+courtroom
+crib
+desert
+desk
+factory
+farm
+field
+fireplace
+floor
+football field
+forest
+furnace
+garage
+garden
+gas station
+golf course
+graduation
+grocery store
+ground
+gym
+hair salon
+halloween
+hallway
+highway
+hills
+hockey rink
+hospital
+hotel room
+house
+kitchen
+lake
+laundromat
+library
+living room
+mall
+map
+market
+meeting room
+mountain
+newsroom
+night
+ocean
+office
+olympics
+orchard
+outside
+parade
+park
+parking lot
+patio
+pavement
+pink wall
+playground
+pond
+pyramid
+rink
+river
+road
+rock wall
+rodeo
+roof
+salon
+school
+screen
+sidewalk
+sink
+sky
+snow
+stable
+stadium
+stage
+store
+street
+sunset
+swimming pool
+parlor
+theater
+track
+tunnel
+underwater
+wall
+warehouse
+waterfall
+white wall
+whiteboard
+windows

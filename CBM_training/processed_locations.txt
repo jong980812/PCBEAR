@@ -1,0 +1,908 @@
+abbey
+access road
+air base
+airfield
+airlock
+airplane cabin
+airport airport
+entrance airport
+airport terminal
+airport ticket counter
+alcove
+alley
+amphitheater
+amusement arcade
+amusement park
+anechoic chamber
+outside the apartment building
+inside the apse
+outside the apse
+aquarium
+aquatic theater
+aqueduct
+arcade
+arch
+archaelogical excavation
+archive
+basketball arena
+football arena
+hockey arena
+performance arena
+rodeo arena
+soccer arena
+armory
+army base
+inside the arrival gate
+outside the arrival gate
+art gallery
+art school
+art studio
+artists loft
+assembly line
+inside the athletic field
+outside the athletic field
+home atrium
+public atrium
+attic
+auditorium
+auto factory
+inside the auto mechanics
+outside the auto mechanics
+auto racing paddock
+auto showroom
+backstage
+backstairs
+badlands
+inside the badminton court
+outside the badminton court
+baggage claim
+kitchen bakery
+shop bakery
+exterior balcony
+interior balcony
+ball pit
+ballroom
+bamboo forest
+inside the bank
+outside the bank
+bank vault
+banquet hall
+inside the baptistry
+outside the baptistry
+bar
+barbershop
+barn
+barndoor
+barnyard
+barrack
+baseball field
+basement
+basilica
+inside the basketball court
+outside the basketball court
+bathhouse
+bathroom
+batters box
+inside the batting cage
+outside the batting cage
+battlement
+bayou
+inside the bazaar
+outside the bazaar
+beach
+beach house
+beauty salon
+bedchamber
+bedroom
+beer garden
+beer hall
+belfry
+bell foundry
+berth
+berth deck
+betting shop
+bicycle racks
+bindery
+biology laboratory
+inside the bistro
+outside the bistro
+inside the bleachers
+outside the bleachers
+boardwalk
+boat deck
+boathouse
+bog
+inside the bomb shelter
+bookbindery
+bookstore
+inside the booth
+botanical garden
+inside the bow window
+outside the bow window
+bowling alley
+box seat
+boxing ring
+breakroom
+inside the brewery
+outside the brewery
+inside the brickyard
+outside the brickyard
+bridge
+building complex
+building facade
+bullpen
+bullring
+burial chamber
+inside the bus depot
+outside the bus depot
+bus interior
+bus shelter
+inside the bus station
+outside the bus station
+butchers shop
+butte
+cabana
+inside the cabin
+outside the cabin
+cafeteria
+call center
+campsite
+campus
+natural canal
+urban canal
+candy store
+canteen
+canyon
+car dealership
+backseat car interior
+frontseat car interior
+caravansary
+cardroom
+cargo container interior
+airplane cargo deck
+boat cargo deck
+cargo port
+freestanding carport
+inside the carport
+outside the carport
+carrousel
+inside the casino
+outside the casino
+castle
+catacomb
+inside the cathedral
+outside the cathedral
+catwalk
+inside the cavern
+outside the cavern
+cemetery
+chalet
+chaparral
+chapel
+checkout counter
+cheese factory
+chemical plant
+chemistry lab
+inside the chicken coop
+outside the chicken coop
+inside the chicken farm
+outside the chicken farm
+childs room
+exterior choir loft
+interior choir loft
+inside the church
+outside the church
+inside the circus tent
+outside the circus tent
+city
+classroom
+clean room
+cliff
+booth cloakroom
+room cloakroom
+inside the clock tower
+inside the cloister
+outside the cloister
+closet
+clothing store
+coast
+coast road
+cockpit
+coffee shop
+computer room
+conference center
+conference hall
+conference room
+confessional
+construction site
+control room
+inside the control tower
+outside the control tower
+inside the convenience store
+outside the convenience store
+corn field
+corral
+corridor
+cottage
+cottage garden
+courthouse
+courtroom
+courtyard
+exterior covered bridge
+interior covered bridge
+crawl space
+creek
+crevasse
+crosswalk
+library cubicle
+office cubicle
+cybercafe
+dacha
+inside the dairy
+outside the dairy
+dam
+dance school
+darkroom
+day care center
+delicatessen
+dentists office
+department store
+departure lounge
+sand desert
+vegetation desert
+desert road
+inside the diner
+outside the diner
+home dinette
+vehicle dinette
+dining car
+dining hall
+dining room
+dirt track
+discotheque
+distillery
+ditch
+dock
+dolmen
+donjon
+inside the doorway
+outside the doorway
+dorm room
+downtown
+drainage ditch
+dress shop
+dressing room
+drill rig
+driveway
+inside the driving range
+outside the driving range
+drugstore
+dry dock
+dugout
+earth fissure
+editing room
+electrical room
+electrical substation
+elevated catwalk
+door elevator
+exterior elevator
+freight elevator elevator
+interior elevator
+elevator lobby
+elevator shaft
+embankment
+embassy
+engine room
+entrance hall
+inside the escalator
+outside the escalator
+escarpment
+estuary
+excavation
+exhibition hall
+fabric store
+inside the factory
+outside the factory
+fairway
+farm
+fastfood restaurant
+fence
+cargo deck ferryboat
+inside the ferryboat
+outside the ferryboat
+passenger deck ferryboat
+cultivated field
+wild field
+field road
+fire escape
+fire station
+inside the firing range
+outside the firing range
+fish farm
+fishmarket
+fishpond
+exterior fitting room
+interior fitting room
+fjord
+inside the flea market
+outside the flea market
+natural flight of stairs
+urban flight of stairs
+floating dry dock
+flood
+inside the florist shop
+outside the florist shop
+fly bridge
+food court
+football field
+broadleaf forest
+needleleaf forest
+forest fire
+forest path
+forest road
+formal garden
+fort
+fortress
+inside the foundry
+outside the foundry
+fountain
+freeway
+funeral chapel
+funeral home
+furnace room
+galley
+game room
+gangplank
+inside the garage
+outside the garage
+garbage dump
+gas station
+gasworks
+gate
+gatehouse
+exterior gazebo
+interior gazebo
+inside the general store
+outside the general store
+inside the geodesic dome
+outside the geodesic dome
+ghost town
+gift shop
+glacier
+glade
+golf course
+gorge
+granary
+great hall
+greengrocery
+inside the greenhouse
+outside the greenhouse
+grotto
+guardhouse
+gulch
+inside the gun deck
+outside the gun deck
+gun store
+inside the gymnasium
+hacienda
+hallway
+handball court
+inside the hangar
+outside the hangar
+harbor
+hardware store
+hat shop
+hatchery
+hatchway
+hayfield
+hayloft
+hearth
+heath
+hedge maze
+hedgerow
+heliport
+herb garden
+highway
+hill
+home office
+home theater
+hoodoo
+hospital
+hospital room
+hot spring
+inside the hot tub
+outside the hot tub
+outside the hotel
+hotel breakfast area
+hotel room
+house
+inside the hunting lodge
+outside the hunting lodge
+hut
+ice cream parlor
+ice floe
+ice shelf
+inside the ice skating rink
+outside the ice skating rink
+iceberg
+igloo
+imaret
+inside the incinerator
+outside the incinerator
+industrial area
+industrial park
+inside the inn
+outside the inn
+irrigation ditch
+islet
+inside the jacuzzi
+outside the jacuzzi
+inside the jail
+outside the jail
+jail cell
+japanese garden
+jetty
+jewelry shop
+joss house
+junk pile
+junkyard
+jury box
+kasbah
+inside the kennel
+outside the kennel
+kindergarden classroom
+inside the kiosk
+outside the kiosk
+kitchen
+kitchenette
+lab classroom
+inside the labyrinth
+outside the labyrinth
+lagoon
+artificial lake
+natural lake
+landfill
+landing
+landing deck
+laundromat
+lava flow
+lavatory
+lawn
+lean-to
+lecture room
+legislative chamber
+levee
+inside the library
+outside the library
+inside the lido deck
+outside the lido deck
+lift bridge
+lighthouse
+limousine interior
+inside the liquor store
+outside the liquor store
+living room
+loading dock
+lobby
+lock chamber
+locker room
+loft
+inside the lookout station
+outside the lookout station
+inside the lumberyard
+outside the lumberyard
+machine shop
+manhole
+mansion
+manufactured home
+inside the market
+outside the market
+marsh
+martial arts gym
+mastaba
+maternity ward
+mausoleum
+medina
+menhir
+mesa
+mess hall
+mezzanine
+military hospital
+military hut
+military tent
+mill
+mine
+mineshaft
+inside the mini golf course
+outside the mini golf course
+mission
+dry moat
+water moat
+mobile home
+inside the monastery
+outside the monastery
+moon bounce
+moor
+morgue
+inside the mosque
+outside the mosque
+motel
+mountain
+mountain path
+mountain road
+mountain snowy
+inside the movie theater
+outside the movie theater
+mudflat
+inside the museum
+outside the museum
+music store
+music studio
+natural history museum
+naval base
+newsroom
+inside the newsstand
+outside the newsstand
+nightclub
+inside the nuclear power plant
+outside the nuclear power plant
+nunnery
+nursery
+nursing home
+oasis
+oast house
+inside the observatory
+outside the observatory
+observatory post
+ocean
+office
+office building
+office cubicles
+inside the oil refinery
+outside the oil refinery
+land oilfield
+offshore oilfield
+oilrig
+operating room
+optician
+orchard
+orchestra pit
+exterior organ loft
+interior organ loft
+orlop deck
+ossuary
+outcropping
+inside the outhouse
+outside the outhouse
+overpass
+oyster bar
+oyster farm
+packaging plant
+pagoda
+palace
+palace hall
+palisade
+pantry
+paper mill
+parade ground
+park
+entrance parking garage
+inside the parking garage
+outside the parking garage
+parking lot
+parlor
+particle accelerator
+inside the party tent
+outside the party tent
+pasture
+patio
+pavilion
+pawnshop
+inside the pedestrian overpass
+outside the pedestrian overpass
+penalty box
+perfume shop
+pet shop
+pharmacy
+phone booth
+physics laboratory
+piano store
+picnic area
+pier
+pig farm
+inside the pilothouse
+outside the pilothouse
+pitchers mound
+pizzeria
+inside the planetarium
+outside the planetarium
+plantation house
+playground
+playroom
+plaza
+inside the podium
+outside the podium
+police station
+pond
+pontoon bridge
+establishment poolroom
+home poolroom
+poop deck
+porch
+portico
+portrait studio
+postern
+inside the power plant
+outside the power plant
+print shop
+priory
+promenade
+promenade deck
+inside the pub
+outside the pub
+pulpit
+pump room
+putting green
+quadrangle
+quay
+quicksand
+inside the quonset hut
+outside the quonset hut
+racecourse
+raceway
+raft
+railroad track
+railway yard
+rainforest
+ramp
+ranch
+ranch house
+reading room
+reception
+recreation room
+rectory
+inside the recycling plant
+outside the recycling plant
+refectory
+repair shop
+residential neighborhood
+resort
+rest area
+restaurant
+restaurant kitchen
+restaurant patio
+inside the restroom
+outside the restroom
+revolving door
+rice paddy
+riding arena
+river
+road cut
+rock arch
+inside the roller skating rink
+outside the roller skating rink
+rolling mill
+roof
+roof garden
+root cellar
+rope bridge
+roundabout
+roundhouse
+rubble
+ruin
+runway
+sacristy
+salt plain
+sand trap
+sandbar
+sandbox
+sauna
+savanna
+sawmill
+schoolhouse
+schoolyard
+science museum
+scriptorium
+sea cliff
+seawall
+security check point
+server room
+sewer
+sewing room
+shed
+shipping room
+inside the shipyard
+outside the shipyard
+shoe shop
+shopfront
+inside the shopping mall
+outside the shopping mall
+shower
+shower room
+shrine
+signal box
+sinkhole
+skate park
+skatepark
+ski jump
+ski lodge
+ski resort
+ski slope
+sky
+skyscraper
+inside the skywalk
+outside the skywalk
+slum
+snowfield
+soccer field
+massage room spa
+mineral bath spa
+spillway
+sporting goods store
+squash court
+stable
+baseball stadium
+football stadium
+outside the stadium
+performance stadium
+soccer stadium
+inside the stage
+outside the stage
+staircase
+starting gate
+inside the steam plant
+outside the steam plant
+inside the steel mill
+outside the steel mill
+water stilt house
+stone circle
+storage room
+storeroom food
+storm cellar
+street
+strip mall
+strip mine
+student residence
+submarine interior
+subway interior
+corridor subway station
+platform subway station
+turnstiles subway station
+sun deck
+supermarket
+sushi bar
+swamp
+swimming hole
+inside the swimming pool
+outside the swimming pool
+inside the synagogue
+outside the synagogue
+taiga
+taxistand
+taxiway
+tea garden
+tearoom
+teashop
+television room
+television studio
+east asia temple
+mesoamerican temple
+south asia temple
+western temple
+inside the tennis court
+outside the tennis court
+inside the tent
+outside the tent
+terrace farm
+textile mill
+indoor procenium theater
+indoor round theater
+indoor seats theater
+outside the theater
+thriftshop
+throne room
+ticket booth
+inside the ticket window
+outside the ticket window
+inside the tobacco shop
+outside the tobacco shop
+toll plaza
+tollbooth
+topiary garden
+tower
+town house
+toyshop
+inside the track
+outside the track
+trading floor
+trailer park
+train depot
+train interior
+train railway
+outside the train station
+platform train station
+station train station
+tree farm
+tree house
+trench
+trestle bridge
+tundra
+natural tunnel
+rail indoor tunnel
+rail outdoor tunnel
+road indoor tunnel
+road outdoor tunnel
+waterway tunnel
+turkish bath
+coral reef underwater
+ice underwater
+kelp forest underwater
+ocean deep underwater
+ocean shallow underwater
+pool underwater
+wreck underwater
+utility room
+utility tunnel
+valley
+van interior
+vegetable garden
+inside the velodrome
+outside the velodrome
+ventilation shaft
+veranda
+vestry
+veterinarians office
+viaduct
+videostore
+village
+vineyard
+volcano
+inside the volleyball court
+outside the volleyball court
+voting booth
+waiting room
+walk in freezer
+inside the warehouse
+outside the warehouse
+inside the washhouse
+outside the washhouse
+watchtower
+water mill
+water park
+water tower
+inside the water treatment plant
+outside the water treatment plant
+block waterfall
+cascade waterfall
+cataract waterfall
+fan waterfall
+frozen waterfall
+plunge waterfall
+watering hole
+wave
+weighbridge
+wet bar
+wharf
+wheat field
+whispering gallery
+exterior widows walk
+interior widows walk
+wig shop
+wind farm
+windmill
+window seat
+barrel storage wine cellar
+bottle storage wine cellar
+winery
+winners circle
+witness stand
+woodland
+workroom
+workshop
+inside the wrestling ring
+outside the wrestling ring
+yard
+youth hostel
+zen garden
+ziggurat
+zoo

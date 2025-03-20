@@ -1,0 +1,440 @@
+Accept something.
+Add something on top.
+Add something to something.
+Adjust something.
+Adorn something with something.
+Aim at something.
+Aim toward something.
+Align something in a straight line.
+Anchor something near something.
+Apply something to something.
+Appreciate something special.
+Approach something with something.
+Arch something over something.
+Arrange something on something.
+Ascend something with careful movements.
+Ask something for clarification.
+Assemble something with precision.
+Attach something to something.
+Bait something with something.
+Bake something in something.
+Balance on something.
+Bang something in rhythm.
+Bathe something.
+Beat something in rhythm with something.
+Beat something with something.
+Bend towards something.
+Bend something.
+Bet something.
+Bind off something.
+Bite into something.
+Blast something with something.
+Blend something with something.
+Block something.
+Blow into something.
+Blow out something.
+Boil something.
+Bounce on something.
+Bounce something repeatedly.
+Bow across something.
+Bowl something down the pitch.
+Brakes slow something.
+Breathe deeply.
+Bring something.
+Browse something.
+Brush something.
+Buff something with something.
+Bump something for encouragement.
+Canter around something.
+Capture something from something.
+Care for something.
+Carry something.
+Cast something into something.
+Catch something.
+Celebrate something.
+Challenge something.
+Change something.
+Chant something.
+Chase something.
+Check something for proper alignment.
+Check something for stability.
+Check something repeatedly.
+Cheers with something.
+Choose something.
+Clap something.
+Clean something.
+Clear something from something.
+Climb down something carefully.
+Climb something carefully.
+Climb up something.
+Clip something into something.
+Clip something off something.
+Coat something with something.
+Collect something from something.
+Color something vibrant.
+Compete against something in something.
+Condition something to keep it smooth.
+Connect something to something.
+Connect with something.
+Control something.
+Cook something.
+Cool something.
+Count something.
+Cover something with something.
+Crack something into something.
+Cradle something.
+Crash something against something.
+Crawl toward something.
+Crease something along the edge.
+Create something loud.
+Create something with something.
+Cross something over something.
+Cross the finish line of something.
+Crunch on something fresh.
+Cuddle something close.
+Cut something.
+Dampen something.
+Dance around something in rhythm.
+Dangle something over the edge.
+Deal something to everyone.
+Defend something from something fiercely.
+Define something with something.
+Deliver something to something.
+Descend down something.
+Dice something into small pieces.
+Dig something.
+Dip something in something.
+Discard something in something.
+Discover something.
+Dispose of something.
+Dive into something.
+Dodge something.
+Drain something into something.
+Draw back something.
+Draw something on the surface.
+Draw something out.
+Dribble something.
+Drill a hole in something.
+Drizzle something on top.
+Drop something onto something.
+Dry something.
+Dust something.
+Edit something.
+Embrace something tightly.
+Encourage something exciting.
+Engage something for stability.
+Enjoy something beautiful.
+Ensuring something is aligned properly.
+Equip something for something.
+Erase something.
+Escaped from something.
+Evading something.
+Examine something closely.
+Exchange something for something.
+Execute a move on something.
+Exfoliate something before something.
+Exhale something gently.
+Explain something clearly.
+Explore something.
+Express emotions through something.
+Extend something toward something.
+Fall off something.
+Fan something out onto something.
+Feed something.
+Fell onto something.
+Fidget with something.
+Field something quickly.
+File something to smooth out the edges.
+Fill something with something.
+Find something.
+Finger something correctly.
+Finish something with something.
+Fire something in something.
+Flip over something.
+Flip through something.
+Float down something.
+Flow through something.
+Fluff something with a quick motion.
+Flush something with something.
+Fly off something with grace.
+Fold something.
+Follow something.
+Frame something.
+Frost something.
+Gallop over something.
+Garnish something on something.
+Gather something into something.
+Gather something together.
+Gear up something.
+Give someone some something.
+Glide down something.
+Glide over something.
+Grab something tightly.
+Grill something.
+Grip something firmly with something.
+Guide something along the trail.
+Hand off something to someone.
+Sift through something.
+Hang from something.
+Hang something.
+Harvest something.
+Heat something.
+Hide behind something.
+Hide something.
+Hit something against something.
+Hit something consistently.
+Hold onto something.
+Hold something.
+Hold the position.
+Ignore something.
+Illuminate something in the night.
+Increase the incline of something.
+Inflate something.
+Inhale something deeply.
+Insert something into something.
+Inspect something for something.
+Jump off something.
+Jump over something.
+Keep something.
+Kick something.
+Knead something with something.
+Knock back something quickly.
+Land on something.
+Lather something with something.
+Laugh with something.
+Launch something into the sky.
+Layer something between something.
+Lead something.
+Lean backward onto something.
+Leap from something.
+Leave something on something.
+Let go of something.
+Lick something with something.
+Lie flat on something.
+Lift something above something.
+Light up something.
+Line up something with something.
+Listen to something.
+Load something onto something.
+Lock something out at the top.
+Look at something.
+Look for something.
+Loop something around something.
+Lose something to something.
+Lower something to something.
+Maintain balance on something.
+Marinate something in something.
+Measure something.
+Mist something with something.
+Mix something.
+Moisturize something.
+Monitor something.
+Mop something.
+Move something to the left.
+Move something to the rhythm.
+Move something to the right.
+Nail something securely to something.
+Navigate around something.
+Nominate something.
+Observe something from something.
+Offer something tasty.
+Open something.
+Operate something to control something.
+Order something from the menu.
+Paddle towards something.
+Paint something.
+Park something near something.
+Pass something between something.
+Pass something from hand to hand.
+Patter something on something.
+Pay something for something.
+Pedal across something.
+Perform a routine on something.
+Perform tricks on something.
+Pick up something.
+Dip something into something.
+Pin something to something.
+Place something in something.
+Place something on something.
+Play something smoothly.
+Pluck something softly.
+Point something at something.
+Polish something.
+Pop something with something.
+Pour something into something.
+Pour something on something.
+Power on something.
+Practice on something.
+Preheat something.
+Prepare something.
+Press down on something.
+Press something.
+Propel something towards something.
+Protect something.
+Prune something.
+Pull something off something.
+Pull something.
+Pumping something.
+Purl something back.
+Push back to something.
+Push off something.
+Push something away.
+Push something back up.
+Push something down.
+Race something.
+Raise something.
+Rake something.
+Rally something back and forth.
+Reach for something.
+Read something.
+Rearrange something.
+Recycle something.
+Reel in something from something.
+Relax against something.
+Release something.
+Remove something from something.
+Repeat the process.
+Replace something with something.
+Respond to something.
+Rest something on the ground.
+Retract something.
+Return something to the opponent.
+Rev up something.
+Reveal something.
+Reward something for good behavior.
+Ride on something.
+Rinse something off with something.
+Roast something.
+Roll out something.
+Roll something.
+Rotate something in a circular motion.
+Rub something against something.
+Run on something.
+Run towards something.
+Save something.
+Savoring something.
+Scatter something.
+Scoop something into something.
+Score something with something.
+Scratch behind something.
+Scrub something against something.
+Searched for something hidden.
+Season something.
+Secure something tightly with something.
+Separate something from something.
+Serve something to someone.
+Serve something with a side of something.
+Sew something together.
+Shake something.
+Shake something to express disapproval.
+Shape something using something.
+Shift weight onto something.
+Shoot something into something.
+Show something amazing.
+Shred something.
+Shuffle something.
+Sing something joyful.
+Sip something slowly.
+Sketch something.
+Skim something.
+Slam something through something.
+Slice something.
+Slide down something.
+Slide something off.
+Slurping something off something.
+Smash something.
+Smile at something.
+Smooth something across the surface.
+Smother something using something.
+Snap something.
+Sneezed into something.
+Sniff around something.
+Soak something.
+Soar above something.
+Something turns into something.
+Something were placed on something.
+Something zipped through the air.
+Speed across something.
+Speed down something.
+Spike something down.
+Spin around something.
+Spin something.
+Spit something out.
+Splash into something.
+Split something into smaller pieces.
+Spray something on something.
+Spread something.
+Sprinkle something.
+Sprint towards something.
+Squeeze something.
+Stack something.
+Stare at something.
+Steal something.
+Steep something.
+Steer something.
+Step towards something.
+Sticking something out.
+Stir something.
+Store something.
+Strengthen something with something.
+Stretch hands toward something.
+Stretch something out.
+Strike something accurately.
+Stroke something.
+Strum something gently.
+Surprise something.
+Sweep something off the surface.
+Swim through something.
+Swing over something.
+Swing something.
+Take a leap off something.
+Take off from something.
+Take something for a stroll.
+Tap on something.
+Taste something.
+Tear open something.
+Teasing something.
+Test something.
+Thread something onto something.
+Throw something towards something.
+Tickle something.
+Tie something around something.
+Tighten something against something.
+Toast to something.
+Toss something away.
+Touch something softly.
+Trade something for something.
+Train with something for something.
+Trim something around something.
+Tripped over something.
+Trot beside something.
+Tuck something underneath something.
+Tune something.
+Turn left around something.
+Turn on something.
+Turn right around something.
+Turn something around.
+Turn something to the next page.
+Twirl something.
+Twist something.
+Type something.
+Unfold something.
+Unlock something.
+Untangle something caught in something.
+Unwrap something.
+Vacuum something.
+Vault past something.
+Walk across something.
+Warm up.
+Wash something.
+Water something.
+Wave at something.
+Weave something.
+Whirl around something.
+Whisk something.
+Whispered into something.
+Whistled something.
+Wipe out on something.
+Wrap something around something.
+Wrapped tightly around something.
+Write something on something.

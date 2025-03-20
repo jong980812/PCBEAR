@@ -2,7 +2,27 @@ import torch
 import math
 from tqdm import tqdm
 
-def cos_similarity_cubed_single(clip_feats, target_feats):
+def cos_similarity_cubed_single_concept(clip_feats, target_feats):
+    """
+    Substract mean from each vector, then raises to third power and compares cos similarity
+    Does not modify any tensors in place
+    Only compares first neuron to first concept etc.
+    """
+
+    clip_feats = clip_feats.float()
+    clip_feats = clip_feats - torch.mean(clip_feats, dim=0, keepdim=True)# ,M
+    target_feats = target_feats - torch.mean(target_feats, dim=0, keepdim=True)
+
+    clip_feats = clip_feats**3
+    target_feats = target_feats**3
+
+    clip_feats = clip_feats/torch.norm(clip_feats, p=2, dim=0, keepdim=True)
+    target_feats = target_feats/torch.norm(target_feats, p=2, dim=0, keepdim=True)
+
+    similarities = torch.sum(target_feats*clip_feats, dim=0)
+    return similarities
+
+def cos_similarity_cubed_single_firstpower_concept(clip_feats, target_feats):
     """
     Substract mean from each vector, then raises to third power and compares cos similarity
     Does not modify any tensors in place
@@ -13,13 +33,74 @@ def cos_similarity_cubed_single(clip_feats, target_feats):
     clip_feats = clip_feats - torch.mean(clip_feats, dim=0, keepdim=True)
     target_feats = target_feats - torch.mean(target_feats, dim=0, keepdim=True)
 
-    clip_feats = clip_feats**3
-    target_feats = target_feats**3
+    clip_feats = clip_feats
+    target_feats = target_feats
 
     clip_feats = clip_feats/torch.norm(clip_feats, p=2, dim=0, keepdim=True)
     target_feats = target_feats/torch.norm(target_feats, p=2, dim=0, keepdim=True)
 
     similarities = torch.sum(target_feats*clip_feats, dim=0)
+    return similarities
+
+def cos_similarity_cubed_single_firstpower_sample(clip_feats, target_feats):
+    """
+    Substract mean from each vector, then raises to third power and compares cos similarity
+    Does not modify any tensors in place
+    Only compares first neuron to first concept etc.
+    """
+
+    clip_feats = clip_feats.float()
+    clip_feats = clip_feats - torch.mean(clip_feats, dim=1, keepdim=True)
+    target_feats = target_feats - torch.mean(target_feats, dim=1, keepdim=True)
+
+    clip_feats = clip_feats
+    target_feats = target_feats
+
+    clip_feats = clip_feats/torch.norm(clip_feats, p=2, dim=1, keepdim=True)
+    target_feats = target_feats/torch.norm(target_feats, p=2, dim=1, keepdim=True)
+
+    similarities = torch.sum(target_feats*clip_feats, dim=1)
+    return similarities
+
+def cos_similarity_cubed_single_secondpower(clip_feats, target_feats):
+    """
+    Substract mean from each vector, then raises to third power and compares cos similarity
+    Does not modify any tensors in place
+    Only compares first neuron to first concept etc.
+    """
+
+    clip_feats = clip_feats.float()
+    clip_feats = clip_feats - torch.mean(clip_feats, dim=0, keepdim=True)
+    target_feats = target_feats - torch.mean(target_feats, dim=0, keepdim=True)
+
+    clip_feats = clip_feats**2
+    target_feats = target_feats**2
+
+    clip_feats = clip_feats/torch.norm(clip_feats, p=2, dim=0, keepdim=True)
+    target_feats = target_feats/torch.norm(target_feats, p=2, dim=0, keepdim=True)
+
+    similarities = torch.sum(target_feats*clip_feats, dim=0)
+    return similarities
+
+
+def cos_similarity_cubed_single_sample(clip_feats, target_feats):
+    """
+    Substract mean from each vector, then raises to third power and compares cos similarity
+    Does not modify any tensors in place
+    Only compares first neuron to first concept etc.
+    """
+
+    clip_feats = clip_feats.float()
+    clip_feats = clip_feats - torch.mean(clip_feats, dim=1, keepdim=True)
+    target_feats = target_feats - torch.mean(target_feats, dim=1, keepdim=True)#N,
+
+    clip_feats = clip_feats**3
+    target_feats = target_feats**3
+
+    clip_feats = clip_feats/torch.norm(clip_feats, p=2, dim=1, keepdim=True)
+    target_feats = target_feats/torch.norm(target_feats, p=2, dim=1, keepdim=True)
+
+    similarities = torch.sum(target_feats*clip_feats, dim=1)
     return similarities
 
 def cos_similarity_cubed(clip_feats, target_feats, device='cuda', batch_size=10000, min_norm=1e-3):

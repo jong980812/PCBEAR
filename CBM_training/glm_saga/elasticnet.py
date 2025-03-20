@@ -12,7 +12,7 @@ from torch.optim import Adam, SGD
 from torch.optim.lr_scheduler import StepLR
 from torch.autograd import grad
 from torch.utils.data import random_split
-
+import random
 # Toy example
 import numpy as np
 import time
@@ -155,7 +155,7 @@ def elastic_loss_and_acc(linear, X, y, lam, alpha, family='multinomial'):
     return loss, acc
 
 # Elastic net loss given a loader instead
-def elastic_loss_and_acc_loader(linear, loader, lam, alpha, preprocess=None, family='multinomial'): 
+def elastic_loss_and_acc_loader(linear, loader, lam, alpha, preprocess=None, family='multinomial',train=False): 
     loss = 0
     acc=0
     n = 0
@@ -164,6 +164,8 @@ def elastic_loss_and_acc_loader(linear, loader, lam, alpha, preprocess=None, fam
         preprocess_device = get_device(preprocess)
     for batch in loader: 
         X,y = batch[0].to(device), batch[1].to(device)
+        if train:
+            X=X[:,2,]
         if preprocess is not None: 
             X = preprocess(X)
         bs = X.size(0)
@@ -257,7 +259,7 @@ def train_spg(linear, loader, max_lr, nepochs, lam, alpha, preprocess=None, min_
 # initial pass over the loaders
 def train_saga(linear, loader, lr, nepochs, lam, alpha, group=True, verbose=None, 
                 state=None, table_device=None, n_ex=None, n_classes=None, tol=1e-4, 
-                preprocess=None, lookbehind=None, family='multinomial', logger=None): 
+                preprocess=None, lookbehind=None, family='multinomial', logger=None,multiview=False): 
     if logger is None: 
         logger = print
     with ch.no_grad(): 
@@ -296,6 +298,9 @@ def train_saga(linear, loader, lr, nepochs, lam, alpha, group=True, verbose=None
             for batch in loader: 
                 if len(batch) == 3: 
                     X,y,idx = batch
+                    if multiview:
+                        rand_index = random.randint(0, 4)
+                        X=X[:,rand_index,:]
                     w = None
                 elif len(batch) == 4: 
                     X,y,w,idx = batch
@@ -531,7 +536,7 @@ def glm_saga(linear, loader, max_lr, nepochs, alpha,
              tol=1e-4, epsilon=0.001, k=100, checkpoint=None, 
              do_zero=True, lr_decay_factor=1, metadata=None, 
              val_loader=None, test_loader=None, lookbehind=None, 
-             family='multinomial', encoder=None): 
+             family='multinomial', encoder=None,multiview=False): 
     if encoder is not None: 
         warnings.warn("encoder argument is deprecated; please use preprocess instead", DeprecationWarning)
         preprocess = encoder
@@ -584,10 +589,10 @@ def glm_saga(linear, loader, max_lr, nepochs, alpha,
         state = train_saga(linear, loader, lr, nepochs, lam, alpha, 
                     table_device=table_device, preprocess=preprocess, group=group, verbose=verbose, 
                     state=state, n_ex=n_ex, n_classes=n_classes, tol=tol, lookbehind=lookbehind, 
-                    family=family, logger=logger)
+                    family=family, logger=logger,multiview=multiview)
         
         with ch.no_grad(): 
-            loss,acc = elastic_loss_and_acc_loader(linear, loader, lam, alpha, preprocess=preprocess, family=family)
+            loss,acc = elastic_loss_and_acc_loader(linear, loader, lam, alpha, preprocess=preprocess, family=family,train=multiview)
             loss,acc = loss.item(),acc.item()
 
             loss_val,acc_val = -1,-1

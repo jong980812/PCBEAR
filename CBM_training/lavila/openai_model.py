@@ -1,10 +1,20 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+
+# This source code is licensed under the license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Part of the code is from https://github.com/openai/CLIP/blob/main/clip/model.py
+# Modified by Yue Zhao
+# The original code is under MIT License
+
 from collections import OrderedDict
 from typing import Tuple, Union
-from einops import rearrange
 
 import numpy as np
 import torch
 import torch.nn.functional as F
+import torch.utils.checkpoint as checkpoint
 from torch import nn
 
 
@@ -67,11 +77,11 @@ class AttentionPool2d(nn.Module):
         self.num_heads = num_heads
 
     def forward(self, x):
-        x = x.reshape(x.shape[0], x.shape[1], x.shape[2] * x.shape[3]).permute(2, 0, 1)  # NCHW -> (HW)NC
+        x = x.flatten(start_dim=2).permute(2, 0, 1)  # NCHW -> (HW)NC
         x = torch.cat([x.mean(dim=0, keepdim=True), x], dim=0)  # (HW+1)NC
         x = x + self.positional_embedding[:, None, :].to(x.dtype)  # (HW+1)NC
         x, _ = F.multi_head_attention_forward(
-            query=x, key=x, value=x,
+            query=x[:1], key=x, value=x,
             embed_dim_to_check=x.shape[-1],
             num_heads=self.num_heads,
             q_proj_weight=self.q_proj.weight,
@@ -89,8 +99,7 @@ class AttentionPool2d(nn.Module):
             training=self.training,
             need_weights=False
         )
-
-        return x[0]
+        return x.squeeze(0)
 
 
 class ModifiedResNet(nn.Module):
@@ -175,22 +184,35 @@ class ResidualAttentionBlock(nn.Module):
         super().__init__()
 
         self.attn = nn.MultiheadAttention(d_model, n_head)
-        self.ln_1 = LayerNorm(d_model)
+        self.ln_1 = nn.LayerNorm(d_model)  # used to be `models.transformer.LayerNorm`
         self.mlp = nn.Sequential(OrderedDict([
             ("c_fc", nn.Linear(d_model, d_model * 4)),
             ("gelu", QuickGELU()),
             ("c_proj", nn.Linear(d_model * 4, d_model))
         ]))
-        self.ln_2 = LayerNorm(d_model)
+        self.ln_2 = nn.LayerNorm(d_model)  # used to be `models.transformer.LayerNorm`
         self.attn_mask = attn_mask
 
     def attention(self, x: torch.Tensor):
         self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
         return self.attn(x, x, x, need_weights=False, attn_mask=self.attn_mask)[0]
 
-    def forward(self, x: torch.Tensor):
-        x = x + self.attention(self.ln_1(x))
-        x = x + self.mlp(self.ln_2(x))
+    def forward_part1(self, x):
+        return self.attention(self.ln_1(x))
+
+    def forward_part2(self, x):
+        return self.mlp(self.ln_2(x))
+
+    def forward(self, x: torch.Tensor, use_checkpoint=False):
+        if use_checkpoint:
+            x = x + checkpoint.checkpoint(self.forward_part1, x)
+        else:
+            x = x + self.forward_part1(x)
+
+        if use_checkpoint:
+            x = x + checkpoint.checkpoint(self.forward_part2, x)
+        else:
+            x = x + self.forward_part2(x)
         return x
 
 
@@ -201,8 +223,13 @@ class Transformer(nn.Module):
         self.layers = layers
         self.resblocks = nn.Sequential(*[ResidualAttentionBlock(width, heads, attn_mask) for _ in range(layers)])
 
-    def forward(self, x: torch.Tensor):
-        return self.resblocks(x)
+    def forward(self, x: torch.Tensor, use_checkpoint=False):
+        if use_checkpoint:
+            for i in range(self.layers):
+                x = checkpoint.checkpoint(self.resblocks[i], x)
+            return x
+        else:
+            return self.resblocks(x)
 
 
 class VisionTransformer(nn.Module):
@@ -222,11 +249,7 @@ class VisionTransformer(nn.Module):
         self.ln_post = LayerNorm(width)
         self.proj = nn.Parameter(scale * torch.randn(width, output_dim))
 
-    def forward(self, x: torch.Tensor, video=False):
-        if video:
-            B, C, T, H, W = x.shape 
-            x = rearrange(x, 'b c t h w -> (b t) c h w')
-
+    def forward(self, x: torch.Tensor, apply_project=True, use_checkpoint=False, cls_at_last=True):
         x = self.conv1(x)  # shape = [*, width, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
@@ -235,18 +258,18 @@ class VisionTransformer(nn.Module):
         x = self.ln_pre(x)
 
         x = x.permute(1, 0, 2)  # NLD -> LND
-        x = self.transformer(x)
+        x = self.transformer(x, use_checkpoint=use_checkpoint)
         x = x.permute(1, 0, 2)  # LND -> NLD
 
-        x = self.ln_post(x[:, 0, :])
-        if video:
-            x = rearrange(x, '(b t) d -> b t d',b=B,t=T)
-            # x = x.mean(dim=1)
+        if cls_at_last:
+            x = self.ln_post(x[:, 0, :])
 
-        if self.proj is not None:
-            x = x @ self.proj
+            if self.proj is not None and apply_project:
+                x = x @ self.proj
 
-        return x
+            return x
+        else:
+            return x[:, 1:, :]
 
 
 class CLIP(nn.Module):
@@ -346,17 +369,24 @@ class CLIP(nn.Module):
     def dtype(self):
         return self.visual.conv1.weight.dtype
 
-    def encode_image(self, image):
-        return self.visual(image.type(self.dtype))
-    def encode_video(self, image):
-        return self.visual(image.type(self.dtype),True)
+    def encode_image(self, image, apply_project=True, use_checkpoint=False):
+        if image.ndim == 4:
+            return self.visual(image.type(self.dtype))
+        else:
+            image = image.permute(0, 2, 1, 3, 4)  # BCTHW -> BTCHW
+            bb, tt, _, _, _ = image.shape
+            x = self.visual(image.reshape(-1, *image.shape[2:]), apply_project=apply_project, use_checkpoint=use_checkpoint)  # ND
+            x = x.view(bb, tt, -1)
+            image_features = x.mean(1)
+            # image_features = x.max(1).values
+            return image_features
 
-    def encode_text(self, text):
+    def encode_text(self, text, use_checkpoint=False):
         x = self.token_embedding(text).type(self.dtype)  # [batch_size, n_ctx, d_model]
 
         x = x + self.positional_embedding.type(self.dtype)
         x = x.permute(1, 0, 2)  # NLD -> LND
-        x = self.transformer(x)
+        x = self.transformer(x, use_checkpoint=use_checkpoint)
         x = x.permute(1, 0, 2)  # LND -> NLD
         x = self.ln_final(x).type(self.dtype)
 
@@ -366,21 +396,25 @@ class CLIP(nn.Module):
 
         return x
 
-    def forward(self, image, text):
-        image_features = self.encode_image(image)
-        text_features = self.encode_text(text)
+    def forward(self, image, text, use_checkpoint=False, norm_embed=True):
+        image_features = self.encode_image(image, use_checkpoint=use_checkpoint)
+        text_features = self.encode_text(text, use_checkpoint=use_checkpoint)
 
         # normalized features
         image_features = image_features / image_features.norm(dim=1, keepdim=True)
         text_features = text_features / text_features.norm(dim=1, keepdim=True)
 
-        # cosine similarity as logits
-        logit_scale = self.logit_scale.exp()
-        logits_per_image = logit_scale * image_features @ text_features.t()
-        logits_per_text = logits_per_image.t()
+        # # cosine similarity as logits
+        # logit_scale = self.logit_scale.exp()
+        # logits_per_image = logit_scale * image_features @ text_features.t()
+        # logits_per_text = logits_per_image.t()
 
-        # shape = [global_batch_size, global_batch_size]
-        return logits_per_image, logits_per_text
+        # # shape = [global_batch_size, global_batch_size]
+        # return logits_per_image, logits_per_text
+
+        return {'image_embed': image_features,
+                'text_embed': text_features,
+                'logit_scale': self.logit_scale.exp()}
 
 
 def convert_weights(model: nn.Module):
@@ -412,12 +446,16 @@ def build_model(state_dict: dict):
 
     if vit:
         vision_width = state_dict["visual.conv1.weight"].shape[0]
-        vision_layers = len([k for k in state_dict.keys() if k.startswith("visual.") and k.endswith(".attn.in_proj_weight")])
+        vision_layers = len(
+            [k for k in state_dict.keys() if k.startswith("visual.") and k.endswith(".attn.in_proj_weight")]
+        )
         vision_patch_size = state_dict["visual.conv1.weight"].shape[-1]
         grid_size = round((state_dict["visual.positional_embedding"].shape[0] - 1) ** 0.5)
         image_resolution = vision_patch_size * grid_size
     else:
-        counts: list = [len(set(k.split(".")[2] for k in state_dict if k.startswith(f"visual.layer{b}"))) for b in [1, 2, 3, 4]]
+        counts: list = [
+            len(set(k.split(".")[2] for k in state_dict if k.startswith(f"visual.layer{b}"))) for b in [1, 2, 3, 4]
+        ]
         vision_layers = tuple(counts)
         vision_width = state_dict["visual.layer1.0.conv1.weight"].shape[0]
         output_width = round((state_dict["visual.attnpool.positional_embedding"].shape[0] - 1) ** 0.5)
@@ -430,7 +468,7 @@ def build_model(state_dict: dict):
     vocab_size = state_dict["token_embedding.weight"].shape[0]
     transformer_width = state_dict["ln_final.weight"].shape[0]
     transformer_heads = transformer_width // 64
-    transformer_layers = len(set(k.split(".")[2] for k in state_dict if k.startswith(f"transformer.resblocks")))
+    transformer_layers = len(set(k.split(".")[2] for k in state_dict if k.startswith("transformer.resblocks")))
 
     model = CLIP(
         embed_dim,
