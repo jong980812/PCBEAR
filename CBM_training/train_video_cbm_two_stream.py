@@ -436,8 +436,8 @@ def train_cbm_and_save(args):
     #! Learning Concept Layer
     #learn projection layer
     from datetime import datetime
-    if args.hard_label:
-        save_name = "{}/{}_cbm_{}{}".format(args.save_dir, args.data_set, args.hard_label.split("/")[-1],datetime.now().strftime("%M%S")) 
+    if args.pose_label:
+        save_name = "{}/{}_cbm_{}{}".format(args.save_dir, args.data_set, args.pose_label.split("/")[-1],datetime.now().strftime("%M%S")) 
     else :
         save_name = "{}/{}_cbm_{}".format(args.save_dir, args.data_set,args.s_concept_set.split("/")[-1])
     os.makedirs(save_name,exist_ok=True)

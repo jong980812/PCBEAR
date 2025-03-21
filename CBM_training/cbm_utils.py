@@ -1,3 +1,4 @@
+import json
 import os
 import torch.distributed as dist
 import math
@@ -590,6 +591,9 @@ def analysis_backbone_dim(model,dataset,args,number_act=5,view_num=50):
 
     print(f"Top {N} least activated dimensions: {bottom_N_indices}")
     print(f"Activation counts for least activated dimensions: {bottom_N_values}")
-    
+
+def save_args(args,save_name):
+    with open(os.path.join(save_name, "args.txt"), 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
     
 

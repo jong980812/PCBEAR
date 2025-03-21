@@ -1,3 +1,4 @@
+from video_dataloader import datasets
 import cbm
 import pickle
 from collections import OrderedDict
@@ -697,9 +698,9 @@ def hard_label(args,target_features, val_target_features,save_name):
     else:
         exit()
     # similarity_fn = similarity.cos_similarity_cubed_single_sample
-    if args.hard_label is not None:
+    if args.pose_label is not None:
         # pkl 파일 경로
-        file_path = args.hard_label
+        file_path = args.pose_label
 
         # 파일 로드
         with open(os.path.join(file_path,'hard_label_train.pkl'), "rb") as file:
@@ -750,7 +751,7 @@ def hard_label(args,target_features, val_target_features,save_name):
     for i in range(args.proj_steps):
         batch = torch.LongTensor(random.sample(indices, k=proj_batch_size))
         outs = proj_layer(target_features[batch].to(args.device).detach())
-        # if args.hard_label is not None:
+        # if args.pose_label is not None:
         if args.use_mlp:
             loss = criterion(outs, train_result_tensor[batch].to(args.device).detach())
         else:
@@ -838,9 +839,9 @@ def soft_label(args,target_features, val_target_features,save_name):
     else:
         exit()
     # similarity_fn = similarity.cos_similarity_cubed_single_sample
-    if args.hard_label is not None:
+    if args.pose_label is not None:
         # pkl 파일 경로
-        file_path = args.hard_label
+        file_path = args.pose_label
 
         # 파일 로드
         with open(os.path.join(file_path,'soft_label_train.pkl'), "rb") as file:
@@ -884,7 +885,7 @@ def soft_label(args,target_features, val_target_features,save_name):
     for i in range(args.proj_steps):
         batch = torch.LongTensor(random.sample(indices, k=proj_batch_size))
         outs = proj_layer(target_features[batch].to(args.device).detach())
-        # if args.hard_label is not None:
+        # if args.pose_label is not None:
         if args.use_mlp:
             loss = criterion(outs, train_result_tensor[batch].to(args.device).detach())
         else:
@@ -1331,33 +1332,35 @@ def train_classification_multiview(args,W_c,pre_concepts,concepts, target_featur
 def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=None, target_features=None,val_target_features=None,save_name=None,joint=None,best_val_loss=None):
     # cls_file = data_utils.LABEL_FILES[args.data_set]
     cls_file = os.path.join(args.video_anno_path, 'class_list.txt')
-    d_train = args.data_set + "_train"
-    d_val = args.data_set + "_val"
-    train_targets = data_utils.get_targets_only(d_train,args)
-    val_targets = data_utils.get_targets_only(d_val,args)
-    train_y = torch.LongTensor(train_targets)
-    val_y = torch.LongTensor(val_targets)
     with open(cls_file, "r") as f:
         classes = f.read().split("\n")
-    if args.multiview:
-        train_y=torch.repeat_interleave(train_y, 5)
-    if joint is None:
-        proj_layer = torch.nn.Linear(in_features=len(pre_concepts) if args.train_mode=='serial' else target_features.shape[1], out_features=len(concepts), bias=False)
-        proj_layer.load_state_dict({"weight":W_c})
-        with torch.no_grad():
-            train_c = proj_layer(target_features.detach())
-            val_c = proj_layer(val_target_features.detach())
-            
-            train_mean = torch.mean(train_c, dim=0, keepdim=True)
-            train_std = torch.std(train_c, dim=0, keepdim=True)
-            
-            train_c -= train_mean
-            train_c /= train_std
+    assert args.nb_classes == len(classes), f"Error: args.nb_classes ({args.nb_classes}) != len(classes) ({len(classes)})"
+    
+    
+    train_video_dataset, _ = datasets.build_dataset(True, False, args)
+    val_video_dataset,_ =   datasets.build_dataset(False, False, args)
+    # d_train = args.data_set + "_train"
+    # d_val = args.data_set + "_val"
+    train_targets = train_video_dataset.label_array
+    val_targets = val_video_dataset.label_array
+    train_y = torch.LongTensor(train_targets)
+    val_y = torch.LongTensor(val_targets)
+        
+    proj_layer = torch.nn.Linear(target_features.shape[1], out_features=len(concepts), bias=False)
+    proj_layer.load_state_dict({"weight":W_c})
+    with torch.no_grad():
+        train_c = proj_layer(target_features.detach())
+        val_c = proj_layer(val_target_features.detach())
+        
+        train_mean = torch.mean(train_c, dim=0, keepdim=True)
+        train_std = torch.std(train_c, dim=0, keepdim=True)
+        
+        train_c -= train_mean
+        train_c /= train_std
 
-            val_c -= train_mean
-            val_c /= train_std
-    else:
-        train_c, val_c = joint
+        val_c -= train_mean
+        val_c /= train_std
+
         
         
 
@@ -1382,7 +1385,7 @@ def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=Non
     # Solve the GLM path
     #concept layer to classification
     output_proj = glm_saga(linear, indexed_train_loader, STEP_SIZE, args.n_iters, ALPHA, epsilon=1, k=1,
-                    val_loader=val_loader, do_zero=False, metadata=metadata, n_ex=len(target_features), n_classes = len(classes),verbose=100)
+                    val_loader=val_loader, do_zero=False, metadata=metadata, n_ex=len(target_features), n_classes = len(classes),verbose=500)
     W_g = output_proj['path'][0]['weight']
     b_g = output_proj['path'][0]['bias']
     
