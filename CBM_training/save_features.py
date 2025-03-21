@@ -13,17 +13,11 @@ from glm_saga.elasticnet import IndexedTensorDataset, glm_saga
 from torch.utils.data import DataLoader, TensorDataset
 from video_dataloader import video_utils
 import torch.distributed as dist
-from learning_concept_layer import spatio_temporal_parallel,spatio_temporal_serial, spatio_temporal_attention,spatio_temporal_joint,spatio_temporal_three_joint,hard_label,soft_label, spatio_temporal_single
-import debugging
+from cbm_utils import *
+from video_dataloader import datasets
 parser = argparse.ArgumentParser(description='Settings for creating CBM')
-# parser.add_argument('--batch_size', default=64, type=int)
-# parser.add_argument('--epochs', default=30, type=int)
-parser.add_argument('--update_freq', default=1, type=int)
-parser.add_argument('--save_ckpt_freq', default=100, type=int)
 
 # Model parameters
-parser.add_argument('--model', default='vit_base_patch16_224', type=str, metavar='MODEL',
-                    help='Name of model to train')
 parser.add_argument('--tubelet_size', type=int, default= 2)
 parser.add_argument('--input_size', default=224, type=int,
                     help='videos input size')
@@ -178,47 +172,135 @@ parser.add_argument('--dist_url', default='env://',
 parser.add_argument('--enable_deepspeed', action='store_true', default=False)
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 parser.add_argument("--dataset", type=str, default="cifar10")
-parser.add_argument("--s_concept_set", type=str, default=None, 
-                    help="path to concept set name")
-parser.add_argument("--t_concept_set", type=str, default=None, 
-                    help="path to concept set name")
-parser.add_argument("--p_concept_set", type=str, default=None, 
-                    help="path to concept set name")
 parser.add_argument("--backbone", type=str, default="clip_RN50", help="Which pretrained model to use as backbone")
 parser.add_argument("--clip_name", type=str, default="ViT-B/16", help="Which CLIP model to use")
-
 parser.add_argument("--device", type=str, default="cuda", help="Which device to use")
 parser.add_argument("--batch_size", type=int, default=512, help="Batch size used when saving model/CLIP activations")
-parser.add_argument("--saga_batch_size", type=int, default=256, help="Batch size used when fitting final layer")
-parser.add_argument("--proj_batch_size", type=int, default=50000, help="Batch size to use when learning projection layer")
-
-parser.add_argument("--feature_layer", type=str, default='layer4', 
-                    help="Which layer to collect activations from. Should be the name of second to last layer in the model")
 parser.add_argument("--activation_dir", type=str, default='saved_activations', help="save location for backbone and CLIP activations")
 parser.add_argument("--save_dir", type=str, default='saved_models', help="where to save trained models")
-parser.add_argument("--clip_cutoff", type=float, default=0.25, help="concepts with smaller top5 clip activation will be deleted")
-parser.add_argument("--proj_steps", type=int, default=1000, help="how many steps to train the projection layer for")
-parser.add_argument("--interpretability_cutoff", type=float, default=0.45, help="concepts with smaller similarity to target concept will be deleted")
-parser.add_argument("--lam", type=float, default=0.0007, help="Sparsity regularization parameter, higher->more sparse")
-parser.add_argument("--n_iters", type=int, default=1000, help="How many iterations to run the final layer solver for")
-parser.add_argument("--print", action='store_true', help="Print all concepts being deleted in this stage")
 parser.add_argument('--data_path', default='data/video_annotation/ucf101', type=str,
                     help='dataset path')
 parser.add_argument('--video_anno_path',type=str)
 parser.add_argument('--center_frame',action='store_true')
-parser.add_argument('--no_aug',type=bool,default=False)
-parser.add_argument('--saved_features',action='store_true')
+parser.add_argument('--no_aug',action='store_true')
+# parser.add_argument('--no_aug',type=bool,default=False)
 parser.add_argument('--dual_encoder', default='clip', choices=['clip', 'lavila', 'internvid','internvid_200m','internvid_10flt'],
                     type=str, help='dataset')
 parser.add_argument('--dual_encoder_frames',type=int,default=16)
 parser.add_argument('--lavila_ckpt',type=str,default=None)
-parser.add_argument('--train_mode',type=str,default='para')
 parser.add_argument('--internvid_version',type=str,default='200m')
-parser.add_argument('--only_s',action='store_true')
-parser.add_argument('--multiview',action='store_true')
-parser.add_argument('--hard_label',type=str,default=None)
-parser.add_argument('--sp_clip',action='store_true')
-parser.add_argument('--use_mlp',action='store_true')
-parser.add_argument('--debug',default=None)
-parser.add_argument('--loss_mode',default='concept',choices=['concept','sample','second','first_concept','first_sample'])
 
+
+
+def frozen_all_parameters(model, name="model"):
+    
+    for param in model.parameters():
+        param.requires_grad = False
+
+    total = sum(p.numel() for p in model.parameters())
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"[{name}] Total params: {total}, Trainable params: {trainable}")
+    if trainable == 0:
+        print(f"✅ {name} is properly frozen.")
+    else:
+        print(f"❌ {name} is NOT frozen. ({trainable} trainable parameters)")
+
+def get_multi_modal_encoder(args,device):
+    if args.dual_encoder == "lavila": 
+        #META Video-text model
+        dual_encoder_model, _ = get_lavila(args,device=device) 
+    elif args.dual_encoder == "clip":
+        #OpenAI 나온 image-text model
+        name = 'ViT-B/16'
+        dual_encoder_model, _ = clip.load(name, device=device)
+    elif "internvid" in args.dual_encoder:
+        #MGC lab Video-text model
+        dual_encoder_model, _ = get_intervid(args,device)
+        # name = 'ViT-B/16'
+        # clip_model, _ = clip.load(name, device=device)
+    return dual_encoder_model
+def get_video_encoder(args,device):
+    if args.backbone.startswith("clip_"):
+        target_model, target_preprocess = clip.load(args.backbone[5:], device=device)
+    elif args.backbone =='timesformer':
+        target_model = Timesformer(
+            img_size=224, patch_size=16,
+        embed_dim=768, depth=12, num_heads=12,
+        num_frames=8,
+        time_init='zeros',
+        attention_style='frozen-in-time',
+        ln_pre=False,
+        act_layer=QuickGELU,
+        is_tanh_gating=False,
+        drop_path_rate=0.,)
+        finetune = torch.load(args.finetune, map_location='cpu')['model_state']
+        msg = target_model.load_state_dict(finetune,True)
+    else:#! VideoMAE는 여기로.
+        target_model, target_preprocess = data_utils.get_target_model(args.backbone, device,args)
+    return target_model
+
+
+
+def main(args):
+    print("=" * 50)
+    print(" Feature Extraction Process")
+    print(f" Dataset: {args.data_set}")
+    print(f" Backbone Model: {args.backbone}")
+    print(f" Dual Encoder Model: {args.dual_encoder}")
+    print(f" Device: {args.device}")
+    print("=" * 50)
+    
+    device = torch.device(args.device)
+    video_utils.init_distributed_mode(args)
+    
+    seed = args.seed
+    random.seed(seed)  # Python random seed 설정
+    np.random.seed(seed)  # NumPy random seed 설정
+    torch.manual_seed(seed)  # PyTorch random seed 설정 (CPU)
+    
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)  # PyTorch random seed 설정 (CUDA)
+        torch.cuda.manual_seed_all(seed)  # 모든 GPU에 적용
+        
+    #! Load model
+    dual_encoder = get_multi_modal_encoder(args,device).to(device).eval()
+    video_encoder = get_video_encoder(args,device).to(device).eval()
+    frozen_all_parameters(dual_encoder,args.dual_encoder);frozen_all_parameters(video_encoder,args.backbone)
+    
+    for mode in ["train","val"]:
+        
+        is_train=True if mode=="train" else False
+        test_mode = False
+        data_name = args.data_set + "_"+mode #! _train or _val
+            
+        target_save_name, vlm_save_name,  = get_save_backbone_name(args.dual_encoder, args.backbone, data_name,args.activation_dir)
+    
+        # Load video dataset
+        video_dataset, nb_classes = datasets.build_dataset(is_train, test_mode, args)
+        video_dataloader = DataLoader(video_dataset, args.batch_size, num_workers=args.num_workers, pin_memory=True,shuffle=False)
+        print(f"Extractin features from VLM {args.dual_encoder}")
+        if args.dual_encoder =='clip':
+            save_clip_image_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
+        elif args.dual_encoder =='lavila':
+            save_lavila_video_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
+        elif 'internvid' in args.dual_encoder:
+            save_internvid_video_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
+
+        print(f"Extractin features from Video backbone {args.backbone}")
+
+        if args.backbone.startswith("clip_"):
+            save_clip_image_features(video_encoder, video_dataloader, target_save_name, args.batch_size, device,args)
+        elif args.backbone.startswith("vmae_") or args.backbone=='AIM':
+            save_vmae_video_features(video_encoder,video_dataloader,target_save_name,args.batch_size,device,args)
+        #!Now we have only VMAE video backbone. Has to be added more Backbone.
+
+    return
+    
+    
+
+
+
+
+if __name__=='__main__':
+    args = parser.parse_args()
+    main(args)

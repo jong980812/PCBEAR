@@ -274,7 +274,9 @@ class SSVideoClsDataset(Dataset):
         if average_duration > 0:
             # all_index += list(np.multiply(list(range(self.num_segment)), average_duration) + np.random.randint(average_duration,
             #                                                                                             size=self.num_segment))
-            all_index += list(np.multiply(list(range(self.num_segment)), average_duration))
+            # all_index += list(np.multiply(list(range(self.num_segment)), average_duration))
+            all_index += list(np.multiply(list(range(self.num_segment)), average_duration) + (average_duration // 2))
+            #! 이렇게 하면, 매 seg마다 가운데 것 가지고옴. 기존에는 맨 앞이었음. 
         elif len(vr) > self.num_segment:
             all_index += list(np.sort(np.random.randint(len(vr), size=self.num_segment)))
         else:

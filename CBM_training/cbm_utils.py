@@ -72,29 +72,7 @@ def save_clip_image_features(model, dataset, save_name, batch_size=1000 , device
     del all_features
     torch.cuda.empty_cache()
     return
-def save_lavila_video_features(model, dataset, save_name, batch_size=1000 , device = "cuda",args = None):
-    _make_save_dir(save_name)
-    all_features = []
 
-    if os.path.exists(save_name):
-        return
-    
-    save_dir = save_name[:save_name.rfind("/")]
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    with torch.no_grad():
-        for images, labels in tqdm(DataLoader(dataset, batch_size, num_workers=8, pin_memory=True)):
-            # t = (images.shape)[2]
-            # if args.center_frame:
-            #     images = images.squeeze(2)
-            features = model.encode_image(images.to(device))# B, D
-            all_features.append(features.cpu())
-
-    torch.save(torch.cat(all_features), save_name)
-    #free memory
-    del all_features
-    torch.cuda.empty_cache()
-    return
 def save_clip_text_features(model, text, save_name, batch_size=1000):
     
     if os.path.exists(save_name):
@@ -276,7 +254,14 @@ def get_save_names(clip_name, target_name, target_layer, d_probe, concept_set, p
     p_text_save_name = "{}/{}_{}.pt".format(save_dir, p_concept_set_name, clip_name.replace('/', ''))
     
     return target_save_name, clip_save_name, s_text_save_name, t_text_save_name,p_text_save_name
-
+def get_save_backbone_name(clip_name, target_name, d_probe, save_dir):
+    target_save_name = "{}/{}_{}.pt".format(save_dir, d_probe, target_name.replace('/', ''))
+    # else:
+    #     target_save_name = "{}/{}_{}_{}{}.pt".format(save_dir, d_probe, target_name, target_layer,
+    #                                              PM_SUFFIX[pool_mode])
+    clip_save_name = "{}/{}_{}.pt".format(save_dir, d_probe, clip_name.replace('/', ''))
+    
+    return target_save_name, clip_save_name
     
 def _all_saved(save_names):
     """
@@ -394,31 +379,7 @@ def get_concept_act_by_pred(model, dataset, device):
     return concept_acts_by_pred
 
 
-def save_vmae_video_features(model, dataset, save_name, batch_size=1000 , device = "cuda",args = None):
-    _make_save_dir(save_name)
-    
-    if os.path.exists(save_name):
-        return
-    
-    save_dir = save_name[:save_name.rfind("/")]
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    # for end_point in range(5):
-    all_features = []
-    #     dataset.end_point = end_point
-    with torch.no_grad():
-        for videos, labels in tqdm(DataLoader(dataset, batch_size, num_workers=10, pin_memory=True,shuffle=False)):
-            # t = (images.shape)[2]
-            # if args.center_frame:
-            #     images = images.squeeze(2)
-            features = model.forward_features(videos.to(device))
-            all_features.append(features.cpu())
-    torch.save(torch.cat(all_features), save_name)
 
-    #free memory
-    del all_features
-    torch.cuda.empty_cache()
-    return
 
 
 
@@ -501,10 +462,56 @@ def get_intervid(args,device):
     clip = clip.eval()
     return clip, tokenizer
     
+def save_vmae_video_features(model, dataloader, save_name, batch_size=1000 , device = "cuda",args = None):
+    _make_save_dir(save_name)
+    
+    if os.path.exists(save_name):
+        return
+    
+    save_dir = save_name[:save_name.rfind("/")]
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    # for end_point in range(5):
+    all_features = []
+    #     dataset.end_point = end_point
+    with torch.no_grad():
+        for videos, labels in (dataloader):
+            # t = (images.shape)[2]
+            # if args.center_frame:
+            #     images = images.squeeze(2)
+            features = model.forward_features(videos.to(device))
+            all_features.append(features.cpu())
+    torch.save(torch.cat(all_features), save_name)
 
+    #free memory
+    del all_features
+    torch.cuda.empty_cache()
+    return
 
+def save_lavila_video_features(model, dataloader, save_name, batch_size=1000 , device = "cuda",args = None):
+    _make_save_dir(save_name)
+    all_features = []
 
-def save_internvid_video_features(model, dataset, save_name, batch_size=1000 , device = "cuda",args = None):
+    if os.path.exists(save_name):
+        return
+    
+    save_dir = save_name[:save_name.rfind("/")]
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    with torch.no_grad():
+        for images, labels in (dataloader):
+            # t = (images.shape)[2]
+            # if args.center_frame:
+            #     images = images.squeeze(2)
+            features = model.encode_image(images.to(device))# B, D
+            all_features.append(features.cpu())
+
+    torch.save(torch.cat(all_features), save_name)
+    #free memory
+    del all_features
+    torch.cuda.empty_cache()
+    return
+def save_internvid_video_features(model, dataloader, save_name, batch_size=1000 , device = "cuda",args = None):
     _make_save_dir(save_name)
     all_labels = []
     if os.path.exists(save_name):
@@ -518,7 +525,7 @@ def save_internvid_video_features(model, dataset, save_name, batch_size=1000 , d
         # dataset.end_point = end_point
         # dl=DataLoader(dataset, batch_size, num_workers=10, pin_memory=True,shuffle=False)
     with torch.no_grad():
-        for images, labels in tqdm(DataLoader(dataset, batch_size, num_workers=10, pin_memory=True,shuffle=False)):
+        for images, labels in (dataloader):
             # t = (images.shape)[2]
             # if args.center_frame:
             #     images = images.squeeze(2)
