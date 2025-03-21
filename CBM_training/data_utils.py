@@ -4,12 +4,12 @@ from torchvision import datasets, transforms, models
 
 import clip
 from pytorchcv.model_provider import get_model as ptcv_get_model
-from datasets import build_dataset
+from video_dataloader.datasets import build_dataset
 import modeling_finetune
 from collections import OrderedDict
 from timm.models import create_model
 from modeling_aim import AIM
-import video_utils
+from video_dataloader import video_utils
 DATASET_ROOTS = {
     "imagenet_train": "YOUR_PATH/CLS-LOC/train/",
     "imagenet_val": "YOUR_PATH/ImageNet_val/",

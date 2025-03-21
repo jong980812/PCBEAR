@@ -2,15 +2,15 @@ import os
 import numpy as np
 import torch
 from torchvision import transforms
-from random_erasing import RandomErasing
+# from random_erasing import RandomErasing
 import warnings
 from decord import VideoReader, cpu
 from torch.utils.data import Dataset
-import video_transforms as video_transforms 
-import volume_transforms as volume_transforms
+from video_dataloader import video_transforms
+from video_dataloader import volume_transforms
 
 
-class HAA500VideoClsDataset(Dataset):
+class SSVideoClsDataset(Dataset):
     """Load your own video classification dataset."""
 
     def __init__(self, anno_path, data_path, mode='train', clip_len=8,
@@ -33,6 +33,10 @@ class HAA500VideoClsDataset(Dataset):
         self.args = args
         self.aug = False
         self.rand_erase = False
+        self.center_frame = args.center_frame
+        self.get_sample_path=False
+        self.no_aug = args.no_aug
+        self.visualize =False
         if self.mode in ['train']:
             self.aug = True
             if self.args.reprob > 0:
@@ -41,15 +45,24 @@ class HAA500VideoClsDataset(Dataset):
             raise ImportError("Unable to import `decord` which is required to read videos.")
 
         import pandas as pd
-        cleaned = pd.read_csv(self.anno_path, header=None, delimiter=',')
+        cleaned = pd.read_csv(self.anno_path, header=None, delimiter=' ')
         self.dataset_samples = list(cleaned.values[:, 0])
         self.label_array = list(cleaned.values[:, 1])
-        self.a = None
+
         if (mode == 'train'):
             pass
 
         elif (mode == 'validation'):
-            self.data_transform = video_transforms.Compose([
+            if self.no_aug:
+                self.data_transform = video_transforms.Compose([
+                    video_transforms.Resize(self.short_side_size, interpolation='bilinear'),
+                    video_transforms.CenterCrop(size=(self.crop_size, self.crop_size)),
+                    volume_transforms.ClipToTensor(),
+                    # video_transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                            # std=[0.229, 0.224, 0.225])
+                ])
+            else:
+                self.data_transform = video_transforms.Compose([
                 video_transforms.Resize(self.short_side_size, interpolation='bilinear'),
                 video_transforms.CenterCrop(size=(self.crop_size, self.crop_size)),
                 volume_transforms.ClipToTensor(),
@@ -103,11 +116,16 @@ class HAA500VideoClsDataset(Dataset):
                 return frame_list, label_list, index_list, {}
             else:
                 buffer = self._aug_frame(buffer, args)
-            
-            return buffer, self.label_array[index], index, {}
+            if self.center_frame:
+                buffer = buffer[:,self.clip_len//2,:,:]
+            return buffer, self.label_array[index]#, index, {}
 
         elif self.mode == 'validation':
             sample = os.path.join(self.data_path,self.dataset_samples[index])
+            if self.visualize:
+                buffer = self.loadvideo_decord(sample)
+                buffer = self.data_transform(buffer)
+                return buffer,self.label_array[index],sample
             buffer = self.loadvideo_decord(sample)
             if len(buffer) == 0:
                 while len(buffer) == 0:
@@ -116,10 +134,13 @@ class HAA500VideoClsDataset(Dataset):
                     sample = os.path.join(self.data_path,self.dataset_samples[index])
                     buffer = self.loadvideo_decord(sample)
             buffer = self.data_transform(buffer)
+            if self.center_frame:
+                buffer = buffer[:,self.clip_len//2,:,:]
+                return buffer,self.label_array[index],sample
             return buffer, self.label_array[index]#, sample.split("/")[-1].split(".")[0]
 
         elif self.mode == 'test':
-            sample = os.path.join(self.data_path,self.test_dataset[index])
+            sample = self.test_dataset[index]
             chunk_nb, split_nb = self.test_seg[index]
             buffer = self.loadvideo_decord(sample)
 
@@ -192,25 +213,24 @@ class HAA500VideoClsDataset(Dataset):
             min_scale=256,
             max_scale=320,
             crop_size=self.crop_size,
-            # random_horizontal_flip=False if args.data_set == 'SSV2' else True,
-            random_horizontal_flip=False if (args.data_set == 'SSV2' or args.data_set == 'TOY') else True,
+            random_horizontal_flip=False if args.data_set == 'SSV2' else True,
             inverse_uniform_sampling=False,
             aspect_ratio=asp,
             scale=scl,
             motion_shift=False
         )
 
-        if self.rand_erase:
-            erase_transform = RandomErasing(
-                args.reprob,
-                mode=args.remode,
-                max_count=args.recount,
-                num_splits=args.recount,
-                device="cpu",
-            )
-            buffer = buffer.permute(1, 0, 2, 3)
-            buffer = erase_transform(buffer)
-            buffer = buffer.permute(1, 0, 2, 3)
+        # if self.rand_erase:
+        #     erase_transform = RandomErasing(
+        #         args.reprob,
+        #         mode=args.remode,
+        #         max_count=args.recount,
+        #         num_splits=args.recount,
+        #         device="cpu",
+        #     )
+        #     buffer = buffer.permute(1, 0, 2, 3)
+        #     buffer = erase_transform(buffer)
+        #     buffer = buffer.permute(1, 0, 2, 3)
 
         return buffer
 
@@ -252,8 +272,9 @@ class HAA500VideoClsDataset(Dataset):
         average_duration = len(vr) // self.num_segment
         all_index = []
         if average_duration > 0:
-            all_index += list(np.multiply(list(range(self.num_segment)), average_duration) + np.random.randint(average_duration,
-                                                                                                        size=self.num_segment))
+            # all_index += list(np.multiply(list(range(self.num_segment)), average_duration) + np.random.randint(average_duration,
+            #                                                                                             size=self.num_segment))
+            all_index += list(np.multiply(list(range(self.num_segment)), average_duration))
         elif len(vr) > self.num_segment:
             all_index += list(np.sort(np.random.randint(len(vr), size=self.num_segment)))
         else:

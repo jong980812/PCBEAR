@@ -7,8 +7,8 @@ import torchvision.transforms.functional as F
 from PIL import Image
 from torchvision import transforms
 
-from rand_augment import rand_augment_transform
-from random_erasing import RandomErasing
+from .rand_augment import rand_augment_transform
+from .random_erasing import RandomErasing
 
 
 import numbers

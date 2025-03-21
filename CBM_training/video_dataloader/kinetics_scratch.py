@@ -5,15 +5,15 @@ import torch
 import decord
 from PIL import Image
 from torchvision import transforms
-from random_erasing import RandomErasing
+# from random_erasing import RandomErasing
 import warnings
 from decord import VideoReader, cpu
 from torch.utils.data import Dataset
-import video_transforms as video_transforms 
-import volume_transforms as volume_transforms
+from video_dataloader import video_transforms
+from video_dataloader import volume_transforms
 
 
-class VideoClsDataset(Dataset):
+class VideoClsDataset_scratch(Dataset):
     """Load your own video classification dataset."""
 
     def __init__(self, anno_path, data_path, mode='train', clip_len=8,
@@ -44,7 +44,7 @@ class VideoClsDataset(Dataset):
         if self.mode in ['train']:
             self.aug = True
             if self.args.reprob > 0:
-                self.rand_erase = True
+                self.rand_erase = False
         if VideoReader is None:
             raise ImportError("Unable to import `decord` which is required to read videos.")
 
@@ -214,7 +214,7 @@ class VideoClsDataset(Dataset):
         buffer = buffer.permute(3, 0, 1, 2)
         # Perform data augmentation.
         scl, asp = (
-            [0.08, 1.0],
+            [0.1, 1.0],
             [0.75, 1.3333],
         )
 
@@ -231,17 +231,17 @@ class VideoClsDataset(Dataset):
             motion_shift=False
         )
 
-        if self.rand_erase:
-            erase_transform = RandomErasing(
-                args.reprob,
-                mode=args.remode,
-                max_count=args.recount,
-                num_splits=args.recount,
-                device="cpu",
-            )
-            buffer = buffer.permute(1, 0, 2, 3)
-            buffer = erase_transform(buffer)
-            buffer = buffer.permute(1, 0, 2, 3)
+        # if self.rand_erase:
+        #     erase_transform = RandomErasing(
+        #         args.reprob,
+        #         mode=args.remode,
+        #         max_count=args.recount,
+        #         num_splits=args.recount,
+        #         device="cpu",
+        #     )
+        #     buffer = buffer.permute(1, 0, 2, 3)
+        #     buffer = erase_transform(buffer)
+        #     buffer = buffer.permute(1, 0, 2, 3)
 
         return buffer
 
@@ -286,9 +286,9 @@ class VideoClsDataset(Dataset):
                 index = np.concatenate((index, np.ones(self.clip_len - seg_len // self.frame_sample_rate) * seg_len))
                 index = np.clip(index, 0, seg_len - 1).astype(np.int64)
             else:
-                points = np.linspace(converted_len, seg_len, 5, endpoint=True)
-                end_idx = int((points[self.end_point]))
-                # end_idx = np.random.randint(converted_len, seg_len)
+                # points = np.linspace(converted_len, seg_len, 5, endpoint=True)
+                # end_idx = int((points[self.end_point]))
+                end_idx = np.random.randint(converted_len, seg_len)
                 str_idx = end_idx - converted_len
                 index = np.linspace(str_idx, end_idx, num=self.clip_len)
                 index = np.clip(index, str_idx, end_idx - 1).astype(np.int64)

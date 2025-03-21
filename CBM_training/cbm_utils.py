@@ -14,7 +14,7 @@ from lavila.openai_model import QuickGELU
 from transforms import Permute
 import torchvision.transforms as transforms
 import torchvision.transforms._transforms_video as transforms_video
-import video_utils
+from video_dataloader import video_utils
 PM_SUFFIX = {"max":"_max", "avg":""}
 
 def save_target_activations(target_model, dataset, save_name, target_layers = ["layer4"], batch_size = 1000,

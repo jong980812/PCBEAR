@@ -24,7 +24,7 @@ import numpy as np
 import torch.optim.lr_scheduler as lr_scheduler
 from glm_saga.elasticnet import IndexedTensorDataset, glm_saga
 from torch.utils.data import DataLoader, TensorDataset
-import video_utils
+from video_dataloader import video_utils
 import torch.distributed as dist
 import torch
 import numpy as np

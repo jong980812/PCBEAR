@@ -11,7 +11,7 @@ import json
 import numpy as np
 from glm_saga.elasticnet import IndexedTensorDataset, glm_saga
 from torch.utils.data import DataLoader, TensorDataset
-import video_utils
+from video_dataloader import video_utils
 import torch.distributed as dist
 from learning_concept_layer import spatio_temporal_parallel,spatio_temporal_serial, spatio_temporal_attention,spatio_temporal_joint,spatio_temporal_three_joint,hard_label,soft_label, spatio_temporal_single
 import debugging
@@ -244,14 +244,16 @@ def train_cbm_and_save(args):
     # similarity_fn = similarity.cos_similarity_cubed_single
     device = torch.device(args.device)
     
+    
+    
     d_train = args.data_set + "_train"
     d_val = args.data_set + "_val"
     #!저장되는 feature이름이 데이터셋이랑 모델이름 조합.
     #! 만약에 kth-5, kth-2
     #get concept set
     cls_file = os.path.join(args.video_anno_path, 'class_list.txt')
-    with open(cls_file, "r") as f:
-        classes = f.read().split("\n")
+    # with open(cls_file, "r") as f:
+    #     classes = f.read().split("\n")
     
     with open(args.s_concept_set) as f:
         s_concepts = f.read().split("\n")
