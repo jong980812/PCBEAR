@@ -5,26 +5,8 @@ import os
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
+import util
 
-def load_class_list(anno_path):
-    """클래스 리스트를 파일에서 불러옴."""
-    file_path = os.path.join(anno_path, "class_list.txt")
-    with open(file_path, "r") as file:
-        return [line.strip() for line in file]
-
-def load_json_files(base_path, class_list, dataset):
-    """주어진 클래스 리스트를 기반으로 JSON 파일 리스트를 가져옴."""
-    if dataset == "Penn_action":
-        return glob.glob(os.path.join(base_path, "*_result.json"))
-    elif dataset == "HAA49":
-        json_files = []
-        for class_name in class_list:
-            class_folder = os.path.join(base_path, class_name)
-            if os.path.isdir(class_folder):
-                json_files.extend(glob.glob(os.path.join(class_folder, "*_result.json")))
-        return json_files
-    elif dataset == "KTH":
-        return glob.glob(os.path.join(base_path, "*_result.json"))
     
 
 def process_keypoints(json_file, scaler, confidence_threshold=0.1):
@@ -46,16 +28,6 @@ def process_keypoints(json_file, scaler, confidence_threshold=0.1):
             frames_data.append(pose_normalized)
     return frames_data
 
-def expand_array(frames_data, F):
-    frames_data = np.array(frames_data) 
-    if frames_data.shape[0] == 0:
-        return None  # F개 프레임을 0으로 채움
-    if frames_data.shape[0] == 1:
-        return np.tile(frames_data, (F, 1, 1))  # 단일 프레임을 F번 복제
-
-    indices = np.linspace(0, frames_data.shape[0] - 1, F, dtype=int)
-    expanded_array = frames_data[indices]
-    return expanded_array
 
 def subsampling(args, json_files, class_list):
     """샘플링 및 데이터 저장."""
@@ -78,7 +50,7 @@ def subsampling(args, json_files, class_list):
     
         # 부족한 프레임을 확장
         if num_frames < L * T:
-            expanded_frames = expand_array(frames_data, L * T)
+            expanded_frames = util.expand_array(frames_data, L * T)
             if expanded_frames is not None:
                 frames_data = expanded_frames
                 num_frames = len(frames_data)
@@ -111,23 +83,14 @@ def subsampling(args, json_files, class_list):
         
         class_data.extend(all_clips)
     return class_data, class_metadata
-    
-def save_data(output_path, class_data, class_metadata):
-    os.makedirs(output_path, exist_ok=True)
-    processed_keypoints_path = os.path.join(output_path, "processed_keypoints.npy")
-    sample_metadata_path = os.path.join(output_path, "sample_metadata.json")
-    
-    np.save(processed_keypoints_path, np.array(class_data))
-    with open(sample_metadata_path, "w") as f:
-        json.dump(class_metadata, f, indent=4)
-    
+        
 
 def Keypointset(args):
     processed_keypoints_path = os.path.join(args.output_path, "processed_keypoints.npy")
     if os.path.exists(processed_keypoints_path):
         print(f"✅ {processed_keypoints_path} 파일이 존재하므로 Keypointset()을 건너뜁니다.")
         return  
-    class_list = load_class_list(args.anno_path)
-    json_files = load_json_files(args.json_path, class_list, args.dataset)
+    class_list = util.load_class_list(args.anno_path)
+    json_files = util.load_json_files(args.json_path, class_list, args.dataset)
     class_data, class_metadata = subsampling(args, json_files, class_list)
-    save_data(args.output_path, class_data, class_metadata)
+    util.save_data(args.output_path, class_data, class_metadata)

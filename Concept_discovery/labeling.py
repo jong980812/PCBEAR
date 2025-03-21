@@ -5,22 +5,8 @@ import json
 from collections import defaultdict
 import pandas as pd
 import pickle
+import util
 
-def find_closest_to_centroid(features, cluster_labels):
-    unique_clusters = np.unique(cluster_labels)  # 클러스터 ID 찾기
-    closest_indices = {}  # 각 클러스터의 대표 샘플 인덱스 저장
-
-    for cluster in unique_clusters:
-        cluster_indices = np.where(cluster_labels == cluster)[0]  # 해당 클러스터 샘플의 인덱스
-        cluster_points = features[cluster_indices]  # 클러스터에 속한 데이터들
-
-        centroid = np.mean(cluster_points, axis=0)  # 클러스터 평균 벡터 계산
-        distances = np.linalg.norm(cluster_points - centroid, axis=1)  # 평균과 각 샘플 간 거리 계산
-        closest_idx = cluster_indices[np.argmin(distances)]  # 가장 가까운 샘플의 원본 인덱스 저장
-
-        closest_indices[cluster] = closest_idx  # 결과 저장
-    
-    return closest_indices
 
 def make_attribute(args, result_gt):
     with open(os.path.join(args.output_path, "sample_metadata.json"), "r") as f :
@@ -52,12 +38,6 @@ def make_attribute(args, result_gt):
         json.dump(video_attributes, f, indent=4)
     return video_attributes
 
-def remove_missing_videos(csv_path, missing_videos, output_csv_path):
-    """누락된 비디오를 CSV에서 제거하고 새로운 CSV 파일로 저장"""
-    df = pd.read_csv(csv_path, header=None, names=["video_name", "class_label"], sep="\s+")
-    df_filtered = df[~df["video_name"].isin(missing_videos)]  # ✅ 누락된 비디오 제외
-    df_filtered.to_csv(output_csv_path, header=False, index=False, sep=" ")
-    print("--------Removed---------")
 
 def hard_label(video_attributes, args, mode):
     output_json_path = os.path.join(args.save_path, f"hard_label_{mode}.json")
@@ -90,13 +70,13 @@ def hard_label(video_attributes, args, mode):
     # ✅ Pickle 파일로 저장
     with open(output_pkl_path, "wb") as f:
         pickle.dump(sorted_annotations, f)
-    remove_missing_videos(csv_path, missing_videos, new_csv_path)
+    util.remove_missing_videos(csv_path, missing_videos, new_csv_path)
 
     return sorted_annotations
 
 def labeling(args, data, result_gt):
     # data, result_gt = clustering.clustering(args)
-    closest_sample_indices = find_closest_to_centroid(data, result_gt)
+    closest_sample_indices = util.find_closest_to_centroid(data, result_gt)
     with open(os.path.join(args.save_path,'concept_index.txt'), "w", encoding="utf-8") as f:
         for key, value in closest_sample_indices.items():
             f.write(f"{key}: {value}\n") 

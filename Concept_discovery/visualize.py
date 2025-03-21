@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import labeling
 import subsampling
 import pandas as pd
+import util
 
 # Keypoint Skeleton Structure
 skeleton = [
@@ -23,17 +24,6 @@ coco_keypoints = {
 # Face Keypoints (Only Nose)
 face_keypoints = [0]
 
-def video_class_mapping(args):
-    class_list = subsampling.load_class_list(args.anno_path)
-    train_csv = os.path.join(args.anno_path,"train.csv")
-    val_csv = os.path.join(args.anno_path,"val.csv")
-    train_df = pd.read_csv(train_csv, header=None, names=["video_name", "class_id"], sep="\s+")
-    val_df = pd.read_csv(val_csv, header=None, names=["video_name", "class_id"], sep="\s+")
-    df = pd.concat([train_df, val_df], ignore_index=True)
-    df["video_id"] = df["video_name"].str.replace(".mp4", "", regex=False)
-
-    df["class_name"] = df["class_id"].apply(lambda x: class_list[int(x)])
-    return dict(zip(df["video_id"], df["class_name"]))
 
 def plot_pose(pose, ax=None, title="Pose Visualization", original_index=None, video_name=None, invert_y=True):
     pose = pose.reshape(17, 2)
@@ -68,7 +58,7 @@ def visualize_pose_by_index(args, original_index, processed_keypoints, sample_me
 
 
     if args.dataset == "Penn_action":
-        video_to_class = video_class_mapping(args)
+        video_to_class = util.video_class_mapping(args)
         class_name = video_to_class.get(video_id, "Unknown Class")
         video_name = f"{video_name}_{class_name}"
     else :

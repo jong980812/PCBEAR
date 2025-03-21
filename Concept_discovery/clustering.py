@@ -9,40 +9,27 @@ import subsampling
 import re
 import pandas as pd
 from tqdm import tqdm
+import util
 
-def set_seed(seed=42):
-    """랜덤 시드를 고정하여 재현성을 보장."""
-    np.random.seed(seed)
-    random.seed(seed)
-
-def load_data(base_path):
-    data = np.load(os.path.join(base_path, 'processed_keypoints.npy'))
-    with open(os.path.join(base_path, "sample_metadata.json"), "r") as f:
-        json_data = json.load(f)
-    return data, json_data
-
-def class_mapping(anno_path):
-    class_list = subsampling.load_class_list(anno_path)
-
-    return {name : idx for idx,name in enumerate(class_list)}
 
 def extract_label(args,json_data, class_map):
     if args.dataset == "Penn_action":
-        class_list = subsampling.load_class_list(args.anno_path)
-        df_list = []
-        for csv_file in ["train.csv", "val.csv"]:
-            csv_path = os.path.join(args.anno_path, csv_file)
-            df_list.append(pd.read_csv(csv_path, header=None, names=["filename", "class_id"], sep="\s+"))
+        # class_list = subsampling.load_class_list(args.anno_path)
+        # df_list = []
+        # for csv_file in ["train.csv", "val.csv"]:
+        #     csv_path = os.path.join(args.anno_path, csv_file)
+        #     df_list.append(pd.read_csv(csv_path, header=None, names=["filename", "class_id"], sep="\s+"))
 
-        df = pd.concat(df_list, ignore_index=True)
-        df["video_id"] = df["filename"].str.replace(".mp4", "", regex=False).astype(str)
-        df["class_id"] = pd.to_numeric(df["class_id"], errors="coerce")
+        # df = pd.concat(df_list, ignore_index=True)
+        # df["video_id"] = df["filename"].str.replace(".mp4", "", regex=False).astype(str)
+        # df["class_id"] = pd.to_numeric(df["class_id"], errors="coerce")
 
-        df = df.dropna(subset=["class_id"])
-        df["class_id"] = df["class_id"].astype(int)
+        # df = df.dropna(subset=["class_id"])
+        # df["class_id"] = df["class_id"].astype(int)
         
-        df["class_name"] = df["class_id"].map(lambda x: class_list[int(x)])
-        label_dict = dict(zip(df["video_id"], df["class_name"]))
+        # df["class_name"] = df["class_id"].map(lambda x: class_list[int(x)])
+        # label_dict = dict(zip(df["video_id"], df["class_name"]))
+        label_dict = util.video_class_mapping(args)
         def get_label(video_id):
             class_name = label_dict.get(video_id, "unknown")  # 매칭되지 않으면 "unknown"
             return class_map.get(class_name, -1)
@@ -79,10 +66,10 @@ def run_finch_clustering(data, labels,args):
     return req_c
 def clustering(args):
     """메인 실행 함수."""
-    set_seed(42)  # 랜덤 시드 설정
-    data, json_data = load_data(args.output_path)
+    util.set_seed(42)  # 랜덤 시드 설정
+    data, json_data = util.load_data(args.output_path)
     data = data.reshape(data.shape[0], -1)
-    class_map = class_mapping(args.anno_path)
+    class_map = util.class_mapping(args.anno_path)
     labels = extract_label(args, json_data, class_map)
     result_gt = run_finch_clustering(data, labels,args)
     return data,result_gt
