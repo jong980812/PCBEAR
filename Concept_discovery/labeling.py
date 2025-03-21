@@ -100,8 +100,9 @@ def labeling(args, data, result_gt):
     with open(os.path.join(args.save_path,'concept_index.txt'), "w", encoding="utf-8") as f:
         for key, value in closest_sample_indices.items():
             f.write(f"{key}: {value}\n") 
-            
+
     video_attributes = make_attribute(args, result_gt)
     train_anno = hard_label(video_attributes, args, mode = "train")
     val_anno = hard_label(video_attributes, args, mode = "val")
+    return closest_sample_indices
 

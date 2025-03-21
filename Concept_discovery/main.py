@@ -8,6 +8,7 @@ import sys
 import subsampling
 import clustering
 import labeling
+import visualize
 
 parser = argparse.ArgumentParser(description='Settings for creating conceptset')
 parser.add_argument('--anno_path', default='')
@@ -23,8 +24,8 @@ parser.add_argument('--req_cluster',  type=int, default=500)
 def concept_decovery(args):
     subsampling.Keypointset(args)
     data, result_gt = clustering.clustering(args)
-    labeling.labeling(args,data,result_gt)
-
+    closest_sample_indices = labeling.labeling(args,data,result_gt)
+    visualize.concept_visualize(args,data,result_gt,closest_sample_indices)
 if __name__=='__main__':
     args = parser.parse_args()
     concept_decovery(args)

@@ -123,6 +123,10 @@ def save_data(output_path, class_data, class_metadata):
     
 
 def Keypointset(args):
+    processed_keypoints_path = os.path.join(args.output_path, "processed_keypoints.npy")
+    if os.path.exists(processed_keypoints_path):
+        print(f"✅ {processed_keypoints_path} 파일이 존재하므로 Keypointset()을 건너뜁니다.")
+        return  
     class_list = load_class_list(args.anno_path)
     json_files = load_json_files(args.json_path, class_list, args.dataset)
     class_data, class_metadata = subsampling(args, json_files, class_list)
