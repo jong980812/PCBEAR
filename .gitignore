@@ -8,3 +8,5 @@ result/
 debugging/
 .vscode/
 *.pyc
+__pycache__/
+.vscode
