@@ -1,0 +1,400 @@
+    1.	Abseiling: harness, rope, carabiner, cliff
+	2.	Air drumming: drumstick, rhythm, beat, hand
+	3.	Answering questions: answer, question, voice, phone
+	4.	Applauding: hands, audience, applause, stage
+	5.	Applying cream: cream, skin, hand, tube
+	6.	Archery: bow, arrow, target, quiver
+	7.	Arm wrestling: arm, table, hand, muscle
+	8.	Arranging flowers: flower, vase, bouquet, petal
+	9.	Assembling computer: motherboard, CPU, screwdriver, case
+	10.	Auctioning: gavel, bidder, auctioneer, item
+	11.	Baby waking up: baby, crib, blanket, pacifier
+	12.	Baking cookies: dough, oven, cookie, tray
+	13.	Balloon blowing: balloon, air, mouth, string
+	14.	Bandaging: bandage, wound, gauze, tape
+	15.	Barbequing: grill, meat, fire, tongs
+	16.	Bartending: shaker, cocktail, glass, bottle
+	17.	Beatboxing: microphone, mouth, rhythm, speaker
+	18.	Bee keeping: hive, bee, honey, smoker
+	19.	Belly dancing: hips, costume, music, veil
+	20.	Bench pressing: barbell, bench, weight, plate
+	21.	Bending back: back, floor, mat, body
+	22.	Bending metal: metal, hammer, forge, tongs
+	23.	Biking through snow: bike, snow, tire, helmet
+	24.	Blasting sand: sand, nozzle, surface, compressor
+	25.	Blowing glass: glass, furnace, pipe, mold
+	26.	Blowing leaves: blower, leaves, yard, bag
+	27.	Blowing nose: tissue, nose, hand, mucus
+	28.	Blowing out candles: candle, flame, breath, smoke
+	29.	Bobsledding: sled, track, ice, team
+	30.	Bookbinding: book, glue, cover, spine
+	31.	Bouncing on trampoline: trampoline, springs, mat, frame
+	32.	Bowling: ball, pins, lane, shoes
+	33.	Braiding hair: braid, hair, strand, comb
+	34.	Breading or breadcrumbing: breadcrumb, meat, flour, egg
+	35.	Breakdancing: floor, music, body, spin
+	36.	Brush painting: brush, paint, canvas, stroke
+	37.	Brushing hair: brush, hair, comb, mirror
+	38.	Brushing teeth: toothbrush, toothpaste, teeth, sink
+	39.	Building cabinet: wood, screws, door, hammer
+	40.	Building shed: nails, wood, hammer, roof
+	41.	Bungee jumping: cord, bridge, platform, helmet
+	42.	Busking: guitar, hat, street, crowd
+	43.	Canoeing or kayaking: paddle, kayak, water, lifejacket
+	44.	Capoeira: movement, music, body, rhythm
+	45.	Carrying baby: baby, stroller, carrier, blanket
+	46.	Cartwheeling: hands, body, floor, legs
+	47.	Carving pumpkin: pumpkin, knife, seed, face
+	48.	Catching fish: fish, hook, bait, net
+	49.	Catching or throwing baseball: ball, glove, bat, field
+	50.	Catching or throwing frisbee: frisbee, hand, field, throw
+	51.	Catching or throwing softball: ball, glove, bat, base   
+    1.	Celebrating: party, cake, balloons, confetti
+	2.	Changing oil: oil, wrench, filter, engine
+	3.	Changing wheel: tire, jack, lug nut, wrench
+	4.	Checking tires: tire, gauge, tread, air
+	5.	Cheerleading: pom-pom, uniform, megaphone, squad
+	6.	Chopping wood: axe, log, stump, kindling
+	7.	Clapping: hands, applause, audience, performance
+	8.	Clay pottery making: clay, wheel, kiln, pot
+	9.	Clean and jerk: barbell, weights, platform, chalk
+	10.	Cleaning floor: mop, broom, bucket, detergent
+	11.	Cleaning gutters: ladder, gutter, leaves, gloves
+	12.	Cleaning pool: skimmer, pool, brush, vacuum
+	13.	Cleaning shoes: polish, brush, shoes, cloth
+	14.	Cleaning toilet: brush, toilet, cleaner, gloves
+	15.	Cleaning windows: squeegee, glass, spray, cloth
+	16.	Climbing a rope: rope, hands, feet, grip
+	17.	Climbing ladder: ladder, rungs, wall, hands
+	18.	Climbing tree: branch, tree, bark, foothold
+	19.	Contact juggling: ball, hand, wrist, control
+	20.	Cooking chicken: chicken, pan, oil, seasoning
+	21.	Cooking egg: egg, skillet, spatula, butter
+	22.	Cooking on campfire: fire, pot, grill, wood
+	23.	Cooking sausages: sausage, grill, tongs, fire
+	24.	Counting money: money, bill, coin, wallet
+	25.	Country line dancing: boots, hat, dancefloor, steps
+	26.	Cracking neck: neck, hands, joint, spine
+	27.	Crawling baby: baby, floor, knees, hands
+	28.	Crossing river: river, water, bank, rocks
+	29.	Crying: tears, eyes, tissue, sob
+	30.	Curling hair: curling iron, hair, strand, clip
+	31.	Cutting nails: nail clipper, nail, file, hand
+	32.	Cutting pineapple: knife, pineapple, peel, slice
+	33.	Cutting watermelon: watermelon, knife, seed, slice
+	34.	Dancing ballet: tutu, slippers, stage, pirouette
+	35.	Dancing Charleston: steps, music, jazz, flapper
+	36.	Dancing Gangnam style: dance, music, steps, sunglasses
+	37.	Dancing Macarena: music, steps, arms, rhythm
+	38.	Deadlifting: barbell, weights, belt, platform
+	39.	Decorating the Christmas tree: tree, ornaments, lights, tinsel
+	40.	Digging: shovel, dirt, hole, spade
+	41.	Dining: table, plate, fork, meal
+	42.	Disc golfing: disc, basket, course, throw
+	43.	Diving cliff: cliff, water, jump, plunge
+	44.	Dodgeball: ball, court, throw, team
+	45.	Doing aerobics: mat, music, steps, instructor
+	46.	Doing laundry: detergent, washer, clothes, dryer
+	47.	Doing nails: polish, nail, brush, file
+	48.	Drawing: pencil, paper, sketch, eraser
+    1.	Dribbling basketball: ball, court, hand, sneakers
+	2.	Drinking: glass, cup, liquid, straw
+	3.	Drinking beer: beer, bottle, glass, foam
+	4.	Drinking shots: shot glass, liquor, counter, bottle
+	5.	Driving car: car, steering wheel, pedal, road
+	6.	Driving tractor: tractor, wheel, field, engine
+	7.	Drop kicking: foot, ball, field, goal
+	8.	Drumming fingers: fingers, table, rhythm, hand
+	9.	Dunking basketball: hoop, ball, rim, net
+	10.	Dying hair: hair, dye, brush, gloves
+	11.	Eating burger: burger, bun, lettuce, patty
+	12.	Eating cake: cake, slice, fork, plate
+	13.	Eating carrots: carrot, bite, crunch, hand
+	14.	Eating chips: chips, bag, salt, hand
+	15.	Eating doughnuts: doughnut, glaze, bite, hand
+	16.	Eating hotdog: hotdog, bun, ketchup, mustard
+	17.	Eating ice cream: ice cream, cone, scoop, spoon
+	18.	Eating spaghetti: spaghetti, fork, plate, sauce
+	19.	Eating watermelon: watermelon, slice, seeds, rind
+	20.	Egg hunting: egg, basket, grass, children
+	21.	Exercising arm: dumbbell, arm, weight, curl
+	22.	Exercising with an exercise ball: ball, mat, core, stretch
+	23.	Extinguishing fire: fire, extinguisher, hose, water
+	24.	Faceplanting: face, ground, impact, dirt
+	25.	Feeding birds: bird, seed, feeder, bread
+	26.	Feeding fish: fish, water, food, tank
+	27.	Feeding goats: goat, hand, hay, fence
+	28.	Filling eyebrows: pencil, eyebrows, mirror, brush
+	29.	Finger snapping: fingers, sound, hand, rhythm
+	30.	Fixing hair: comb, hair, mirror, clip
+	31.	Flipping pancake: pancake, pan, spatula, batter
+	32.	Flying kite: kite, string, wind, sky
+	33.	Folding clothes: shirt, fold, laundry, basket
+	34.	Folding napkins: napkin, fold, table, fabric
+	35.	Folding paper: paper, fold, crease, origami
+	36.	Front raises: dumbbell, arm, shoulder, grip
+	37.	Frying vegetables: vegetables, pan, oil, spatula
+	38.	Garbage collecting: trash, bin, truck, bag
+	39.	Gargling: mouthwash, throat, water, sink
+	40.	Getting a haircut: scissors, chair, hair, cape
+	41.	Getting a tattoo: needle, ink, skin, artist
+	42.	Giving or receiving award: trophy, medal, stage, podium
+	43.	Golf chipping: club, ball, green, flag
+	44.	Golf driving: club, ball, tee, fairway
+	45.	Golf putting: putter, ball, hole, green
+	46.	Grinding meat: grinder, meat, handle, bowl
+	47.	Grooming dog: brush, fur, dog, scissors
+	48.	Grooming horse: brush, mane, horse, hoof
+	49.	Gymnastics tumbling: mat, flip, handstand, spring
+	50.	Hammer throw: hammer, ring, chain, throw
+	51.	Headbanging: hair, head, music, rhythm
+    1.	Headbutting: head, skull, forehead, target
+	2.	High jump: bar, mat, track, jump
+	3.	High kick: leg, foot, target, balance
+	4.	Hitting baseball: bat, ball, glove, field
+	5.	Hockey stop: skate, ice, stick, puck
+	6.	Holding snake: snake, hand, scales, tail
+	7.	Hopscotch: chalk, stone, square, foot
+	8.	Hoverboarding: board, wheels, feet, balance
+	9.	Hugging: arms, embrace, person, chest
+	10.	Hula hooping: hoop, waist, hips, spin
+	11.	Hurdling: hurdle, track, leg, race
+	12.	Hurling (sport): ball, stick, field, goal
+	13.	Ice climbing: ice, axe, crampons, rope
+	14.	Ice fishing: hole, rod, fish, ice
+	15.	Ice skating: skates, rink, ice, blade
+	16.	Ironing: iron, board, shirt, steam
+	17.	Javelin throw: javelin, track, field, grip
+	18.	Jetskiing: jetski, water, lifejacket, waves
+	19.	Jogging: shoes, path, sweat, pace
+	20.	Juggling balls: balls, hands, air, rhythm
+	21.	Juggling fire: torch, flames, hands, air
+	22.	Juggling soccer ball: ball, foot, balance, control
+	23.	Jumping into pool: water, pool, splash, diving board
+	24.	Jumpstyle dancing: feet, floor, music, rhythm
+	25.	Kicking field goal: ball, post, foot, kick
+	26.	Kicking soccer ball: ball, goal, foot, cleats
+	27.	Kissing: lips, face, mouth, cheeks
+	28.	Kitesurfing: kite, board, wind, water
+	29.	Knitting: yarn, needles, stitch, scarf
+	30.	Krumping: arms, body, rhythm, music
+	31.	Laughing: mouth, teeth, sound, face
+	32.	Laying bricks: brick, mortar, trowel, wall
+	33.	Long jump: sandpit, track, legs, jump
+	34.	Lunge: leg, ground, body, knee
+	35.	Making a cake: flour, eggs, oven, frosting
+	36.	Making a sandwich: bread, meat, cheese, knife
+	37.	Making bed: sheet, pillow, blanket, mattress
+	38.	Making jewelry: beads, wire, pliers, chain
+	39.	Making pizza: dough, sauce, cheese, oven
+	40.	Making snowman: snow, carrot, scarf, coal
+	41.	Making sushi: rice, seaweed, fish, knife
+	42.	Making tea: teapot, leaves, cup, water
+	43.	Marching: boots, line, drum, steps
+	44.	Massaging back: hands, back, oil, table
+	45.	Massaging feet: hands, feet, lotion, pressure
+	46.	Massaging legs: hands, legs, oil, muscles
+	47.	Massaging person’s head: hands, scalp, fingers, oil
+	48.	Milking cow: cow, udder, bucket, stool
+	49.	Mopping floor: mop, bucket, floor, water
+	50.	Motorcycling: motorcycle, helmet, road, engine
+	1.	Moving furniture: sofa, table, chair, box
+	2.	Mowing lawn: lawnmower, grass, blades, yard
+	3.	News anchoring: microphone, camera, teleprompter, desk
+	4.	Opening bottle: bottle, cap, opener, hand
+	5.	Opening present: gift, paper, ribbon, box
+	6.	Paragliding: parachute, harness, wind, hill
+	7.	Parasailing: parachute, boat, harness, rope
+	8.	Parkour: wall, obstacle, roof, ground
+	9.	Passing American football (in game): ball, field, quarterback, receiver
+	10.	Passing American football (not in game): ball, hands, throw, catch
+	11.	Peeling apples: apple, knife, peel, core
+	12.	Peeling potatoes: potato, peeler, skin, knife
+	13.	Petting animal (not cat): hand, fur, animal, pet
+	14.	Petting cat: cat, fur, hand, whiskers
+	15.	Picking fruit: basket, tree, hand, fruit
+	16.	Planting trees: shovel, soil, tree, seedling
+	17.	Plastering: plaster, trowel, wall, putty
+	18.	Playing accordion: accordion, keys, bellows, music
+	19.	Playing badminton: racket, shuttlecock, net, court
+	20.	Playing bagpipes: bagpipes, pipe, reed, kilt
+	21.	Playing basketball: ball, hoop, court, sneakers
+	22.	Playing bass guitar: bass, strings, amp, pick
+	23.	Playing cards: cards, deck, hand, table
+	24.	Playing cello: cello, bow, strings, music stand
+	25.	Playing chess: board, pieces, king, queen
+	26.	Playing clarinet: clarinet, reed, keys, mouthpiece
+	27.	Playing controller: controller, buttons, console, screen
+	28.	Playing cricket: bat, ball, wicket, pitch
+	29.	Playing cymbals: cymbals, sticks, stand, crash
+	30.	Playing didgeridoo: didgeridoo, mouthpiece, breath, sound
+	31.	Playing drums: drum, sticks, snare, cymbal
+	32.	Playing flute: flute, keys, mouthpiece, music
+	33.	Playing guitar: guitar, strings, pick, fretboard
+	34.	Playing harmonica: harmonica, mouth, reeds, breath
+	35.	Playing harp: harp, strings, fingers, soundboard
+	36.	Playing ice hockey: puck, stick, skates, rink
+	37.	Playing keyboard: keyboard, keys, stand, synthesizer
+	38.	Playing kickball: ball, base, foot, field
+	39.	Playing Monopoly: board, dice, money, properties
+	40.	Playing organ: organ, keys, pipes, pedals
+	41.	Playing paintball: paintball, gun, mask, field
+	42.	Playing piano: piano, keys, bench, pedal
+	43.	Playing poker: cards, chips, table, hand
+	44.	Playing recorder: recorder, holes, mouthpiece, music
+	45.	Playing saxophone: saxophone, reed, keys, neck strap
+	46.	Playing squash or racquetball: racket, ball, court, wall
+	47.	Playing tennis: racket, ball, net, court
+	48.	Playing trombone: trombone, slide, bell, mouthpiece
+	49.	Playing trumpet: trumpet, valve, bell, mouthpiece
+	50.	Playing ukulele: ukulele, strings, fretboard, soundhole
+	51.	Playing violin: violin, bow, strings, chinrest
+	1.	Playing volleyball: ball, net, court, spike
+	2.	Playing xylophone: xylophone, mallets, keys, stand
+	3.	Pole vault: pole, bar, pit, track
+	4.	Presenting weather forecast: map, screen, microphone, pointer
+	5.	Pull ups: bar, grip, chin, arms
+	6.	Pumping fist: fist, arm, air, motion
+	7.	Pumping gas: pump, nozzle, tank, gas
+	8.	Punching bag: bag, gloves, chain, stand
+	9.	Punching person (boxing): gloves, ring, opponent, fist
+	10.	Push up: floor, arms, chest, body
+	11.	Pushing car: car, hands, road, tires
+	12.	Pushing cart: cart, wheels, handle, groceries
+	13.	Pushing wheelchair: wheelchair, handle, wheels, seat
+	14.	Reading book: book, pages, cover, glasses
+	15.	Reading newspaper: newspaper, article, headline, page
+	16.	Recording music: microphone, studio, track, headphones
+	17.	Riding a bike: bike, helmet, pedals, tires
+	18.	Riding camel: camel, saddle, reins, desert
+	19.	Riding elephant: elephant, saddle, trunk, forest
+	20.	Riding mechanical bull: bull, saddle, grip, arena
+	21.	Riding mountain bike: bike, trail, tires, helmet
+	22.	Riding mule: mule, saddle, reins, path
+	23.	Riding or walking with horse: horse, reins, saddle, stirrups
+	24.	Riding scooter: scooter, handlebars, wheels, foot
+	25.	Riding unicycle: unicycle, wheel, pedal, seat
+	26.	Ripping paper: paper, hand, tear, edge
+	27.	Robot dancing: body, arms, movement, rhythm
+	28.	Rock climbing: rope, harness, cliff, carabiner
+	29.	Rock scissors paper: hand, rock, scissors, paper
+	30.	Roller skating: skates, wheels, rink, helmet
+	31.	Running on treadmill: treadmill, belt, shoes, speed
+	32.	Sailing: sail, boat, wind, mast
+	33.	Salsa dancing: music, rhythm, partner, shoes
+	34.	Sanding floor: sander, dust, wood, grit
+	35.	Scrambling eggs: eggs, pan, spatula, stove
+	36.	Scuba diving: tank, fins, mask, wetsuit
+	37.	Setting table: plate, fork, napkin, glass
+	38.	Shaking hands: hands, grip, fingers, palm
+	39.	Shaking head: head, neck, motion, face
+	40.	Sharpening knives: knife, sharpener, edge, stone
+	41.	Sharpening pencil: pencil, sharpener, lead, shavings
+	42.	Shaving head: razor, head, foam, blade
+	43.	Shaving legs: razor, legs, foam, blade
+	44.	Shearing sheep: sheep, shear, wool, clippers
+	45.	Shining shoes: shoes, brush, polish, cloth
+	46.	Shooting basketball: ball, hoop, net, court
+	47.	Shooting goal (soccer): ball, goal, net, foot
+	48.	Shot put: shot, circle, throw, field
+	1.	Shoveling snow: shovel, snow, driveway, gloves
+	2.	Shredding paper: shredder, paper, strips, bin
+	3.	Shuffling cards: cards, deck, hands, table
+	4.	Side kick: leg, foot, target, balance
+	5.	Sign language interpreting: hands, fingers, gestures, signs
+	6.	Singing: voice, microphone, lyrics, stage
+	7.	Situp: mat, abs, body, floor
+	8.	Skateboarding: skateboard, wheels, deck, helmet
+	9.	Ski jumping: skis, ramp, helmet, boots
+	10.	Skiing (not slalom or crosscountry): skis, poles, snow, boots
+	11.	Skiing crosscountry: skis, poles, trail, snow
+	12.	Skiing slalom: skis, gates, poles, course
+	13.	Skipping rope: rope, handles, feet, rhythm
+	14.	Skydiving: parachute, goggles, helmet, wind
+	15.	Slacklining: slackline, tree, balance, feet
+	16.	Slapping: hand, face, sound, impact
+	17.	Sled dog racing: dogs, sled, harness, snow
+	18.	Smoking: cigarette, smoke, lighter, ash
+	19.	Smoking hookah: hookah, coals, tobacco, pipe
+	20.	Snatch weight lifting: barbell, weights, grip, platform
+	21.	Sneezing: nose, tissue, hand, germs
+	22.	Sniffing: nose, air, scent, smell
+	23.	Snorkeling: snorkel, mask, fins, water
+	24.	Snowboarding: snowboard, bindings, slope, boots
+	25.	Snowkiting: kite, snowboard, wind, snow
+	26.	Snowmobiling: snowmobile, helmet, snow, throttle
+	27.	Somersaulting: body, floor, flip, legs
+	28.	Spinning poi: poi, fire, string, hands
+	29.	Spray painting: can, paint, nozzle, surface
+	30.	Spraying: spray, liquid, bottle, mist
+	31.	Springboard diving: springboard, pool, diver, water
+	32.	Squat: barbell, legs, weight, stance
+	33.	Sticking tongue out: tongue, mouth, teeth, face
+	34.	Stomping grapes: grapes, barrel, feet, juice
+	35.	Stretching arm: arm, muscles, tension, stretch
+	36.	Stretching leg: leg, muscles, floor, tension
+	37.	Strumming guitar: guitar, strings, pick, soundhole
+	38.	Surfing crowd: crowd, hands, body, stage
+	39.	Surfing water: surfboard, waves, ocean, leash
+	40.	Sweeping floor: broom, dust, floor, dustpan
+	41.	Swimming backstroke: water, pool, arms, lane
+	42.	Swimming breast stroke: water, pool, stroke, lane
+	43.	Swimming butterfly stroke: water, pool, stroke, lane
+	44.	Swing dancing: partner, shoes, rhythm, floor
+	45.	Swinging legs: legs, seat, air, motion
+	46.	Swinging on something: swing, rope, branch, bar
+	47.	Sword fighting: sword, shield, opponent, blade
+	48.	Tai chi: movement, body, balance, breath
+	49.	Taking a shower: showerhead, water, soap, towel
+	50.	Tango dancing: partner, shoes, music, floor
+	51.	Tap dancing: shoes, tap, rhythm, floor
+    1.	Tapping guitar: guitar, strings, fretboard, pick
+	2.	Tapping pen: pen, table, fingers, hand
+	3.	Tasting beer: beer, glass, foam, bottle
+	4.	Tasting food: spoon, plate, mouth, flavor
+	5.	Testifying: witness, stand, courtroom, jury
+	6.	Texting: phone, screen, keyboard, message
+	7.	Throwing axe: axe, target, handle, blade
+	8.	Throwing ball: ball, hand, field, throw
+	9.	Throwing discus: discus, ring, hand, field
+	10.	Tickling: fingers, ribs, laugh, feet
+	11.	Tobogganing: sled, snow, hill, speed
+	12.	Tossing coin: coin, hand, air, flip
+	13.	Tossing salad: bowl, salad, tongs, dressing
+	14.	Training dog: leash, treats, dog, commands
+	15.	Trapezing: trapeze, bar, net, swing
+	16.	Trimming or shaving beard: razor, beard, scissors, trimmer
+	17.	Trimming trees: branches, saw, ladder, clippers
+	18.	Triple jump: sandpit, track, hop, jump
+	19.	Tying bow tie: bow tie, hands, collar, knot
+	20.	Tying knot (not on a tie): rope, knot, hands, loop
+	21.	Tying tie: tie, collar, knot, hands
+	22.	Unboxing: box, hands, package, tape
+	23.	Unloading truck: truck, boxes, ramp, dolly
+	24.	Using computer: keyboard, screen, mouse, desk
+	25.	Using remote controller (not gaming): remote, TV, buttons, signal
+	26.	Using segway: segway, wheels, handlebar, balance
+	27.	Vault: vault, pole, bar, track
+	28.	Waiting in line: line, person, queue, patience
+	29.	Walking the dog: leash, dog, collar, sidewalk
+	30.	Washing dishes: sink, sponge, dish, soap
+	31.	Washing feet: feet, water, towel, soap
+	32.	Washing hair: hair, shampoo, water, towel
+	33.	Washing hands: hands, soap, water, sink
+	34.	Water skiing: skis, rope, boat, water
+	35.	Water sliding: slide, water, pool, speed
+	36.	Watering plants: plants, watering can, soil, water
+	37.	Waxing back: wax, strips, back, skin
+	38.	Waxing chest: wax, strips, chest, skin
+	39.	Waxing eyebrows: wax, strips, eyebrows, tweezers
+	40.	Waxing legs: wax, strips, legs, skin
+	41.	Weaving basket: basket, reeds, hands, weave
+	42.	Welding: welder, torch, metal, mask
+	43.	Whistling: lips, air, sound, fingers
+	44.	Windsurfing: board, sail, wind, water
+	45.	Wrapping present: wrapping paper, ribbon, tape, box
+	46.	Wrestling: mat, opponent, grip, ring
+	47.	Writing: pen, paper, notebook, hand
+	48.	Yawning: mouth, air, breath, stretch
+	49.	Yoga: mat, pose, breath, stretch
+	50.	Zumba: music, dance, rhythm, instructor

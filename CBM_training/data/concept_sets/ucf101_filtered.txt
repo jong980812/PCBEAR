@@ -1,0 +1,115 @@
+Body Motion includes Flipping.
+Body Motion includes Walking.
+Body Motion includes Running.
+Body Motion includes Riding.
+Body Motion includes Up_down.
+Body Motion includes Pulling.
+Body Motion includes Lifting.
+Body Motion includes Pushing.
+Body Motion includes Diving.
+Body Motion includes Jumping_Up.
+Body Motion includes Jumping_Forward.
+Body Motion includes Jumping_Over_Obstacle.
+Body Motion includes Spinning.
+Body Motion includes Climbing_Up.
+Body Motion includes Horizontal.
+Body Motion includes Vertical_Up.
+Body Motion includes Vertical_Down.
+Body Motion includes Bending.
+Body Parts Visible includes Head_Closeup.
+Body Parts Visible includes Face_Closeup.
+Body Parts Visible includes Upper Body.
+Body Parts Visible includes Lower Body.
+Body Parts Visible includes Full Body.
+Body Parts Visible includes One_Hand.
+Body Parts Visible includes Two_Hands.
+Number of People includes One.
+Number of People includes Two.
+Number of People includes Many.
+Object includes Ball_Like.
+Object includes Big_Ball_Like.
+Object includes Stick_Like.
+Object includes Rope_Like.
+Object includes Sharp.
+Object includes Circular.
+Object includes Cylinderical.
+Object includes Musical_Instrument.
+Object includes Portable_Musical_Instrument.
+Object includes Animal.
+Object includes Boat_Like.
+Outdoor is included.
+Indoor is included.
+Outdoor includes Grass.
+Outdoor includes Water.
+Outdoor includes Ocean/Lake.
+Outdoor includes Court.
+Outdoor includes Sky.
+Outdoor includes Street/Road.
+Outdoor includes Track.
+Indoor includes Pool.
+Indoor includes Office.
+Indoor includes Court.
+Indoor includes Gym.
+Indoor includes Home.
+Indoor includes Track.
+Posture includes Sitting.
+Posture includes Sitting_In_Front_Of_Table_Like_Object.
+Posture includes Standing.
+Posture includes Lying.
+Posture includes Handstand.
+Body Parts Used includes Head.
+Body Parts Used includes Hands.
+Body Parts Used includes Arms.
+Body Parts Used includes Legs.
+Body Parts Used includes Foot.
+Body Part Articulation-Arm includes One_Arm_Motion.
+Body Part Articulation-Arm includes Two_Arms_Motion.
+Body Part Articulation-Arm includes Synchronized_Arm_Motion.
+Body Part Articulation-Arm includes Alternate_Arm_Motion.
+Body Part Articulation-Arm includes One_Arm_Raised_Over_Head.
+Body Part Articulation-Arm includes Two_Arms_Raised_Over_Head.
+Body Part Articulation-Arm includes One_Arm_Raised_Chest_Level.
+Body Part Articulation-Arm includes Two_Arms_Raised_Chest_Level.
+Body Part Articulation-Arm includes One_Arm_Open_To_The_Side.
+Body Part Articulation-Arm includes Two_Arms_Open_To_The_Side.
+Body Part Articulation-Arm includes One_Arm_Down.
+Body Part Articulation-Arm includes Two_Arms_Down.
+Body Part Articulation-Arm includes One_Arm_Bent.
+Body Part Articulation-Arm includes Two_Arms_Bent.
+Body Part Articulation-Arm includes One_Arm_Stretched.
+Body Part Articulation-Arm includes Two_Arms_Stretched.
+Body Part Articulation-Arm includes One_Arm_Swinging.
+Body Part Articulation-Arm includes Two_Arms_Swinging.
+Body Part Articulation-Leg includes Synchronized_Leg_Motion.
+Body Part Articulation-Leg includes Alternate_Leg_Motion.
+Body Part Articulation-Leg includes Fold_Unfold_Motion.
+Body Part Articulation-Leg includes Up_Down_Motion.
+Body Part Articulation-Leg includes Up_Forward_Motion.
+Body Part Articulation-Leg includes Side_Stretch_Motion.
+Body Part Articulation-Leg includes One_Leg_Raise.
+Body Part Articulation-Leg includes Two_Legs_Raise.
+Body Part Articulation-Leg includes Legs_Open_To_The_Side.
+Body Part Articulation-Leg includes One_Leg_Bent.
+Body Part Articulation-Leg includes Two_Legs_Bent.
+Body Part Articulation-Leg includes One_Leg_Stretched.
+Body Part Articulation-Leg includes Two_Legs_Stretched.
+Body Part Articulation-Hand includes Throw_Release_Motion.
+Body Part Articulation-Hand includes Synchronized_Hand_Motion.
+Body Part Articulation-Hand includes One_Hand_Closed.
+Body Part Articulation-Hand includes Two_Hands_Closed.
+Body Part Articulation-Hand includes One_Hand_Grab.
+Body Part Articulation-Hand includes Two_Hands_Grab.
+Body Part Articulation-Hand includes One_Hand_Open.
+Body Part Articulation-Hand includes Two_Hands_Open.
+Body Part Articulation-Head includes Facing_Down.
+Body Part Articulation-Head includes Facing_Up.
+Body Part Articulation-Head includes Facing_Front.
+Body Part Articulation-Head includes Facing_Sideways.
+Body Part Articulation-Head includes Straight_Position.
+Body Part Articulation-Head includes Tilted_Position.
+Body Part Articulation-Torso includes Down_Forward_Motion.
+Body Part Articulation-Torso includes Twist_Motion.
+Body Part Articulation-Torso includes Bent_Position.
+Body Part Articulation-Torso includes Straight_Up_Position.
+Body Part Articulation-Feet includes Touching_Ground.
+Body Part Articulation-Feet includes In_Air.

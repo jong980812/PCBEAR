@@ -1,0 +1,199 @@
+People are walking slowly.
+People are walking quickly.
+People are jogging.
+People are running.
+People are standing still.
+People are sitting down.
+People are standing up.
+People are bending forward.
+People are bending sideways.
+People are stretching arms upward.
+People are stretching arms outward.
+People are stretching legs.
+People are squatting down.
+People are jumping in place.
+People are jumping forward.
+People are hopping on one foot.
+People are balancing on one foot.
+People are leaning forward.
+People are leaning backward.
+People are leaning sideways.
+People are turning their heads left.
+People are turning their heads right.
+People are looking up.
+People are looking down.
+People are shaking their heads.
+People are nodding their heads.
+People are shrugging their shoulders.
+People are crossing their arms.
+People are uncrossing their arms.
+People are raising one hand.
+People are waving their hands.
+People are clapping their hands.
+People are snapping their fingers.
+People are pointing with their fingers.
+People are gesturing with their hands.
+People are rotating their wrists.
+People are rolling their shoulders.
+People are raising their eyebrows.
+People are blinking.
+People are smiling.
+People are frowning.
+People are laughing.
+People are yawning.
+People are coughing.
+People are sneezing.
+People are taking deep breaths.
+People are exhaling deeply.
+People are stretching their bodies.
+People are scratching their heads.
+People are rubbing their chins.
+People are touching their faces.
+People are covering their faces with their hands.
+People are resting their chins on their hands.
+People are crossing their legs.
+People are uncrossing their legs.
+People are tapping their feet.
+People are stomping their feet.
+People are spinning in circles.
+People are twirling around.
+People are dancing.
+People are jumping up and down.
+People are performing cartwheels.
+People are doing somersaults.
+People are shadowboxing.
+People are performing planks.
+People are doing push-ups.
+People are doing sit-ups.
+People are doing jumping jacks.
+People are doing squats.
+People are running in place.
+People are jogging in place.
+People are stretching their necks.
+People are touching their toes.
+People are rolling their necks.
+People are twisting their torsos.
+People are flexing their muscles.
+People are leaning their heads on their hands.
+People are tilting their heads.
+People are rubbing their eyes.
+People are covering their mouths while yawning.
+People are biting their lips.
+People are whistling.
+People are humming.
+People are clearing their throats.
+People are sighing.
+People are shivering.
+People are stretching their legs forward.
+People are relaxing their bodies.
+People are holding their breath.
+People are shaking their arms loose.
+People are flexing their toes.
+People are rocking side to side.
+People are crouching down.
+People are sitting cross-legged.
+People are pacing back and forth.
+People are doing high kicks.
+People are rolling on the ground.
+People are doing lunges.
+People are skipping.
+People are hopping in place.
+People are rotating their ankles.
+People are marching in place.
+People are walking in circles.
+People are shuffling sideways.
+People are walking backward.
+People are walking on tiptoes.
+People are standing on tiptoes.
+People are rolling their shoulders forward.
+People are rolling their shoulders backward.
+People are tilting their heads sideways.
+People are shaking their heads quickly.
+People are nodding slowly.
+People are looking left and right.
+People are blinking repeatedly.
+People are rubbing their foreheads.
+People are wiping sweat from their faces.
+People are rubbing their temples.
+People are stretching their fingers.
+People are snapping their fingers rhythmically.
+People are clenching their fists.
+People are spreading their fingers wide.
+People are cracking their knuckles.
+People are waving with both hands.
+People are moving their arms in a circular motion.
+People are swinging their arms back and forth.
+People are stretching their arms behind their backs.
+People are folding their arms behind their heads.
+People are bouncing on their toes.
+People are shifting their weight from one foot to another.
+People are leaning back slightly.
+People are leaning forward slightly.
+People are tilting their heads backward.
+People are shrugging one shoulder at a time.
+People are lowering their heads slowly.
+People are closing their eyes tightly.
+People are pursing their lips.
+People are sucking in their cheeks.
+People are tapping their fingers against their thighs.
+People are drumming their fingers on a surface.
+People are rubbing their hands together.
+People are stretching their necks to one side.
+People are doing a deep side stretch.
+People are moving their arms across their chests.
+People are kicking one leg forward.
+People are lifting their knees toward their chests.
+People are stepping side to side.
+People are shifting their shoulders up and down.
+People are rotating their hips in circles.
+People are moving their legs outward and inward.
+People are bouncing lightly on their feet.
+People are swaying from side to side.
+People are balancing on their toes.
+People are crouching with their hands on their knees.
+People are taking small steps in place.
+People are bouncing their knees slightly.
+People are extending their arms to the sides.
+People are lowering their arms slowly.
+People are standing on one leg.
+People are bending their knees slightly.
+People are shaking their legs out.
+People are doing a half-turn.
+People are shifting from one leg to the other.
+People are rolling their heads in circles.
+People are dropping their heads forward.
+People are leaning forward from the waist.
+People are standing with arms akimbo.
+People are pressing their palms together.
+People are clasping their hands behind their backs.
+People are moving their shoulders in circles.
+People are rotating their shoulders one by one.
+People are moving their hands in front of them.
+People are raising their knees high while walking.
+People are walking with long strides.
+People are shuffling their feet slowly.
+People are standing with their feet wide apart.
+People are leaning against a wall.
+People are stretching their arms across their bodies.
+People are circling their arms slowly.
+People are walking briskly.
+People are shifting their hips from side to side.
+People are crouching low to the ground.
+People are swaying their arms while walking.
+People are hopping from one foot to the other.
+People are skipping while moving forward.
+People are doing small, quick jumps.
+People are stepping backward.
+People are shaking their heads slowly.
+People are bouncing on their heels.
+People are hopping from side to side.
+People are stretching their backs.
+People are bending their spines backward.
+People are standing with their arms crossed.
+People are shuffling their feet in place.
+People are relaxing their bodies completely.
+People are stretching their legs wide.
+People are squatting with their hands on the floor.
+People are twisting their bodies from side to side.
+People are tilting their heads up and down.
+People are swinging their legs back and forth.

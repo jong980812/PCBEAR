@@ -1,0 +1,200 @@
+People approaching something.
+People attaching something.
+People bending something.
+People breaking something.
+People burying something.
+People closing something.
+People covering something.
+People digging something.
+People dropping something.
+People folding something.
+People hitting something.
+People holding something.
+People laying something down.
+People letting something roll.
+People lifting something.
+People moving something.
+People opening something.
+People picking something up.
+People piling something.
+People plugging something in.
+People poking something.
+People pouring something.
+People pulling something.
+People pushing something.
+People putting something down.
+People removing something.
+People rolling something.
+People scooping something.
+People showing something.
+People spilling something.
+People spinning something.
+People spreading something.
+People sprinkling something.
+People squeezing something.
+People stacking something.
+People stuffing something.
+People taking something.
+People tearing something.
+People throwing something.
+People tilting something.
+People tipping something.
+People touching something.
+People turning something.
+People twisting something.
+People uncovering something.
+People unfolding something.
+People wiping something.
+People colliding with something.
+People deflecting something.
+People dropping something behind something.
+People dropping something in front of something.
+People dropping something into something.
+People dropping something next to something.
+People dropping something onto something.
+People failing to put something into something.
+People lifting a surface with something on it.
+People lifting one end of something.
+People moving something across a surface.
+People moving something away.
+People moving something closer.
+People moving something down.
+People moving something up.
+People opening something.
+People picking something up.
+People piling something up.
+People pulling something from behind something.
+People pulling something from left to right.
+People pulling something from right to left.
+People pulling something onto something.
+People pulling something out of something.
+People pushing something from left to right.
+People pushing something from right to left.
+People pushing something off of something.
+People pushing something onto something.
+People pushing something so it spins.
+People pushing something so it almost falls off but doesn’t.
+People pushing something so it falls off the table.
+People pushing something so it slightly moves.
+People pushing something with something.
+People putting number of something onto something.
+People putting something behind something.
+People putting something in front of something.
+People putting something into something.
+People putting something next to something.
+People putting something on a flat surface without letting it roll.
+People putting something on a surface.
+People putting something on the edge of something so it is not supported and falls down.
+People putting something onto a slanted surface but it doesn’t glide down.
+People putting something onto something.
+People putting something onto something else that cannot support it so it falls down.
+People putting something similar to other things that are already on the table.
+People putting something that can’t roll onto a slanted surface so it slides down.
+People putting something that can’t roll onto a slanted surface so it stays where it is.
+People putting something that cannot actually stand upright on the table so it falls on its side.
+People putting something underneath something.
+People putting something upright on the table.
+People putting something and something on the table.
+People removing something revealing something behind.
+People rolling something on a flat surface.
+People scooping something up with something.
+People shaking something.
+People sliding something.
+People flipping something.
+People pulling something apart.
+People pushing something together.
+People rotating something.
+People balancing something.
+People bouncing something.
+People catching something.
+People squeezing something out.
+People pressing something.
+People kicking something.
+People tearing something apart.
+People smashing something.
+People crushing something.
+People stretching something.
+People turning something upside down.
+People dragging something.
+People bouncing something off a surface.
+People folding something in half.
+People slicing something.
+People cutting something.
+People chopping something.
+People scratching something.
+People scrubbing something.
+People cleaning something.
+People polishing something.
+People stacking something vertically.
+People arranging something.
+People mixing something.
+People stirring something.
+People shaking something in a container.
+People flattening something.
+People hammering something.
+People chiseling something.
+People drawing something.
+People writing something.
+People erasing something.
+People gluing something.
+People taping something.
+People stapling something.
+People sewing something.
+People knitting something.
+People folding something into a shape.
+People molding something.
+People sculpting something.
+People painting something.
+People spraying something.
+People brushing something.
+People washing something.
+People rinsing something.
+People drying something.
+People heating something.
+People cooling something.
+People freezing something.
+People boiling something.
+People baking something.
+People microwaving something.
+People grilling something.
+People frying something.
+People flipping something in a pan.
+People rolling something with a pin.
+People slicing something thin.
+People peeling something.
+People grating something.
+People mashing something.
+People crushing something into powder.
+People blending something.
+People whisking something.
+People measuring something.
+People pouring something into a measuring cup.
+People filling something.
+People draining something.
+People filtering something.
+People straining something.
+People seasoning something.
+People garnishing something.
+People stirring something in a pot.
+People shaking something in a jar.
+People pressing something with a tool.
+People scooping something with a spoon.
+People spreading something with a knife.
+People drizzling something.
+People sprinkling something from a container.
+People serving something.
+People slicing something with a knife.
+People cutting something with scissors.
+People opening something with a key.
+People unlocking something.
+People locking something.
+People bolting something.
+People fastening something.
+People securing something.
+People tying something.
+People untying something.
+People wrapping something.
+People unwrapping something.
+People packing something.
+People unpacking something.
+People labeling something.

@@ -18,14 +18,14 @@ new_results/
 psh/
 images/
 *.pkl
-*.json
-*.csv
+# *.json
+# *.csv
 *.mp4
 *.jpg
 *.png
 *.ipynb
 vit-explain-main/
-data/
+# data/
 *.pt
 .vscode
 result_final/

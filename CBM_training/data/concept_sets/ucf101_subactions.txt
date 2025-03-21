@@ -1,0 +1,249 @@
+people pick up brushes
+people apply shadow
+people blend colors
+people draw lines
+people pick up lipstick
+people apply color to lips
+people check reflection
+people draw bowstring
+people aim at target
+people release arrow
+people move on hands and knees
+people explore surroundings
+people reach out for objects
+people mount beam
+people perform routines
+people dismount
+people walk in formation
+people play instruments
+people follow commands
+people wind up arm
+people throw ball
+people follow through
+people dribble
+people pass
+people shoot
+people run towards hoop
+people jump
+people dunk
+people lie on bench
+people lift weight
+people lower weight
+people pedal
+people steer
+people balance
+people aim cue
+people strike ball
+people line up shots
+people hold dryer
+people section hair
+people dry sections
+people lean forward
+people take deep breath
+people blow air
+people stand
+people bend knees
+people lower body
+people approach lane
+people swing arm
+people release ball
+people stand in stance
+people throw punches
+people move around bag
+people hit bag quickly
+people maintain rhythm
+people push off wall
+people move arms in circles
+people kick legs
+people pick up brush
+people apply paste
+people move brush on teeth
+people lift bar to chest
+people adjust grip
+people push bar overhead
+people stand on edge
+people jump off cliff
+people dive into water
+people run up
+people swing bat
+people hit ball
+people hold knife
+people slice ingredients
+people chop vegetables
+people stand on platform
+people jump off
+people enter water
+people hold sticks
+people strike drums
+people lunge
+people parry attacks
+people stand ready
+people swing stick
+people run
+people tumble
+people land routines
+people catch
+people move arms alternately
+people swing club
+people hold scissors
+people snip hair
+people shape style
+people hold hammer
+people strike nail
+people drive nail in
+people spin
+people release hammer
+people kick up into handstand
+people push up
+people balance on hands
+people move hands forward
+people walk on hands
+people place hands on head
+people rub scalp
+people apply pressure
+people jump over bar
+people land on mat
+people ride horse
+people steer horse
+people urge horse to run
+people mount horse
+people ride at various paces
+people spin hoop
+people move hips
+people keep hoop spinning
+people glide on ice
+people perform spins
+people execute lifts
+people throw javelin
+people throw balls
+people catch balls
+people repeat cycle
+people spread arms and legs
+people return to start
+people swing rope
+people jump over rope
+people repeat jumps
+people paddle
+people steer kayak
+people navigate water
+people hold needles
+people loop yarn
+people create stitches
+people jump forward
+people land in sand
+people step forward
+people march
+people salute
+people follow formations
+people hold spoon
+people stir ingredients
+people blend mixtures
+people hold mop
+people dip mop in water
+people clean floor
+people swing nunchucks
+people perform tricks
+people maintain control
+people grip bars
+people swing between bars
+people stretch dough
+people toss dough in air
+people catch dough
+people hold bow
+people draw bow across strings
+people finger notes
+people hold drum
+people strike drumhead
+people create rhythm
+people strike drum
+people create beats
+people hold flute
+people cover holes
+people strum strings
+people finger chords
+people play notes
+people press keys
+people create music
+people pluck strings
+people adjust frets
+people create melodies
+people strike drumheads
+people produce rhythms
+people adjust tones
+people produce music
+people run with pole
+people plant pole
+people vault over bar
+people grip handles
+people swing legs
+people grip bar
+people pull body up
+people form fists
+people swing arms
+people hit target
+people lie prone
+people push body up
+people navigate rapids
+people steer raft
+people grip holds
+people ascend wall
+people reach top
+people grip rope
+people climb to top
+people grip oars
+people pull oars
+people propel boat
+people step to rhythm
+people turn bodies
+people maintain balance
+people apply cream
+people use razor
+people remove hair
+people grip shot
+people release shot
+people push off ground
+people balance on board
+people glide on snow
+people navigate slopes
+people use poles
+people ride jet ski
+people accelerate
+people jump from plane
+people freefall
+people deploy parachute
+people balance ball
+people use feet and knees
+people keep ball in air
+people place ball
+people kick ball
+people grip rings
+people perform holds
+people execute routines
+people face off
+people push opponent
+people maintain stance
+people stand on board
+people ride waves
+people sit on seat
+people swing back and forth
+people grip paddle
+people aim shots
+people perform slow movements
+people grip racket
+people release discus
+people jump on trampoline
+people perform flips
+people land on feet
+people place fingers on keys
+people input text
+people hold leash
+people walk alongside
+people control direction
+people place hands on wall
+people lean towards wall
+people push body back
+people hold marker
+people write text
+people step back
+people throw yo-yo
+people pull string

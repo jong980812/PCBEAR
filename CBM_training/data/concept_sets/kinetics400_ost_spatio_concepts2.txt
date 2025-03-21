@@ -1,0 +1,1314 @@
+Abseiling Gear
+Climber
+Rock Face
+Safety Anchor
+Drummer
+Crowd
+Setting
+Sound
+Heroic Protagonist
+Villainous Antagonist
+Explosive Device
+Urban Environment
+Audience
+Performer
+Backdrop
+The Cream
+The Applicator
+The Character
+The Setting
+Bow
+Arrows
+Archer
+Target
+The Table
+The Competitors
+The Referee
+The Crowd
+Flowers
+Vase
+Florist
+Pruning Shears
+Enthusiastic Technician
+Shiny Motherboard
+Glowing Power Supply
+Agile Graphics Card
+Auctioneer
+Bid Paddle
+Artwork
+Bidders
+Baby
+Actor (Caregiver)
+Baking Sheet
+Cookie Dough
+Baker
+Oven
+Vibrant Color
+Inflatable Surface
+Determined Expression
+Puffed Cheeks
+The Wounded Fighter
+The First Aid Kit
+The Bandage
+The Supportive Ally
+Grill
+Chef
+Utensils
+Gathering
+The Bartender
+The Cocktail Shaker
+The Bar Top
+The Patron
+Beatboxer
+Microphone
+Stage
+Beekeeper
+Beehive
+Smoker
+Honeycomb
+Dancer
+Music
+Lighting
+Barbell
+Lifter
+Spotter
+Bench
+Athletic Protagonist
+Ancient Artifact
+Dynamic Environment
+Formidable Antagonist
+Hero
+Metal
+Tool
+Environment
+Biker
+Bike
+Snow
+Scenery
+Rugged Desert Landscape
+Leathery Survivor
+Charging Adventurer
+The Blower
+Focused
+The Molten Glass
+Glowing
+The Glass Pipe
+Flexible
+The Workshop
+Chaotic
+Whirling Leaves
+Determined Protagonist
+Chasing Rival
+Rustling Environment
+Tissue
+Face
+Hand
+Candles
+Flames
+Breath
+Celebrants
+Bobsled
+Ice Track
+Driver
+Brake Person
+Leather Covers
+Thread and Needle
+Bookbinder
+Cutter
+Trampoline
+Acrobat
+Spectators
+Sunset
+Bowling Ball
+Bowling Pins
+Bowler
+Bowling Lane
+The Hair
+The Braider's Hands
+The Onlookers
+Torn and Crumbled
+Golden Brown
+Focused and Determined
+Dynamic Movements
+Boom Box
+Floor
+Brush
+Canvas
+Painter
+Palette
+The Hairbrush
+Person Brushing Hair
+The Reflection in a Mirror
+Bristles
+Handle
+Size
+Color
+Texture
+Flavor
+Packaging
+Expression
+Motion
+Posture
+Attire
+Surface
+Frame
+Location
+Condition
+The Cabinet
+Sturdy
+Modern
+Secure
+Concealed
+The Builder
+Determined
+Athletic
+Resourceful
+Courageous
+Weathered
+Shadowy
+Rammed-earth walls
+Cluttered
+Bungee Cord
+Jump Platform
+Jumper
+Safety Crew
+Street Performer
+Tip Jar
+Audience Member
+Urban Setting
+The Kayak
+The Paddler
+The Rapids
+The Surrounding Wilderness
+Capoeirista
+Opponent
+Berimbau
+Mat
+Fragile
+Vulnerable
+Cuddly
+Dependable
+Caregiver
+Agile
+Protective
+Athlete
+Obstacle
+Pumpkin
+Carving Knife
+Carver
+Spoon
+Fisherman
+Fishing Rod
+Bait
+Water Surface
+Baseball
+Pitcher
+Catcher
+Outfielder
+Frisbee
+Aerodynamic
+colorful
+lightweight
+spinning
+Thrower
+Energetic
+focused
+athletic
+confident
+anticipatory
+enthusiastic
+steady
+Surroundings
+Open field
+sunlit
+vibrant
+inviting
+Softball
+Batter
+Confetti Cannons
+Champagne Flutes
+Cheering Crowd
+Banners and Streamers
+Wrench
+Oil Filter
+Mechanic
+Oil Pan
+Tire
+Car Jack
+Object Tires
+Worn
+Inflated
+Actor Mechanic
+Skilled
+Cheerleaders
+Pom-Poms
+Cheerleading Megaphone
+Stadium Bleachers
+Axe
+Chopping Block
+Chopper
+Wood Splinters
+Hands
+Atmosphere
+Clay
+Potter's Wheel
+Potter
+Apprentice
+Key Object Barbell
+Heavyweight
+Textured Grip
+Color-coded Plates
+Balanced Structure
+Key Actor Weightlifter
+Focused Determination
+Dynamic Posture
+Muscular Physique
+Intense Breathing
+Mop
+Bucket
+Cleaner
+Ladder
+Gutter
+Tools
+Pool Brush
+Skimmer Net
+Pool Cleaner Robot
+Pool Technician
+Shoe Brush
+Shoe Cleaner
+Shoegle Cleaner
+Shoe Owner
+Toilet Brush
+Cleaning Solution
+Gloved Cleaner
+Toilet Bowl
+Window Cleaner
+Squeegee
+Safety Harness
+Rope
+Harness
+Surrounding Environment
+Observer
+The Tree
+Climbing Gear
+Crystal Ball
+Juggler
+Sizzling Skillet
+Juicy Chicken Breasts
+Focused Chef
+Watchful Sous-Chef
+Frying Pan
+Egg
+Spatula
+Campfire
+Cookware
+Ingredients
+Sizzling Sausages
+Flipping Spatula
+Object Stack of Money
+Crisp
+Untouched
+Actor Money Counter
+Nervous
+Focus-driven
+Objects
+Cowboy Boots
+Hat
+Actors
+Dancers
+Instructor
+Tense Stance
+Focused Gaze
+Sweaty Skin
+Worn Gear
+Sinewy Tendons
+Veins Pulsing
+Crisp Sound
+Tension Release
+Swift
+Curious
+Rugged Riverbank
+Swift Current
+Daring Adventurer
+Ancient Raft
+Character in Distress
+Dramatic Environment
+Weapon of Choice
+Innocent Bystander
+Key Objects
+Curling Iron
+Hairspray
+Key Actors
+Hair Stylist
+Client
+Nail Clippers
+Nails
+Person's Hand
+Emotional Tone
+Pineapple
+Knife
+Cutting Board
+Object Watermelon
+Actor Chef
+Costume
+Venue
+Sound System
+Actor
+Coach
+Object
+Weightlifting Platform
+Christmas Tree
+Ornaments
+Child
+Parent
+The Shovel
+The Excavator
+The Digger
+The Ground
+Table
+Chair
+Diner
+Disc Golf Disc
+Disc Golf Basket
+Disc Golfer
+Caddy
+The Cliff
+The Diver
+The Water
+The Spectators
+Dodgeball
+Players
+Court
+Referee
+Instructors
+Participants
+Exercise Mats
+Weights
+Washing Machine
+Laundry Basket
+Actor (Protagonist)
+Actor (Sibling/Helper)
+Nail Polish
+Nail Technician
+Nail File
+Manicure Table
+Villain
+Vehicle
+Basketball
+Inflated and Textured
+Orange with Black Stripes
+Player
+Agile and Quick-footed
+Glass
+Bottles
+Patron
+Bartender
+Frosty Beer Mug
+Beverage Can
+Gruff Mechanic
+Adventurous Friend
+Shot Glasses
+Liquor Bottle
+Car
+Pursuers
+Tractor
+Field
+Concrete Floor
+Sports Shoes
+Fingers
+Basket
+Hair Dye
+Tinting Brush
+Mirror
+Gloves
+Burger
+Actor (Person Eating the Burger)
+The Cake
+The Fork
+The Eater
+The Plate
+Carrots
+Spectator
+Bowl
+Chips
+Dip
+Eater
+Friend
+Doughnuts
+Coffee
+Enthusiastic Eater
+Competitive Friend
+Hotdog
+Ice Cream Cone
+A Child
+A Dog
+A Park Bench
+The Chef
+The Diner
+The Spaghetti
+The Table Setting
+Watermelon
+Slick Knife
+Participant
+Colorful Easter Eggs
+Eager Children
+Sunlit Garden
+Playful Bunny Costume
+Resistance Bands
+Gym Mat
+Exercise Ball
+Fitness Instructor
+Workout Space
+Firefighter
+Fire Truck
+Fire Extinguisher
+Actor The Protagonist
+Object The Ground
+Unforgiving
+Grimy
+Birds
+Feeder
+Fish
+Feeding Trough
+Goat Feed
+Farmer
+Goats
+Eyebrow Pencil
+Compact Mirror
+Makeup Artist
+Snap
+Light
+Protagonist
+Antagonist
+The Mirror
+The Hair Product
+The Protagonist
+Pancake
+Cook
+Skillet
+Vibrant Colors
+Streamlined Design
+Long Tail
+Strong String
+Actor The Parent
+Object The Pile of Clothes
+Actor The Child
+Object The Folding Table
+The Napkin
+The Server
+The Surroundings
+The Paper
+The Folder
+The Workspace
+The Audience
+Dumbbells
+Exercise Mat
+Trainer
+Sizzling Pan
+Vibrant Vegetables
+Energetic Chef
+Aromatic Seasonings
+Waste Truck
+Garbage Bins
+Waste Collector
+Bystander
+Character (The Gargler)
+Liquid (The Gargle)
+Environment (The Setting)
+Sound (The Gargling)
+Stylist
+Scissors
+Salon Chair
+Tattoo Needle
+Tattoo Machine
+Tattoo Artist
+Client's Skin
+Award
+Presenter
+Recipient
+Golf Club
+Golf Ball
+Golfer
+Greenside Bunker
+Driving Range
+Putting Green
+Heavy-duty Meat Grinder
+Raw Cuts of Meat
+Butcher
+Metal Bowl
+The Dog
+The Grooming Brush
+The Groomer
+The Grooming Table
+Grooming Brush
+Horse
+Groomer
+Hitching Post
+Gymnast
+Balance Beam
+Hammer
+Throwing Circle
+Metallic Guitar
+Frenzied Crowd
+Intense Lead Singer
+Vibrant Stage Lights
+Victor
+Impact Point
+The Athlete
+The Bar
+The Mat
+The Coach
+The Fighter
+The Opponent
+The Environment
+The Kick
+Baseball Bat
+Skates
+Hockey Stick
+Puck
+Sinuous
+Scaled
+Cold-Blooded
+Venomous
+Muscular
+Cautious
+Adventurous
+Chalk Squares
+Pebbles
+The Challenger
+Hoverboard
+Rider
+Urban Landscape
+The Embracer
+The Embraced
+Emotional Atmosphere
+Key Object Hula Hoop
+Lightweight Material
+Key Actor Hula Hooper
+Dynamic Stance
+Expressive Movements
+Hurdles
+Athletes
+Track Surface
+Hurley (Stick)
+Sliotar (Ball)
+Goalposts
+Ice Wall
+Ice Axes
+Rope System
+Frosted Ice Hole
+Snowy Surroundings
+Ice Surface
+Skater
+Iron
+Ironing Board
+Person Ironing
+Clothes
+Javelin
+Launching Position
+Throwing Arc
+Jetski
+Life Jacket
+Pursuer
+Jogger
+Running Shoes
+Park Path
+Water Bottle
+Vividly Colored
+Perfectly Rounded
+Textured Surface
+Agile Performer
+Expressive Face
+Colorful Attire
+Flaming Torches
+Soccer Ball
+Character (Diver)
+Setting (Pool)
+Action (Jump)
+Audience (Onlookers)
+Footwear
+The Football
+The Kicker
+The Goalposts
+The Snapper
+Kicker (Player)
+Body Type
+Characters
+Movement
+Kite
+Kitesurfer
+Surfboard
+Waves
+Knitting Needles
+Colorful Yarn
+Knitters
+Finished Knitted Piece
+Antagonistic Rival
+Chaos-Inducing Sidekick
+Bricks
+Mortar
+Mason
+Assistant
+Sandpit
+Inviting
+Dramatic
+The Hero
+The Weapon
+Mixing Bowl
+Whisk
+Actor (Chef)
+Object (Bread)
+Object (Condiments)
+Actor (Helper)
+Comforter
+Pillows
+Person Making the Bed
+Pet (e.g., Cat or Dog)
+Workbench
+Jeweler's Tools
+Jeweler
+Pizza Dough
+Toppings Bar
+Snowman
+Children
+Snowflakes
+Snow Shovel
+Key Object Sushi Roll
+Colorful
+Meticulously Crafted
+Key Actor Sushi Chef
+Skillful
+Teapot
+Tea Leaves
+Tea Enthusiast
+Cat
+Marching Soldiers
+Flags
+Drummers
+Onlookers
+Massage Therapist
+Receiver
+Massage Oil
+Ambient Music
+Actor (the masseuse)
+Actor (the client)
+Object (massage oil)
+Object (massage chair)
+Legs
+Massager
+Oil or Lotion
+Key Object Cow
+Gentle
+Hulking
+Mottled
+Docile
+Key Actor Farmer
+Experienced
+Rugged
+Motorcycle
+Road
+Sofa
+Coffee Table
+Mover 1
+Mover 2
+Lawn Mower
+Lawn
+Mower Operator
+Grass Clippings
+Anchor
+Teleprompter
+News Desk
+Camera
+Key Object Bottle
+Material
+Shape
+Key Actor Person
+Action
+The Present
+The Unwrapper
+The Timekeeper
+Paraglider Wing
+Clouds
+Pilot
+Parasail
+Boat
+Parasailer
+Ocean
+Runner
+Onlooker
+The Quarterback
+The Receiver
+The Defense
+Football
+Quarterback
+Peeling Knife
+Apples
+Potato Peeler
+Potatoes
+The Handler
+The Leash
+Couch
+Baskets
+Ladders
+Harvesters
+Young Trees
+Garden Tools
+Environmental Activists
+Sunlight
+Trowel
+Plaster Bucket
+Skilled Plasterer
+Supervisor
+Dynamic Performer
+Skilled Hands
+Vibrant Attire
+Intricate Design
+Lustrous Finish
+Versatile Instrument
+Portable Size
+Badminton Racket
+Shuttlecock (Birdie)
+Player (Athlete)
+Court Surface
+Resonant
+Ornate
+Bulging
+Passionate
+Hoop
+Player (Point Guard)
+Player (Center)
+Bass Guitar
+Amplifier
+Bass Player
+Worn Edges
+Vibrant Illustrations
+Tattered Deck
+Glinting Surface
+Cello
+Elegant
+Richly Strained
+Polished
+Depthful
+Cellist
+Graceful
+Synchronized
+Chessboard
+Chess Pieces
+Timer
+Actor (Clarinet Player)
+Object (Clarinet)
+Delicate
+Controller
+Screen/Display
+Cricket Bat
+Cricket Ball
+Batsman
+Cymbals
+Percussionist
+Drumstick
+Stage Setup
+Length
+Decorative Elements
+Sound Quality
+Facial Expression
+Key Object Drums
+Thunderous
+Vibrant
+Dynamic
+Key Actor Drummer
+Charismatic
+Flute
+Flutist
+Auditory Waves
+Guitar
+Guitarist
+Actor The Harmonist
+Object The Harmonica
+Brightly Colored
+Object Harp
+Glistening strings
+Intricate craftsmanship
+Resonant body
+Dynamic presence
+Actor Musician
+Focused expression
+Fluid movements
+Dynamic posture
+Emotional intensity
+Goaltender
+Arena Crowd
+Sleek
+Illuminated
+Responsive
+Compact
+Expressive
+Kickball
+Outfielders
+Monopoly Board
+Game Pieces
+Player 1 (the Strategist)
+Player 2 (the Negotiator)
+Majestic
+Intimidating
+Paintball Marker
+Protective Gear
+Player (Team Leader)
+Obstacle Course
+Piano
+Pianist
+Sheet Music
+Poker Table
+The Dealer
+Player One (The Bluffing Veteran)
+Player Two (The Nervous Newcomer)
+Recorder
+Rival Musician
+The Saxophone
+The Musician
+The Stage
+The Ball
+The Racquet
+The Player
+The Court
+Tennis Racket
+Tennis Ball
+Trombone
+Shiny Brass Finish
+Slide Mechanism
+Musician
+Charismatic Performer
+Masterful Technique
+Intense Focus
+Brilliant Shine
+Vibrant Sound
+The Ukulele
+Violin
+Violinist
+Volleyball
+Net
+Sand Court
+Colorful Bars
+Reflective Mallets
+Focused Expression
+Rhythmic Movements
+Pole
+Landing Mat
+Bar
+Meteorologist
+Weather Map
+Radar Equipment
+Studio Setting
+Challenging Environment
+Intimidating Rival
+High-Stakes Clock
+Key Object Pumping Fist
+Clenched
+Veined
+Raised
+Key Actor Protagonist
+Fearless
+Key Object Gas Pump
+Digital Display
+Nozzle
+Hose
+Key Actor Gas Station Attendant
+Uniformed
+Gloved Hands
+Quick Movements
+Durable
+Weighted
+Hanging
+Textured
+Athletic Build
+Actor (Person Doing Push-Ups)
+Object (Ground Surface)
+Object (Exercise Mat)
+Actor (Observer or Trainer)
+Pusher
+Sturdy Construction
+Smooth-Rolling Wheels
+Compact Design
+Wheelchair
+Passenger
+Object Book
+Well-worn
+Illuminated pages
+Actor Reader
+Engrossed
+Animated gestures
+Newspaper
+Reader
+Coffee Cup
+Window Scene
+Mixing Console
+Sound Engineer
+Lead Vocalist
+Cyclist
+Bicycle
+Camel
+Alert
+Majestic Presence
+Thundering Movement
+Vibrant Adornments
+Eager Intelligence
+Mechanical Bull
+Safety Gear
+Mountain Bike
+Trail
+Mule Description
+Rider Description
+Environment Description
+Action Description
+The Horse
+The Rider
+The Objective
+Scooter
+Obstacles
+Sleek Frame
+Brightly Colored Tire
+Sturdy Pedals
+Integrated Safety Brake
+Sporty Attire
+The Ripper
+Robot
+Dance Floor
+DJ Booth
+Cliffside
+Climbing Rope
+Belayer
+Rock (the Object)
+Scissors (the Object)
+Paper (the Object)
+The Players (the Actors)
+Rink
+Treadmill
+Sweat
+Sailboat
+Rudder
+Skipper
+Crew Member
+Sanding Machine
+Wooden Floor
+Worker
+Dust Particles
+Eggs
+Diving Gear
+Underwater Environment
+Scuba Diver
+Marine Creatures
+Plates
+Cutlery
+Actors (the person setting the table)
+Facial Expressions
+The Knives
+The Sharpening Stone
+The Sharpening Expert
+The Atmosphere
+Object Pencil
+Actor Person
+The Razor
+The Chair
+The Shaver
+Razor
+Shaving Cream
+Towel
+Key Object Sheep
+Key Actor Shepherd
+Shoes
+Shine Kit
+Shoeshiner
+Customer
+Shooter
+Goalkeeper
+Attacking Player
+Soccer Goal
+Heavy
+Smooth
+Spherical
+Shovel
+Person Shoveling
+Shredder
+Documents
+Office Worker
+Security Guard
+Shuffling Cards
+Dealer
+Loyal Companion
+Resourceful Strategist
+Skilled Combatant
+Comic Relief
+Interpreter
+Deaf Participant
+Communication Device
+The Singer
+The Microphone
+The Performer
+The Timer
+The Resistance Band
+Skateboard
+Ramp
+Ski Jumper
+Ski
+Jump Ramp
+Skis
+Ski Poles
+Skiers
+Snow Terrain
+Poles
+Snowy Landscape
+Racer
+Gate Markers
+Tension-filled
+Skydivers
+Parachutes
+Aircraft
+Slackline
+Anchor Points
+Slackliner
+Actor (Slapper)
+Actor (Recipient of the slap)
+Object (Hand)
+Object (Face)
+Sled
+Musher
+Sled Dogs
+Character in Action
+Cigarette
+Hookah
+Tobacco Mixture
+Surrounding Crowd
+Weightlifter
+Chalk
+Platform
+Key Object Tissue
+Key Actor Sneezing Person
+The Hunter
+The Clue
+Snorkeler
+Coral Reef
+Underwater Camera
+Tropical Fish
+Snowboard
+Snowboarder
+Mountain Terrain
+Snow Gear
+Snowkiter
+Snowy Terrain
+Wind
+Snowmobile
+Companion Rider
+Ground Surface
+Surrounding Obstacles
+Luminous
+Spray Can
+Graffiti Artist
+Wall Surface
+Mask
+Mistery canister
+Targeted surface
+The Sprayer
+Environmental elements
+Diving Board
+Diver
+Judges
+The Antagonist
+The Escape Vehicle
+Action Tool
+Grapes
+Feet
+Container
+Tension
+Focus
+Gracefulness
+Surfers
+Surfboards
+Surfer
+Wave
+Broom
+Dustpan
+Sweeper
+Swimmer
+Water
+Goggles
+Lane Markers
+Swimming Cap
+Pool Lane
+Starting Block
+Dynamic Movement
+Muscular Definition
+Speed and Precision
+Contrasting Motion
+The Grappling Hook
+The Swinging Hero
+The Distant Building
+The Urban Landscape
+Swords
+Combatants
+The Practitioner
+The Tai Chi Training Sword
+Key Object Shower
+Steam-filled
+Chrome fixtures
+Key Actor Character
+Soaked
+Determined expression
+Lead Dancer
+Follow Dancer
+Costumes
+Tap Shoes
+Sleek Design
+Metallic Finish
+Tactile Grip
+Rhythmic Clack
+The Beer Glass
+The Brewer
+The Tasting Table
+The Enthusiastic Taster
+Dish
+Taster
+Witness
+Lawyer
+Courtroom
+Evidence
+Key Object Smartphone
+Key Actor User
+Weighty
+Forged Steel Blade
+Rugged Wooden Handle
+Battle-Scarred
+Slightly Inflated
+Lightweight
+Casual Attire
+Discus
+Throwing Technique
+Field Environment
+The Tickler
+The Ticklee
+Tickling Tools
+Toboggan
+Gleaming
+Circular
+Fluid
+Salad Bowl
+Serving Spoon
+The Trainer
+Training Equipment
+Trapeze Bar
+Aerial Performer
+Safety Net
+Ringmaster
+Beard
+Chainsaw
+Tree Trimmer
+Takeoff Board
+Landing Pits
+The Bow Tie
+The Hands
+The Suit
+The Tie
+Pattern
+The Actor (Person Tying the Tie)
+Appearance
+Heroic Main Character
+Mysterious Box
+Cutting Tool
+Contents
+Key Object Truck
+Heavy-duty
+Metallic exterior
+Open rear compartment
+Diesel engine rumble
+Key Actor Loader
+Muscular build
+Bright safety vest
+Gloved hands
+Computer
+Keyboard
+User (Hacker/Protagonist)
+Antagonist (Security Agent)
+Remote Controller
+Operator
+Drone
+Segway
+Imposing Structure
+High-Tech Security
+Subdued Lighting
+Temperature-Controlled
+Queue
+VIP Pass
+Bouncer
+Group of Friends
+The Walker
+The Neighborhood
+The Skillet
+The Soap Sponge
+The Dishwasher
+The Dishwasher User
+Water Basin
+Person Washing Feet
+Feet Being Washed
+Person
+Shampoo Bottle
+Showerhead
+Soap Dispenser
+Water Faucet
+Person’s Hands
+Hand Towel
+Water Skier
+Wakes
+Water Slide
+Swimmers
+Splash Zone
+Lifeguard
+Watering Can
+Gardener
+Potted Plant
+Garden Hose
+Character (Protagonist)
+Weapon (Tactical Knife)
+Environment (Urban Rooftop)
+Antagonist (Mysterious Figure)
+Waxing Strip
+Wax Technician
+Wax Strip
+Tweezers
+Esthetician
+Wax Warmer
+The Waxer
+The Client
+Intricately Woven
+Sturdy Yet Flexible
+Earth-toned Colors
+Compact and Lightweight
+Welder
+Welding Torch
+Intense Flame
+Robust Design
+Metal Pieces
+Hot and Glowing
+Industrial Texture
+Sparks
+Explosive Display
+Choreographed Motion
+Whistling Tornado
+Clenching Fists
+Gleaming Blade
+Shadowy Figure
+Windsurfer
+Windsurfing Board
+Sail
+Ocean Waves
+The Gift
+The Ribbon
+The Wrapper
+The Scissors
+Wrestler (Athlete)
+Opponent (Rival)
+Wrestling Mat (Environment)
+Referee (Authority Figure)
+Weapon
+Yawning Character
+Yoga Mat
+Block
+Zumba Instructor
+Music System
