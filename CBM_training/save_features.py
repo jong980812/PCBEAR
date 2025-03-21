@@ -219,6 +219,7 @@ def get_multi_modal_encoder(args,device):
         # name = 'ViT-B/16'
         # clip_model, _ = clip.load(name, device=device)
     return dual_encoder_model
+
 def get_video_encoder(args,device):
     if args.backbone.startswith("clip_"):
         target_model, target_preprocess = clip.load(args.backbone[5:], device=device)
