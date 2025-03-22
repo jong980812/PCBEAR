@@ -13,8 +13,9 @@ from glm_saga.elasticnet import IndexedTensorDataset, glm_saga
 from torch.utils.data import DataLoader, TensorDataset
 from video_dataloader import video_utils
 import torch.distributed as dist
-from learning_concept_layer import spatio_temporal_parallel,spatio_temporal_serial, spatio_temporal_attention,spatio_temporal_joint,spatio_temporal_three_joint,hard_label,soft_label, spatio_temporal_single
+from learning_concept_layer import train_classification_layer, train_cocept_layer, spatio_temporal_parallel,spatio_temporal_serial,spatio_temporal_joint,spatio_temporal_three_joint,only_pose,soft_label, spatio_temporal_single
 import debugging
+from save_features import get_multi_modal_encoder, frozen_all_parameters
 parser = argparse.ArgumentParser(description='Settings for creating CBM')
 # parser.add_argument('--batch_size', default=64, type=int)
 # parser.add_argument('--epochs', default=30, type=int)
@@ -223,7 +224,7 @@ parser.add_argument('--loss_mode',default='concept',choices=['concept','sample',
 #!
 parser.add_argument('--backbone_features',type=str,default=None)
 parser.add_argument('--vlm_features',type=str,default=None)
-parser.add_argument('--train_mode', default='pose', choices=['pose','pose_sp','text'],
+parser.add_argument('--train_mode', default='pose', choices=['pose','pose_sp','sp','stp'],
                     type=str, help='dataset')
 
 
@@ -264,247 +265,116 @@ def train_cbm_and_save(args):
         save_name = "{}/{}_cbm_{}".format(args.save_dir, args.data_set,args.s_concept_set.split("/")[-1])
     #load features
     os.makedirs(save_name,exist_ok=True)
-    if args.train_mode =='pose':  
+    
+    if 'pose' in args.train_mode:  
         cbm_utils.save_args(args,save_name)
-        hard_label(args,backbone_features,val_backbone_features,save_name)
-        return
+        pose_train_c,pose_val_c=only_pose(args,backbone_features,val_backbone_features,save_name)
+        if args.train_mode =='pose':
+            return
 
+    
+    dual_encoder = get_multi_modal_encoder(args,device).to(device).eval()
+    frozen_all_parameters(dual_encoder,args.dual_encoder)
 
-    with open(args.s_concept_set) as f:
-        s_concepts = f.read().split("\n")
-        # s_concepts = list(set(s_concepts))
-    with open(args.t_concept_set) as f:
-        t_concepts = f.read().split("\n")
-        # t_concepts = list(set(t_concepts))
-    with open(args.p_concept_set) as f:
-        p_concepts = f.read().split("\n")
-        # p_concepts = list(set(p_concepts))
-    if args.debug is not None:
-        debugging.debug(args,args.debug)
-        return
+    if 's' in args.train_mode:
+        with open(args.s_concept_set, 'r') as f: 
+            s_concepts = (f.read()).split('\n')
+        s_concept_save_name=cbm_utils.save_text_features(args.s_concept_set,args,dual_encoder)
+    if 'p' in args.train_mode:
+        with open(args.p_concept_set, 'r') as f: 
+            p_concepts = (f.read()).split('\n')
+        p_concept_save_name=cbm_utils.save_text_features(args.p_concept_set,args,dual_encoder)
+            
+        
+
+            
     vlm_features = torch.load(args.vlm_features,map_location="cpu").float()
-    val_vlm_features=torch.load(args.vlm_features.replace('train','val'),map_location="cpu").float()
-    # with torch.no_grad():
-    #     if args.sp_clip:
-    #         target_features = torch.load(target_save_name, map_location="cpu").float()
-            
-    #         val_target_features = torch.load(val_target_save_name, map_location="cpu").float()
+    val_vlm_features=torch.load(args.vlm_features.replace(f'{args.data_set}_train',f'{args.data_set}_val'),map_location="cpu").float()
+    
+    with torch.no_grad():
+    #! VLM Visual features
+        vlm_features /= torch.norm(vlm_features, dim=1, keepdim=True)
+        val_vlm_features /= torch.norm(val_vlm_features, dim=1, keepdim=True)
+    #! VLM Textual features
+        s_text_features = torch.load(s_concept_save_name, map_location="cpu").float()
+        s_text_features /= torch.norm(s_text_features, dim=1, keepdim=True)
+        p_text_features = torch.load(p_concept_save_name, map_location="cpu").float()
+        p_text_features /= torch.norm(p_text_features, dim=1, keepdim=True)
+    #! Concept matrix         
+        s_concept_matrix = vlm_features @ s_text_features.T
+        s_val_concept_matrix = val_vlm_features @ s_text_features.T
+        p_concept_matrix = vlm_features @ p_text_features.T
+        p_val_concept_matrix = val_vlm_features @ p_text_features.T
         
-    #     #! Internvid
-    #         image_features = torch.load(clip_save_name, map_location="cpu").float()#B,T,D
-    #         image_features /= torch.norm(image_features, dim=1, keepdim=True)
-    #         val_image_features = torch.load(val_clip_save_name, map_location="cpu").float()
-    #         val_image_features /= torch.norm(val_image_features, dim=1, keepdim=True)
-    #     #! CLIP
-    #         sp_image_features = torch.load(sp_clip_save_name, map_location="cpu").float()#B,T,D
-    #         sp_image_features /= torch.norm(sp_image_features, dim=2, keepdim=True)
-    #         sp_val_image_features = torch.load(sp_val_clip_save_name, map_location="cpu").float()
-    #         sp_val_image_features /= torch.norm(sp_val_image_features, dim=2, keepdim=True)
-
-    #         s_text_features = torch.load(s_text_save_name, map_location="cpu").float()
-    #         s_text_features /= torch.norm(s_text_features, dim=1, keepdim=True)
-            
-    #         t_text_features = torch.load(t_text_save_name, map_location="cpu").float()
-    #         t_text_features /= torch.norm(t_text_features, dim=1, keepdim=True)
-            
-    #         p_text_features = torch.load(p_text_save_name, map_location="cpu").float()
-    #         p_text_features /= torch.norm(p_text_features, dim=1, keepdim=True)
-            
-    #         s_clip_features = (sp_image_features @ s_text_features.T).mean(1)
-    #         s_val_clip_features = (sp_val_image_features @ s_text_features.T).mean(1)
-    #         t_clip_features = image_features @ t_text_features.T
-    #         t_val_clip_features = val_image_features @ t_text_features.T
-    #         p_clip_features = (sp_image_features @ p_text_features.T).mean(1)
-    #         p_val_clip_features = (sp_val_image_features @ p_text_features.T).mean(1)
-    #     else:
-    #         target_features = torch.load(target_save_name, map_location="cpu").float()
-            
-    #         val_target_features = torch.load(val_target_save_name, map_location="cpu").float()
-        
-    #         image_features = torch.load(clip_save_name, map_location="cpu").float()
-    #         image_features /= torch.norm(image_features, dim=1, keepdim=True)
-            
-
-    #         val_image_features = torch.load(val_clip_save_name, map_location="cpu").float()
-    #         val_image_features /= torch.norm(val_image_features, dim=1, keepdim=True)
-
-    #         s_text_features = torch.load(s_text_save_name, map_location="cpu").float()
-    #         s_text_features /= torch.norm(s_text_features, dim=1, keepdim=True)
-            
-    #         t_text_features = torch.load(t_text_save_name, map_location="cpu").float()
-    #         t_text_features /= torch.norm(t_text_features, dim=1, keepdim=True)
-            
-    #         p_text_features = torch.load(p_text_save_name, map_location="cpu").float()
-    #         p_text_features /= torch.norm(p_text_features, dim=1, keepdim=True)
-            
-    #         s_clip_features = image_features @ s_text_features.T
-    #         s_val_clip_features = val_image_features @ s_text_features.T
-    #         t_clip_features = image_features @ t_text_features.T
-    #         t_val_clip_features = val_image_features @ t_text_features.T
-    #         p_clip_features = image_features @ p_text_features.T
-    #         p_val_clip_features = val_image_features @ p_text_features.T
-        
-    #     del image_features, s_text_features, t_text_features,p_text_features, val_image_features
-    
-    # #filter concepts not activating highly
-    # s_highest = torch.mean(torch.topk(s_clip_features, dim=0, k=5)[0], dim=0)
-    # t_highest = torch.mean(torch.topk(t_clip_features, dim=0, k=5)[0], dim=0)
-    # p_highest = torch.mean(torch.topk(p_clip_features, dim=0, k=5)[0], dim=0)
-
-
-    # if args.print:
-    #     for i, concept in enumerate(s_concepts):
-    #         if s_highest[i]<=args.clip_cutoff:
-    #             print("!**Spatial** Deleting {}, CLIP top5:{:.3f}".format(concept, s_highest[i]))
-
-    # original_n_concept = len(s_concepts)
-    # s_concepts = [s_concepts[i] for i in range(len(s_concepts)) if s_highest[i]>args.clip_cutoff]
-    # print(f"!**Spatial** Num concept {len(s_concepts)} from {original_n_concept}")
-    # if args.print:
-    #     for i, concept in enumerate(t_concepts):
-    #         if t_highest[i]<=args.clip_cutoff:
-    #             print("?**Temporal** Deleting {}, CLIP top5:{:.3f}".format(concept, t_highest[i]))
-
-    # original_n_concept = len(t_concepts)
-    # t_concepts = [t_concepts[i] for i in range(len(t_concepts)) if t_highest[i]>args.clip_cutoff]
-    # print(f"?**Temporal** Num concept {len(t_concepts)} from {original_n_concept}")
-    
-    # if args.print:
-    #     for i, concept in enumerate(p_concepts):
-    #         if p_highest[i]<=args.clip_cutoff:
-    #             print("!**Place** Deleting {}, CLIP top5:{:.3f}".format(concept, p_highest[i]))
-
-    # original_n_concept = len(p_concepts)
-    # p_concepts = [p_concepts[i] for i in range(len(p_concepts)) if p_highest[i]>args.clip_cutoff]
-    # print(f"!**Place** Num concept {len(p_concepts)} from {original_n_concept}")
-    
-    # #save memory by recalculating
-    # del s_clip_features, t_clip_features, p_clip_features
-    # with torch.no_grad():
-    #     if args.sp_clip:
-    #         image_features = torch.load(clip_save_name, map_location="cpu").float()
-    #         image_features /= torch.norm(image_features, dim=1, keepdim=True)
-    #         sp_image_features = torch.load(sp_clip_save_name, map_location="cpu").float()
-    #         sp_image_features /= torch.norm(sp_image_features, dim=2, keepdim=True)
-
-    #         s_text_features = torch.load(s_text_save_name, map_location="cpu").float()[s_highest>args.clip_cutoff]
-    #         s_text_features /= torch.norm(s_text_features, dim=1, keepdim=True)
-            
-    #         t_text_features = torch.load(t_text_save_name, map_location="cpu").float()[t_highest>args.clip_cutoff]
-    #         t_text_features /= torch.norm(t_text_features, dim=1, keepdim=True)
-            
-    #         p_text_features = torch.load(p_text_save_name, map_location="cpu").float()[p_highest>args.clip_cutoff]
-    #         p_text_features /= torch.norm(p_text_features, dim=1, keepdim=True)
-            
-    #         s_clip_features = (sp_image_features @ s_text_features.T).mean(1)
-    #         t_clip_features = image_features @ t_text_features.T
-    #         p_clip_features = (sp_image_features @ p_text_features.T).mean(1)
-    #     else:
-    #         image_features = torch.load(clip_save_name, map_location="cpu").float()
-    #         image_features /= torch.norm(image_features, dim=1, keepdim=True)
-
-    #         s_text_features = torch.load(s_text_save_name, map_location="cpu").float()[s_highest>args.clip_cutoff]
-    #         s_text_features /= torch.norm(s_text_features, dim=1, keepdim=True)
-            
-    #         t_text_features = torch.load(t_text_save_name, map_location="cpu").float()[t_highest>args.clip_cutoff]
-    #         t_text_features /= torch.norm(t_text_features, dim=1, keepdim=True)
-            
-    #         p_text_features = torch.load(p_text_save_name, map_location="cpu").float()[p_highest>args.clip_cutoff]
-    #         p_text_features /= torch.norm(p_text_features, dim=1, keepdim=True)
-            
-    #         s_clip_features = image_features @ s_text_features.T
-    #         t_clip_features = image_features @ t_text_features.T
-    #         p_clip_features = image_features @ p_text_features.T
-    #     del image_features, s_text_features,t_text_features,p_text_features
-    
-    # s_val_clip_features = s_val_clip_features[:, s_highest>args.clip_cutoff]
-    # t_val_clip_features = t_val_clip_features[:, t_highest>args.clip_cutoff]
-    # p_val_clip_features = p_val_clip_features[:, p_highest>args.clip_cutoff]
-    # #! Learning Concept Layer
-    # #learn projection layer
-
-    # os.makedirs(save_name,exist_ok=True)
-    # # save_spatial = os.path.join(save_name,'spatial')
-    # # save_temporal = os.path.join(save_name,'temporal')
 
     
-    # #!
-    # #target_feat -> Backbone feat
-    # #clip_feat -> dual encoder feat
-    # #!
-    # if args.train_mode=='serial':
-    #     spatio_temporal_serial(args,
-    #                         s_concepts,
-    #                         target_features,
-    #                         val_target_features,
-    #                         s_clip_features,
-    #                         s_val_clip_features,
-    #                         t_concepts,
-    #                         t_clip_features,
-    #                         t_val_clip_features,
-    #                         save_name)
-    # elif args.train_mode=='single':
-    #     spatio_temporal_single(args,
-    #                         s_concepts,
-    #                         target_features,
-    #                         val_target_features,
-    #                         s_clip_features,
-    #                         s_val_clip_features,
-    #                         save_name)
-    # elif args.train_mode =='attention':
-    #     # spatio_temporal_attention()
-    #     spatio_temporal_attention(args,
-    #                         s_concepts,
-    #                         target_features,
-    #                         val_target_features,
-    #                         s_clip_features,
-    #                         s_val_clip_features,
-    #                         t_concepts,
-    #                         t_clip_features,
-    #                         t_val_clip_features,
-    #                         save_name)
-    # elif args.train_mode =='joint':
-    #     spatio_temporal_joint(args,
-    #                         s_concepts,
-    #                         target_features,
-    #                         val_target_features,
-    #                         s_clip_features,
-    #                         s_val_clip_features,
-    #                         t_concepts,
-    #                         t_clip_features,
-    #                         t_val_clip_features,
-    #                         save_name)
-    # elif args.train_mode =='triple':
-    #     spatio_temporal_three_joint(
-    #                         args,
-    #                         s_concepts,
-    #                         target_features,
-    #                         val_target_features,
-    #                         s_clip_features,
-    #                         s_val_clip_features,
-    #                         t_concepts,
-    #                         t_clip_features,
-    #                         t_val_clip_features,
-    #                         p_concepts,
-    #                         p_clip_features,
-    #                         p_val_clip_features,
-    #                         save_name
-    #     )
-    # elif args.train_mode =='para':
-    #     spatio_temporal_parallel(args,
-    #                         s_concepts,
-    #                         target_features,
-    #                         val_target_features,
-    #                         s_clip_features,
-    #                         s_val_clip_features,
-    #                         t_concepts,
-    #                         t_clip_features,
-    #                         t_val_clip_features,
-    #                         save_name)
-    # elif args.train_mode == 'hard_label':
-    #     hard_label(args,target_features,val_target_features,save_name)
-    # else :
-    #     soft_label(args,target_features,val_target_features,save_name)
+    #filter concepts not activating highly
+    s_highest = torch.mean(torch.topk(s_concept_matrix, dim=0, k=5)[0], dim=0)
+    p_highest = torch.mean(torch.topk(p_concept_matrix, dim=0, k=5)[0], dim=0)
+
+
+    if args.print:
+        for i, concept in enumerate(s_concepts):
+            if s_highest[i]<=args.clip_cutoff:
+                print("!**Spatial** Deleting {}, CLIP top5:{:.3f}".format(concept, s_highest[i]))
+        for i, concept in enumerate(p_concepts):
+            if p_highest[i]<=args.clip_cutoff:
+                print("!**Place** Deleting {}, CLIP top5:{:.3f}".format(concept, p_highest[i]))
+    original_n_concept = len(s_concepts)
+    s_concepts = [s_concepts[i] for i in range(len(s_concepts)) if s_highest[i]>args.clip_cutoff]
+    print(f"!**Spatial** Num concept: {original_n_concept} -> {len(s_concepts)}")
+    original_p_concept = len(p_concepts)
+    p_concepts = [p_concepts[i] for i in range(len(p_concepts)) if p_highest[i]>args.clip_cutoff]
+    print(f"!**Place** Num concept: {original_p_concept} -> {len(p_concepts)}")
+
+
+    s_concept_matrix = s_concept_matrix[:, s_highest>args.clip_cutoff]
+    p_concept_matrix = p_concept_matrix[:, p_highest>args.clip_cutoff]
+    s_val_concept_matrix = s_val_concept_matrix[:, s_highest>args.clip_cutoff]
+    p_val_concept_matrix = p_val_concept_matrix[:, p_highest>args.clip_cutoff]
+    
+
+    
+    s_save_name = os.path.join(save_name,'spatial');os.makedirs(s_save_name,exist_ok=True)
+    p_save_name = os.path.join(save_name,'place');os.makedirs(p_save_name,exist_ok=True)
+
+#! Learning Spatial concepts
+    s_W_c, s_concepts, s_best_val_loss= train_cocept_layer(args=args,
+                                                            concepts=s_concepts,
+                                                            target_features=backbone_features,
+                                                            val_target_features=val_backbone_features,
+                                                            clip_feature=s_concept_matrix,
+                                                            val_clip_features=s_val_concept_matrix,
+                                                            save_name=s_save_name)
+    spatial_train_c,spatial_val_c=train_classification_layer(args=args,
+                               W_c=s_W_c,
+                               pre_concepts= None, 
+                               concepts=s_concepts,
+                               target_features=backbone_features,
+                               val_target_features=val_backbone_features,
+                               save_name=s_save_name,
+                               joint=None,
+                               best_val_loss=s_best_val_loss)
+#! Learning Place concepts
+    
+    p_W_c, p_concepts, p_best_val_loss= train_cocept_layer(args=args,
+                                                            concepts=p_concepts,
+                                                            target_features=backbone_features,
+                                                            val_target_features=val_backbone_features,
+                                                            clip_feature=p_concept_matrix,
+                                                            val_clip_features=p_val_concept_matrix,
+                                                            save_name=p_save_name)
+    place_train_c,place_val_c=train_classification_layer(args=args,
+                               W_c=p_W_c,
+                               pre_concepts= None, 
+                               concepts=p_concepts,
+                               target_features=backbone_features,
+                               val_target_features=val_backbone_features,
+                               save_name=p_save_name,
+                               joint=None,
+                               best_val_loss=p_best_val_loss)
+    
+    #! 얻어진 컨셉들은 interpretability cutoff적용된 새로운 것.
 
     
 

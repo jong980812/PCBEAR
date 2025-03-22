@@ -30,6 +30,154 @@ from torch.utils.data import DataLoader, TensorDataset
 from video_dataloader import video_utils
 import torch.distributed as dist
 
+
+def train_cocept_layer(args,concepts, target_features,val_target_features,clip_feature,val_clip_features,save_name):
+    similarity_fn = similarity.cos_similarity_cubed_single_concept
+    proj_layer = torch.nn.Linear(in_features=target_features.shape[1], out_features=len(concepts),
+                                bias=False).to(args.device)
+    opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-3)
+
+    indices = [ind for ind in range(len(target_features))]
+
+    best_val_loss = float("inf")
+    best_step = 0
+    best_weights = None
+    proj_batch_size = min(args.proj_batch_size, len(target_features))
+    for i in range(args.proj_steps):
+        batch = torch.LongTensor(random.sample(indices, k=proj_batch_size))
+        outs = proj_layer(target_features[batch].to(args.device).detach())
+        loss = -similarity_fn(clip_feature[batch].to(args.device).detach(), outs)
+        
+        loss = torch.mean(loss)
+        loss.backward()
+        opt.step()
+        if i%50==0 or i==args.proj_steps-1:
+            with torch.no_grad():
+                val_output = proj_layer(val_target_features.to(args.device).detach())
+                val_loss = -similarity_fn(val_clip_features.to(args.device).detach(), val_output)
+                val_loss = torch.mean(val_loss)
+            if i==0:
+                best_val_loss = val_loss
+                best_step = i
+                best_weights = proj_layer.weight.clone()
+                print("Step:{}, Avg train similarity:{:.4f}, Avg val similarity:{:.4f}".format(best_step, -loss.cpu(),
+                                                                                            -best_val_loss.cpu()))
+                
+            elif val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_step = i
+                best_weights = proj_layer.weight.clone()
+            else: #stop if val loss starts increasing
+                break
+            print("Step:{}, Avg train similarity:{:.4f}, Avg val similarity:{:.4f}".format(i, -loss.cpu(),
+                                                                                            -val_loss.cpu()))
+        opt.zero_grad()
+    proj_layer.load_state_dict({"weight":best_weights})
+    print("**Best step:{}, Avg val similarity:{:.4f}".format(best_step, -best_val_loss.cpu()))
+
+    #delete concepts that are not interpretable
+    with torch.no_grad():
+        outs = proj_layer(val_target_features.to(args.device).detach())
+        sim = similarity_fn(val_clip_features.to(args.device).detach(), outs)
+        interpretable = sim > args.interpretability_cutoff
+        
+    if args.print:
+        for i, concept in enumerate(concepts):
+            if sim[i]<=args.interpretability_cutoff:
+                print("Deleting {}, Iterpretability:{:.3f}".format(concept, sim[i]))
+    original_n_concept = len(concepts)
+
+    concepts = [concepts[i] for i in range(len(concepts)) if interpretable[i]]
+    print(f"interpretability_cutoff: concept {original_n_concept}-> {len(concepts)}")
+    W_c = proj_layer.weight[interpretable]
+    torch.save(W_c, os.path.join(save_name ,"W_c.pt"))
+    with open(os.path.join(save_name, "concepts.txt"), 'w') as f:
+        f.write(concepts[0])
+        for concept in concepts[1:]:
+            f.write('\n'+concept)
+    return W_c,concepts,best_val_loss
+
+def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=None, target_features=None,val_target_features=None,save_name=None,joint=None,best_val_loss=None):
+    # cls_file = data_utils.LABEL_FILES[args.data_set]
+    cls_file = os.path.join(args.video_anno_path, 'class_list.txt')
+    with open(cls_file, "r") as f:
+        classes = f.read().split("\n")
+    assert args.nb_classes == len(classes), f"Error: args.nb_classes ({args.nb_classes}) != len(classes) ({len(classes)})"
+    
+    
+    train_video_dataset, _ = datasets.build_dataset(True, False, args)
+    val_video_dataset,_ =   datasets.build_dataset(False, False, args)
+    # d_train = args.data_set + "_train"
+    # d_val = args.data_set + "_val"
+    train_targets = train_video_dataset.label_array
+    val_targets = val_video_dataset.label_array
+    train_y = torch.LongTensor(train_targets)
+    val_y = torch.LongTensor(val_targets)
+        
+    proj_layer = torch.nn.Linear(target_features.shape[1], out_features=len(concepts), bias=False)
+    proj_layer.load_state_dict({"weight":W_c})
+    with torch.no_grad():
+        train_c = proj_layer(target_features.detach())
+        val_c = proj_layer(val_target_features.detach())
+        
+        train_mean = torch.mean(train_c, dim=0, keepdim=True)
+        train_std = torch.std(train_c, dim=0, keepdim=True)
+        
+        train_c -= train_mean
+        train_c /= train_std
+
+        val_c -= train_mean
+        val_c /= train_std
+
+        
+        
+
+
+    indexed_train_ds = IndexedTensorDataset(train_c, train_y)
+    val_ds = TensorDataset(val_c,val_y)
+        
+    indexed_train_loader = DataLoader(indexed_train_ds, batch_size=args.saga_batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=args.saga_batch_size, shuffle=False)
+
+    # Make linear model and zero initialize
+    linear = torch.nn.Linear(train_c.shape[1],len(classes)).to(args.device)
+    linear.weight.data.zero_()
+    linear.bias.data.zero_()
+    
+    STEP_SIZE = 0.05
+    ALPHA = 0.99
+    metadata = {}
+    metadata['max_reg'] = {}
+    metadata['max_reg']['nongrouped'] = args.lam
+
+    # Solve the GLM path
+    #concept layer to classification
+    output_proj = glm_saga(linear, indexed_train_loader, STEP_SIZE, args.n_iters, ALPHA, epsilon=1, k=1,
+                    val_loader=val_loader, do_zero=False, metadata=metadata, n_ex=len(target_features), n_classes = len(classes),verbose=500)
+    W_g = output_proj['path'][0]['weight']
+    b_g = output_proj['path'][0]['bias']
+    
+    if joint is None:
+        torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
+        torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
+    torch.save(W_g, os.path.join(save_name, "W_g.pt"))
+    torch.save(b_g, os.path.join(save_name, "b_g.pt"))
+    with open(os.path.join(save_name, "metrics.txt"), 'w') as f:
+        out_dict = {}
+        for key in ('lam', 'lr', 'alpha', 'time'):
+            out_dict[key] = float(output_proj['path'][0][key])
+        out_dict['metrics'] = output_proj['path'][0]['metrics']
+        nnz = (W_g.abs() > 1e-5).sum().item()
+        total = W_g.numel()
+        out_dict['sparsity'] = {"Non-zero weights":nnz, "Total weights":total, "Percentage non-zero":nnz/total}
+        out_dict['concept_layer_best_loss'] = -(best_val_loss.item())
+        json.dump(out_dict, f, indent=2)
+
+    return train_c, val_c
+
+
+
+
 def spatio_temporal_joint(args,
                             s_concepts,
                             target_features,
@@ -650,41 +798,9 @@ def spatio_temporal_single(args,
     # accuracy = cbm_utils.get_accuracy_cbm(model, val_data_t, device,32,10)
     # print("?****? Accuracy: {:.2f}%".format(accuracy*100))
 
-def spatio_temporal_attention(args,
-                            s_concepts,
-                            target_features,
-                            val_target_features,
-                            s_clip_features,
-                            s_val_clip_features,
-                            t_concepts,
-                            t_clip_features,
-                            t_val_clip_features,
-                            save_name):
-    save_spatial = os.path.join(save_name,'spatial')
-    save_temporal = os.path.join(save_name,'temporal')
-    os.mkdir(save_spatial)
-    os.mkdir(save_temporal)
-    s_W_c,s_concepts = train_cocept_layer(args,
-                               s_concepts,
-                               target_features,
-                               val_target_features,
-                               s_clip_features,
-                               s_val_clip_features,
-                               save_spatial)
-    t_W_c,t_concepts = train_cocept_layer(args,
-                               t_concepts,
-                               target_features,
-                               val_target_features,
-                               t_clip_features,
-                               t_val_clip_features,
-                               save_temporal)
-
-    
-    del s_clip_features, s_val_clip_features,t_clip_features, t_val_clip_features
-    train_attention_layer(args,s_concepts,t_concepts,s_W_c,t_W_c,target_features,val_target_features,save_name)
 
 
-def hard_label(args,target_features, val_target_features,save_name):
+def only_pose(args,target_features, val_target_features,save_name):
     if args.loss_mode =='concept':
         similarity_fn = similarity.cos_similarity_cubed_single_concept
     elif args.loss_mode =='sample':
@@ -719,18 +835,18 @@ def hard_label(args,target_features, val_target_features,save_name):
         
         val_result_tensor = torch.tensor(val_attribute,dtype=target_features.dtype)
         # if not args.use_mlp:
-        train_result_tensor[train_result_tensor == 0.] = 0.05
-        train_result_tensor[train_result_tensor == 1.] = 0.3
-        val_result_tensor[val_result_tensor == 0.] = 0.05
-        val_result_tensor[val_result_tensor == 1.] = 0.3
+        # train_result_tensor[train_result_tensor == 0.] = 0.05
+        # train_result_tensor[train_result_tensor == 1.] = 0.3
+        # val_result_tensor[val_result_tensor == 0.] = 0.05
+        # val_result_tensor[val_result_tensor == 1.] = 0.3
     
     
 
     if args.use_mlp:
-        proj_layer = cbm.ModelOracleCtoY(n_class_attr=2, input_dim=target_features.shape[1],
-                                    num_classes=train_result_tensor.shape[1])
+        # proj_layer = cbm.ModelOracleCtoY(n_class_attr=2, input_dim=target_features.shape[1],num_classes=train_result_tensor.shape[1])
+        proj_layer =torch.nn.Linear(target_features.shape[1],train_result_tensor.shape[1])
         proj_layer = proj_layer.cuda()
-        opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-3)
+        opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-2)
         criterion = torch.nn.CrossEntropyLoss()
     else:
         proj_layer = torch.nn.Linear(in_features=target_features.shape[1], out_features=train_result_tensor.shape[1],
@@ -775,12 +891,13 @@ def hard_label(args,target_features, val_target_features,save_name):
                 best_val_loss = val_loss
                 best_step = i
                 if args.use_mlp:
-                    best_weights = {
-                    "linear.weight": proj_layer.linear.weight.clone(),
-                    "linear.bias": proj_layer.linear.bias.clone(),
-                    "linear2.weight": proj_layer.linear2.weight.clone(),
-                    "linear2.bias": proj_layer.linear2.bias.clone()
-                }
+                    best_weights = proj_layer.weight.clone()
+                    # best_weights = {
+                    # "linear.weight": proj_layer.linear.weight.clone(),
+                    # "linear.bias": proj_layer.linear.bias.clone(),
+                    # "linear2.weight": proj_layer.linear2.weight.clone(),
+                    # "linear2.bias": proj_layer.linear2.bias.clone()
+                # }
                 else:
                     best_weights = proj_layer.weight.clone()
 
@@ -788,12 +905,14 @@ def hard_label(args,target_features, val_target_features,save_name):
                 best_val_loss = val_loss
                 best_step = i
                 if args.use_mlp:
-                    best_weights = {
-                    "linear.weight": proj_layer.linear.weight.clone(),
-                    "linear.bias": proj_layer.linear.bias.clone(),
-                    "linear2.weight": proj_layer.linear2.weight.clone(),
-                    "linear2.bias": proj_layer.linear2.bias.clone()
-                }
+                    best_weights = proj_layer.weight.clone()
+
+                #     best_weights = {
+                #     "linear.weight": proj_layer.linear.weight.clone(),
+                #     "linear.bias": proj_layer.linear.bias.clone(),
+                #     "linear2.weight": proj_layer.linear2.weight.clone(),
+                #     "linear2.bias": proj_layer.linear2.bias.clone()
+                # }
                 else:
                     best_weights = proj_layer.weight.clone()
             else: #stop if val loss starts increasing
@@ -814,7 +933,7 @@ def hard_label(args,target_features, val_target_features,save_name):
     # save_classification = os.path.join(save_name,'classification')
 
     # os.mkdir(save_classification)
-    train_classification_layer(args,
+    train_c, val_c =  train_classification_layer(args,
                                W_c=W_c,
                                pre_concepts=None,
                                concepts = train_result_tensor[0],
@@ -823,7 +942,7 @@ def hard_label(args,target_features, val_target_features,save_name):
                                 save_name=save_name,
                                 best_val_loss=best_val_loss
                                )
-
+    return train_c,val_c
 
 def soft_label(args,target_features, val_target_features,save_name):
     if args.loss_mode =='concept':
@@ -958,540 +1077,9 @@ def soft_label(args,target_features, val_target_features,save_name):
                                 best_val_loss=best_val_loss
                                )
 
-def train_cocept_layer(args,concepts, target_features,val_target_features,clip_feature,val_clip_features,save_name):
-    similarity_fn = similarity.cos_similarity_cubed_single_concept
-    proj_layer = torch.nn.Linear(in_features=target_features.shape[1], out_features=len(concepts),
-                                bias=False).to(args.device)
-    opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-3)
-
-    indices = [ind for ind in range(len(target_features))]
-
-    best_val_loss = float("inf")
-    best_step = 0
-    best_weights = None
-    proj_batch_size = min(args.proj_batch_size, len(target_features))
-    for i in range(args.proj_steps):
-        batch = torch.LongTensor(random.sample(indices, k=proj_batch_size))
-        outs = proj_layer(target_features[batch].to(args.device).detach())
-        loss = -similarity_fn(clip_feature[batch].to(args.device).detach(), outs)
-        
-        loss = torch.mean(loss)
-        loss.backward()
-        opt.step()
-        if i%50==0 or i==args.proj_steps-1:
-            with torch.no_grad():
-                val_output = proj_layer(val_target_features.to(args.device).detach())
-                val_loss = -similarity_fn(val_clip_features.to(args.device).detach(), val_output)
-                val_loss = torch.mean(val_loss)
-            if i==0:
-                best_val_loss = val_loss
-                best_step = i
-                best_weights = proj_layer.weight.clone()
-                print("Step:{}, Avg train similarity:{:.4f}, Avg val similarity:{:.4f}".format(best_step, -loss.cpu(),
-                                                                                            -best_val_loss.cpu()))
-                
-            elif val_loss < best_val_loss:
-                best_val_loss = val_loss
-                best_step = i
-                best_weights = proj_layer.weight.clone()
-            else: #stop if val loss starts increasing
-                break
-            print("Step:{}, Avg train similarity:{:.4f}, Avg val similarity:{:.4f}".format(i, -loss.cpu(),
-                                                                                            -val_loss.cpu()))
-        opt.zero_grad()
-    proj_layer.load_state_dict({"weight":best_weights})
-    print("**Best step:{}, Avg val similarity:{:.4f}".format(best_step, -best_val_loss.cpu()))
-
-    #delete concepts that are not interpretable
-    with torch.no_grad():
-        outs = proj_layer(val_target_features.to(args.device).detach())
-        sim = similarity_fn(val_clip_features.to(args.device).detach(), outs)
-        interpretable = sim > args.interpretability_cutoff
-        
-    if args.print:
-        for i, concept in enumerate(concepts):
-            if sim[i]<=args.interpretability_cutoff:
-                print("Deleting {}, Iterpretability:{:.3f}".format(concept, sim[i]))
-    original_n_concept = len(concepts)
-
-    concepts = [concepts[i] for i in range(len(concepts)) if interpretable[i]]
-    print(f"Num concept {len(concepts)} from {original_n_concept}")
-    W_c = proj_layer.weight[interpretable]
-    torch.save(W_c, os.path.join(save_name ,"W_c.pt"))
-    with open(os.path.join(save_name, "concepts.txt"), 'w') as f:
-        f.write(concepts[0])
-        for concept in concepts[1:]:
-            f.write('\n'+concept)
-    return W_c,concepts,best_val_loss
-
-def train_cocept_layer_scratch(args,concepts, target_features,val_target_features,clip_feature,val_clip_features,save_name):
-    similarity_fn = similarity.cos_similarity_cubed_single
-    proj_layer = torch.nn.Linear(in_features=target_features.shape[1], out_features=len(concepts),
-                                bias=False).to(args.device)
-    opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-3)
-
-    indices = [ind for ind in range(len(target_features))]
-
-    best_val_loss = float("inf")
-    best_step = 0
-    best_weights = None
-    proj_batch_size = min(args.proj_batch_size, len(target_features))
-    for i in range(args.proj_steps):
-        batch = torch.LongTensor(random.sample(indices, k=proj_batch_size))
-        outs = proj_layer(target_features[batch].to(args.device).detach())
-        loss = -similarity_fn(clip_feature[batch].to(args.device).detach(), outs)
-        
-        loss = torch.mean(loss)
-        loss.backward()
-        opt.step()
-        if i%50==0 or i==args.proj_steps-1:
-            with torch.no_grad():
-                val_output = proj_layer(val_target_features.to(args.device).detach())
-                val_loss = -similarity_fn(val_clip_features.to(args.device).detach(), val_output)
-                val_loss = torch.mean(val_loss)
-            if i==0:
-                best_val_loss = val_loss
-                best_step = i
-                best_weights = proj_layer.weight.clone()
-                print("Step:{}, Avg train similarity:{:.4f}, Avg val similarity:{:.4f}".format(best_step, -loss.cpu(),
-                                                                                            -best_val_loss.cpu()))
-                
-            elif val_loss < best_val_loss:
-                best_val_loss = val_loss
-                best_step = i
-                best_weights = proj_layer.weight.clone()
-            else: #stop if val loss starts increasing
-                break
-        opt.zero_grad()
-    proj_layer.load_state_dict({"weight":best_weights})
-    print("**Best step:{}, Avg val similarity:{:.4f}".format(best_step, -best_val_loss.cpu()))
-
-    #delete concepts that are not interpretable
-    with torch.no_grad():
-        outs = proj_layer(val_target_features.to(args.device).detach())
-        sim = similarity_fn(val_clip_features.to(args.device).detach(), outs)
-        interpretable = sim > args.interpretability_cutoff
-        
-    if args.print:
-        for i, concept in enumerate(concepts):
-            if sim[i]<=args.interpretability_cutoff:
-                print("Deleting {}, Iterpretability:{:.3f}".format(concept, sim[i]))
-    original_n_concept = len(concepts)
-
-    concepts = [concepts[i] for i in range(len(concepts)) if interpretable[i]]
-    print(f"Num concept {len(concepts)} from {original_n_concept}")
-    W_c = proj_layer.weight[interpretable]
-    torch.save(W_c, os.path.join(save_name ,"W_c.pt"))
-    with open(os.path.join(save_name, "concepts.txt"), 'w') as f:
-        f.write(concepts[0])
-        for concept in concepts[1:]:
-            f.write('\n'+concept)
-    return W_c,concepts
-def train_attention_layer(args,s_concepts,t_concepts, s_W_c, t_W_c,target_features,val_target_features,save_name ):
-    
-    
-    s_proj_layer = torch.nn.Linear(in_features=target_features.shape[1], out_features=len(s_concepts), bias=False)
-    s_proj_layer.load_state_dict({"weight":s_W_c})
-    t_proj_layer = torch.nn.Linear(in_features=target_features.shape[1], out_features=len(t_concepts), bias=False)
-    t_proj_layer.load_state_dict({"weight":t_W_c})
-    cls_file = data_utils.LABEL_FILES[args.data_set]
-    with open(cls_file, "r") as f:
-        classes = f.read().split("\n")
-        
-    
-    sparse_linear_attention = Sparse_attention(1,1,None, len(t_concepts),len(classes))
-    sparse_linear_attention.to(args.device)
-    optimizer = optim.Adam(
-    list(sparse_linear_attention.parameters()),  # 두 모듈의 파라미터를 함께 학습
-    lr=0.001)  # Learning rate
-    print((sparse_linear_attention.parameters()))
-    # scheduler = lr_scheduler.StepLR(optimizer, step_size=target_features.shape[0], gamma=0.1)
-    
-    d_train = args.data_set + "_train"
-    d_val = args.data_set + "_val"
-    train_targets = data_utils.get_targets_only(d_train,args)
-    val_targets = data_utils.get_targets_only(d_val,args)
-    with torch.no_grad():
-        s_train_c = s_proj_layer(target_features.detach())
-        s_val_c = s_proj_layer(val_target_features.detach())
-        s_train_mean = torch.mean(s_train_c, dim=0, keepdim=True)
-        s_train_std = torch.std(s_train_c, dim=0, keepdim=True)
-        s_train_c -= s_train_mean
-        s_train_c /= s_train_std
-        s_val_c -= s_train_mean
-        s_val_c /= s_train_std
-  
-        train_y = torch.LongTensor(train_targets)
-        val_y = torch.LongTensor(val_targets)
-
-        t_train_c = t_proj_layer(target_features.detach())
-        t_val_c = t_proj_layer(val_target_features.detach())
-        t_train_mean = torch.mean(t_train_c, dim=0, keepdim=True)
-        t_train_std = torch.std(t_train_c, dim=0, keepdim=True)
-        t_train_c -= t_train_mean
-        t_train_c /= t_train_std
-        t_val_c -= t_train_mean
-        t_val_c /= t_train_std
-    train_ds = TensorDataset(s_train_c,t_train_c,train_y)
-    val_ds = TensorDataset(s_val_c,t_val_c,val_y)
-    train_dataloader = DataLoader(train_ds, batch_size=32, shuffle=True,num_workers=10,pin_memory=True)
-    val_loader = DataLoader(val_ds,batch_size=32,shuffle=False,num_workers=10,pin_memory=True)
-    loss_fn=nn.CrossEntropyLoss()
-    num_epochs = 5
-    for epoch in range(num_epochs):
-        sparse_linear_attention.train()
-        for batch in tqdm(train_dataloader):
-        # 학습 코드 (forward, backward, optimizer.step 등)
-            x1,x2,y = batch
-            x1=x1.to(args.device)
-            x2=x2.to(args.device)
-            y=y.to(args.device)
-            optimizer.zero_grad()
-            # 예시 데이터와 로스 계산 과정
-            out = sparse_linear_attention(x2,x1)
-            loss = loss_fn(out,y)
-            loss.backward()
-            optimizer.step()
-            # 매 epoch마다 스케줄러 업데이트
-            # scheduler.step()
-            
-            # 현재 학습률 출력
-        print(f"Epoch {epoch+1}, Loss: {loss}")#, Current learning rate: {scheduler.get_last_lr()}")
-        correct = 0
-        total = 0
-        sparse_linear_attention.eval()
-        for batch in val_loader:
-            with torch.no_grad():
-                #outs = target_model(images.to(device))
-                x1,x2,y = batch
-                x1=x1.to(args.device)
-                x2=x2.to(args.device)
-                # y=y.to(args.device)
-                outs = sparse_linear_attention(x2,x1)
-                pred = torch.argmax(outs, dim=1)
-                correct += torch.sum(pred.cpu()==y)
-                total += len(y)
-        print(f'acc:{correct/total}')
-
-def train_new_classification_layer(args,W_c,pre_concepts,concepts, target_features,val_target_features,save_name):
-    proj_layer = torch.nn.Linear(in_features=len(pre_concepts) if args.train_mode=='serial' else target_features.shape[1], out_features=len(concepts), bias=False)
-    proj_layer.load_state_dict({"weight":W_c})
-    d_train = args.data_set + "_train"
-    d_val = args.data_set + "_val"
-    train_targets = data_utils.get_targets_only(d_train,args)
-    val_targets = data_utils.get_targets_only(d_val,args)
-    cls_file = data_utils.LABEL_FILES[args.data_set]
-    target_features = target_features.view(target_features.shape[0]//5,5,-1)
-    val_target_features = val_target_features.view(val_target_features.shape[0]//5,5,-1)
-    with open(cls_file, "r") as f:
-        classes = f.read().split("\n")
-    with torch.no_grad():
-        train_cs, val_cs = [],[]
-        for i in range(5):
-            train_c = proj_layer(target_features[:,i,:].detach())
-            val_c = proj_layer(val_target_features[:,i,:].detach())
-            
-            train_mean = torch.mean(train_c, dim=0, keepdim=True)
-            train_std = torch.std(train_c, dim=0, keepdim=True)
-            
-            train_c -= train_mean
-            train_c /= train_std
-            val_c -= train_mean
-            val_c /= train_std
-            train_cs.append(train_c.unsqueeze(1))
-            val_cs.append(val_c.unsqueeze(1))
-        train_cs=torch.cat(train_cs,dim=1)
-        val_cs=torch.cat(val_cs,dim=1)
-
-            
-        train_y = torch.LongTensor(train_targets)
-        val_y = torch.LongTensor(val_targets)
-        indexed_train_ds = IndexedTensorDataset(train_cs, train_y)
-        val_ds = TensorDataset(val_cs,val_y)
-    indexed_train_loader = DataLoader(indexed_train_ds, batch_size=args.saga_batch_size, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=args.saga_batch_size, shuffle=False)
-    
-    sparse_linear_attention = Sparse_attention(len(concepts),1,None, len(concepts),len(classes))
-    sparse_linear_attention.to(args.device)
-    optimizer = optim.Adam(
-    list(sparse_linear_attention.parameters()),  # 두 모듈의 파라미터를 함께 학습
-    lr=0.0001)  # Learning rate
-    print((sparse_linear_attention.parameters()))
-    loss_fn=nn.CrossEntropyLoss()
-    num_epochs = 50
-    for epoch in range(num_epochs):
-        sparse_linear_attention.train()
-        for batch in (indexed_train_loader):
-        # 학습 코드 (forward, backward, optimizer.step 등)
-            x1,y,_ = batch
-            x1=x1.to(args.device)
-            y=y.to(args.device)
-            optimizer.zero_grad()
-            # 예시 데이터와 로스 계산 과정
-            out,_ = sparse_linear_attention(x1)
-            loss = loss_fn(out,y)
-            loss.backward()
-            optimizer.step()
-            # 매 epoch마다 스케줄러 업데이트
-            # scheduler.step()
-            
-            # 현재 학습률 출력
-        print(f"Epoch {epoch+1}, Loss: {loss}")#, Current learning rate: {scheduler.get_last_lr()}")
-        correct = 0
-        total = 0
-        sparse_linear_attention.eval()
-        for batch in val_loader:
-            with torch.no_grad():
-                #outs = target_model(images.to(device))
-                x1,y = batch
-                x1=x1.to(args.device)
-                # x2=x2.to(args.device)
-                # y=y.to(args.device)
-                outs ,_= sparse_linear_attention(x1)
-                pred = torch.argmax(outs, dim=1)
-                correct += torch.sum(pred.cpu()==y)
-                total += len(y)
-        print(f'acc:{correct/total}')
-    torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
-    torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
-    torch.save(sparse_linear_attention.state_dict(), os.path.join(save_name, "W.pt"))
-def train_classification_multiview(args,W_c,pre_concepts,concepts, target_features,val_target_features,save_name):
-    proj_layer = torch.nn.Linear(in_features=len(pre_concepts) if args.train_mode=='serial' else target_features.shape[1], out_features=len(concepts), bias=False)
-    proj_layer.load_state_dict({"weight":W_c})
-    d_train = args.data_set + "_train"
-    d_val = args.data_set + "_val"
-    train_targets = data_utils.get_targets_only(d_train,args)
-    val_targets = data_utils.get_targets_only(d_val,args)
-    cls_file = data_utils.LABEL_FILES[args.data_set]
-    target_features = target_features.view(target_features.shape[0]//5,5,-1)
-    # val_target_features = val_target_features.view(val_target_features.shape[0]//5,5,-1)
-    with open(cls_file, "r") as f:
-        classes = f.read().split("\n")
-    with torch.no_grad():
-        train_cs=[]
-        val_c = proj_layer(val_target_features.detach())
-
-        for i in range(5):
-            train_c = proj_layer(target_features[:,i,:].detach())
-            # val_c = proj_layer(val_target_features[:,i,:].detach())
-            
-            train_mean = torch.mean(train_c, dim=0, keepdim=True)
-            train_std = torch.std(train_c, dim=0, keepdim=True)
-            
-            train_c -= train_mean
-            train_c /= train_std
-            train_cs.append(train_c.unsqueeze(1))
-
-        train_cs=torch.cat(train_cs,dim=1)
-        # val_cs=torch.cat(val_cs,dim=1)
-        ind2_train_c = proj_layer(target_features[:,2,:].detach())
-        
-        train_mean = torch.mean(ind2_train_c, dim=0, keepdim=True)
-        train_std = torch.std(ind2_train_c, dim=0, keepdim=True)
-        val_c -= train_mean
-        val_c /= train_std
-            
-        train_y = torch.LongTensor(train_targets)
-        val_y = torch.LongTensor(val_targets)
-        indexed_train_ds = IndexedTensorDataset(train_cs, train_y)
-        val_ds = TensorDataset(val_c,val_y)
-    indexed_train_loader = DataLoader(indexed_train_ds, batch_size=args.saga_batch_size, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=args.saga_batch_size, shuffle=False)
-    # Make linear model and zero initialize
-    linear = torch.nn.Linear(train_c.shape[1],len(classes)).to(args.device)
-    linear.weight.data.zero_()
-    linear.bias.data.zero_()
-    
-    STEP_SIZE = 0.01
-    ALPHA = 0.99
-    metadata = {}
-    metadata['max_reg'] = {}
-    metadata['max_reg']['nongrouped'] = args.lam
-
-    # Solve the GLM path
-    #concept layer to classification
-    output_proj = glm_saga(linear, indexed_train_loader, STEP_SIZE, args.n_iters, ALPHA, epsilon=1, k=1,
-                    val_loader=val_loader, do_zero=False, metadata=metadata, n_ex=len(target_features), n_classes = len(classes),verbose=10,multiview=True)
-    W_g = output_proj['path'][0]['weight']
-    b_g = output_proj['path'][0]['bias']
-    
-
-    torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
-    torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
-    torch.save(W_g, os.path.join(save_name, "W_g.pt"))
-    torch.save(b_g, os.path.join(save_name, "b_g.pt"))
-    with open(os.path.join(save_name, "metrics.txt"), 'w') as f:
-        out_dict = {}
-        for key in ('lam', 'lr', 'alpha', 'time'):
-            out_dict[key] = float(output_proj['path'][0][key])
-        out_dict['metrics'] = output_proj['path'][0]['metrics']
-        nnz = (W_g.abs() > 1e-5).sum().item()
-        total = W_g.numel()
-        out_dict['sparsity'] = {"Non-zero weights":nnz, "Total weights":total, "Percentage non-zero":nnz/total}
-        json.dump(out_dict, f, indent=2)
-def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=None, target_features=None,val_target_features=None,save_name=None,joint=None,best_val_loss=None):
-    # cls_file = data_utils.LABEL_FILES[args.data_set]
-    cls_file = os.path.join(args.video_anno_path, 'class_list.txt')
-    with open(cls_file, "r") as f:
-        classes = f.read().split("\n")
-    assert args.nb_classes == len(classes), f"Error: args.nb_classes ({args.nb_classes}) != len(classes) ({len(classes)})"
-    
-    
-    train_video_dataset, _ = datasets.build_dataset(True, False, args)
-    val_video_dataset,_ =   datasets.build_dataset(False, False, args)
-    # d_train = args.data_set + "_train"
-    # d_val = args.data_set + "_val"
-    train_targets = train_video_dataset.label_array
-    val_targets = val_video_dataset.label_array
-    train_y = torch.LongTensor(train_targets)
-    val_y = torch.LongTensor(val_targets)
-        
-    proj_layer = torch.nn.Linear(target_features.shape[1], out_features=len(concepts), bias=False)
-    proj_layer.load_state_dict({"weight":W_c})
-    with torch.no_grad():
-        train_c = proj_layer(target_features.detach())
-        val_c = proj_layer(val_target_features.detach())
-        
-        train_mean = torch.mean(train_c, dim=0, keepdim=True)
-        train_std = torch.std(train_c, dim=0, keepdim=True)
-        
-        train_c -= train_mean
-        train_c /= train_std
-
-        val_c -= train_mean
-        val_c /= train_std
-
-        
-        
-
-
-    indexed_train_ds = IndexedTensorDataset(train_c, train_y)
-    val_ds = TensorDataset(val_c,val_y)
-        
-    indexed_train_loader = DataLoader(indexed_train_ds, batch_size=args.saga_batch_size, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=args.saga_batch_size, shuffle=False)
-
-    # Make linear model and zero initialize
-    linear = torch.nn.Linear(train_c.shape[1],len(classes)).to(args.device)
-    linear.weight.data.zero_()
-    linear.bias.data.zero_()
-    
-    STEP_SIZE = 0.05
-    ALPHA = 0.99
-    metadata = {}
-    metadata['max_reg'] = {}
-    metadata['max_reg']['nongrouped'] = args.lam
-
-    # Solve the GLM path
-    #concept layer to classification
-    output_proj = glm_saga(linear, indexed_train_loader, STEP_SIZE, args.n_iters, ALPHA, epsilon=1, k=1,
-                    val_loader=val_loader, do_zero=False, metadata=metadata, n_ex=len(target_features), n_classes = len(classes),verbose=500)
-    W_g = output_proj['path'][0]['weight']
-    b_g = output_proj['path'][0]['bias']
-    
-    if joint is None:
-        torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
-        torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
-    torch.save(W_g, os.path.join(save_name, "W_g.pt"))
-    torch.save(b_g, os.path.join(save_name, "b_g.pt"))
-    with open(os.path.join(save_name, "metrics.txt"), 'w') as f:
-        out_dict = {}
-        for key in ('lam', 'lr', 'alpha', 'time'):
-            out_dict[key] = float(output_proj['path'][0][key])
-        out_dict['metrics'] = output_proj['path'][0]['metrics']
-        nnz = (W_g.abs() > 1e-5).sum().item()
-        total = W_g.numel()
-        out_dict['sparsity'] = {"Non-zero weights":nnz, "Total weights":total, "Percentage non-zero":nnz/total}
-        out_dict['concept_layer_best_loss'] = -(best_val_loss.item())
-        json.dump(out_dict, f, indent=2)
 
 
 
-class LayerNorm(nn.LayerNorm):
-    """Subclass torch's LayerNorm to handle fp16."""
-
-    def forward(self, x: torch.Tensor):
-        orig_type = x.dtype
-        ret = super().forward(x.type(torch.float32))
-        return ret.type(orig_type)
 
 
-class QuickGELU(nn.Module):
-    def forward(self, x: torch.Tensor):
-        return x * torch.sigmoid(1.702 * x)
-class ResidualAttentionBlock(nn.Module):
-    def __init__(self, d_model: int=1, n_head: int=1, attn_mask: torch.Tensor = None):
-        super().__init__()
 
-        self.attn = nn.MultiheadAttention(d_model, n_head)
-        # self.ln_1 = LayerNorm(d_model)
-        # self.mlp = nn.Sequential(OrderedDict([
-        #     ("c_fc", nn.Linear(d_model, d_model * 4)),
-        #     ("gelu", QuickGELU()),
-        #     ("c_proj", nn.Linear(d_model * 4, d_model))
-        # ]))
-        # self.ln_2 = LayerNorm(d_model)
-        self.attn_mask = attn_mask
-
-    def attention(self, x: torch.Tensor, x2:torch.Tensor):
-        self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-
-        return self.attn(x, x2, x2, need_weights=False, attn_mask=self.attn_mask)[0]
-
-    def forward(self, x: torch.Tensor,x2:torch.Tensor):
-        x = self.attention(x,x2)+x
-        # x = x + self.mlp((x))
-        return x
-
-
-class Sparse_attention(nn.Module):
-    def __init__(self, d_model: int=1, n_head: int=1, attn_mask: torch.Tensor = None, linear_in=1, linear_out=1):
-        super().__init__()
-        
-        self.attention = ResidualAttentionBlock(d_model,n_head,attn_mask)
-        self.spatial_token = nn.Parameter(torch.randn(1,linear_in))
-        self.sparse_linear = SparseLinear(linear_in,linear_out,bias=True,sparsity=0.9,alpha=0.1)
-        
-    def forward(self,x):
-        # x1 = x1.unsqueeze(-1)
-        # x2 = x2.unsqueeze(-1)
-        # spatial_token = self.spatial_token.expand(1,x1.shape[0],-1)
-        x = x.permute(1, 0, 2)  # NLD -> LND
-        # x2 = x2.permute(1, 0, 2)  # NLD -> LND
-        
-        x= self.attention(x,x)
-        x = x.permute(1, 0, 2)  #NLD
-        # final_feat=x.mean(1)
-        x = self.sparse_linear(x)
-        x = x.mean(1)
-        return x,None#final_feat
-    def forward_feat(self,x):
-    
-        spatial_token = self.spatial_token.expand(1,x.shape[0],-1)
-        x1 = x.permute(1, 0, 2)  # NLD -> LND
-        # x2 = x2.permute(1, 0, 2)  # NLD -> LND
-
-        sub_act= self.attention(spatial_token,x1).permute(1,0,2).squeeze(1)#N,1,D
-        mean_act = x[:,2,:]#.mean(1)  #NLD
-        # final_feat=x.squeeze(1)
-        x = self.sparse_linear(mean_act)
-        # sub_x = self.sparse_linear(sub_act)
-        final = x#+sub_x*0.1
-        return final,sub_act
-    def forward_feat_ensemble(self,x):
-    
-        spatial_token = self.spatial_token.expand(1,x.shape[0],-1)
-        x1 = x.permute(1, 0, 2)  # NLD -> LND
-        # x2 = x2.permute(1, 0, 2)  # NLD -> LND
-
-        sub_act= self.attention(spatial_token,x1).permute(1,0,2).squeeze(1)#N,1,D
-        # mean_act = x.mean(1)  #NLD
-        # final_feat=x.squeeze(1)
-        x = self.sparse_linear(x)
-        sub_x = self.sparse_linear(sub_act)
-        final = x.mean(1)+(0.1*sub_x)
-        return final,sub_act
-    # def forward_feat_self(self,x1):
-    
-    #     x=x1[]
-    #     return x,final_feat

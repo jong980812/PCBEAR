@@ -5,7 +5,6 @@ import torch
 import data_utils
 from sparselinear import SparseLinear
 import torch.nn as nn
-from learning_concept_layer import Sparse_attention
 class CBM_model(torch.nn.Module):
     def __init__(self, backbone_name, W_c, W_g, b_g, proj_mean, proj_std, device="cuda",args=None):
         super().__init__()
@@ -212,68 +211,8 @@ class standard_model(torch.nn.Module):
         x = self.final(proj_c)
         return x, proj_c
 
-class CBM_model_attention(torch.nn.Module):
-    def __init__(self, backbone_name, W_c, W, proj_mean, proj_std, device="cuda",args=None, d_model=None, n_classes=None,):
-        super().__init__()
-        model, _ = data_utils.get_target_model(backbone_name, device,args)
-        model.eval()
-        #remove final fully connected layer
-        if "clip" in backbone_name:
-            self.backbone = model
-        elif "cub" in backbone_name:
-            self.backbone = lambda x: model.features(x)
-        elif "vmae" or 'AIM' in backbone_name:
-            self.backbone = lambda x: model.forward_features(x)
-        else:
-            self.backbone = torch.nn.Sequential(*list(model.children())[:-1])
-        self.sparse_linear_attention = Sparse_attention(d_model,1,None, d_model,n_classes).to(device)
-        self.sparse_linear_attention.load_state_dict(W)
-        self.sparse_linear_attention.eval()
-        
-        self.proj_layer = torch.nn.Linear(in_features=W_c.shape[1], out_features=W_c.shape[0], bias=False).to(device)
-        self.proj_layer.load_state_dict({"weight":W_c})
-            
-        self.proj_mean = proj_mean
-        self.proj_std = proj_std
-        
-    def get_feature(self,x):
-        backbone_feat = self.backbone(x)
-        backbone_feat = torch.flatten(backbone_feat, 1)
-        x = self.proj_layer(backbone_feat)
-        proj_c = (x-self.proj_mean)/self.proj_std
-        x = self.sparse_linear_attention(proj_c)
-        
-        return x,proj_c
-    def forward(self, x):
-        num_t = x.shape[0]
-        features = []
-        for i in range(num_t):
-            feat = self.backbone(x[i])
-            feat = torch.flatten(feat, 1)
-            feat = self.proj_layer(feat)
-            proj_c = (feat-self.proj_mean)/self.proj_std
-            features.append(proj_c)
-        proj_c = torch.cat(features,dim=0)#
-        x,sub_act = self.sparse_linear_attention(proj_c.unsqueeze(0))
-        return x, proj_c,sub_act
-def load_cbm_two_stream_attention(load_dir, device,argument):
-    print('**********Load Spatio model***************')
-    with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
-        args = json.load(f)
-    W_c = torch.load(os.path.join(load_dir,'spatial' ,"W_c.pt"), map_location=device)
-    W = torch.load(os.path.join(load_dir,'spatial', "W.pt"), map_location=device)
 
-    proj_mean = torch.load(os.path.join(load_dir,'spatial', "proj_mean.pt"), map_location=device)
-    proj_std = torch.load(os.path.join(load_dir,'spatial', "proj_std.pt"), map_location=device)
-    s_model = CBM_model_attention(args['backbone'], W_c, W, proj_mean, proj_std, device,argument,proj_mean.shape[1],args['nb_classes'])
-    print('**********Load Temporal model***************')
-    W_c = torch.load(os.path.join(load_dir,'temporal' ,"W_c.pt"), map_location=device)
-    W = torch.load(os.path.join(load_dir,'temporal', "W.pt"), map_location=device)
 
-    proj_mean = torch.load(os.path.join(load_dir,'temporal', "proj_mean.pt"), map_location=device)
-    proj_std = torch.load(os.path.join(load_dir,'temporal', "proj_std.pt"), map_location=device)
-    t_model = CBM_model_attention(args['backbone'], W_c, W, proj_mean, proj_std, device,argument,proj_mean.shape[1],args['nb_classes'])
-    return s_model,t_model
 def load_cbm(load_dir, device,argument):
     with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
         args = json.load(f)

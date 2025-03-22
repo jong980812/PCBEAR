@@ -194,7 +194,26 @@ def save_activations(clip_name, target_name, target_layers, d_probe,
                                 batch_size, device, pool_mode)
     return
     
-    
+
+
+def save_text_features(concept_set, args, dual_encoder_model):
+    concept_set_name = (concept_set.split("/")[-1]).split(".")[0] if concept_set is not None else None
+    concepts_save_name = "{}/{}_{}.pt".format(args.activation_dir, concept_set_name, args.dual_encoder)    
+    with open(concept_set, 'r') as f: 
+        words = (f.read()).split('\n')
+    if args.dual_encoder =='clip':
+        concepts = clip.tokenize(["{}".format(word) for word in words]).to(args.device)
+        save_clip_text_features(dual_encoder_model , concepts, concepts_save_name, args.batch_size)
+    elif args.dual_encoder =='lavila':
+        concepts = clip.tokenize(["{}".format(word) for word in words]).to(args.device)
+        save_clip_text_features(dual_encoder_model , concepts, concepts_save_name, args.batch_size)
+    elif 'internvid' in args.dual_encoder:
+        # concepts = clip.tokenize(["A photo of {}.".format(word) for word in words]).to(args.device)
+        concepts = dual_encoder_model.text_encoder.tokenize(["{}".format(word) for word in words], context_length=32).to(args.device)
+
+        save_internvid_text_features(dual_encoder_model , concepts, concepts_save_name, args.batch_size)
+
+    return concepts_save_name
 def get_similarity_from_activations(target_save_name, clip_save_name, text_save_name, similarity_fn, 
                                    return_target_feats=True):
     image_features = torch.load(clip_save_name)

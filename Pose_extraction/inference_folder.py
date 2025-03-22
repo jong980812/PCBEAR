@@ -22,8 +22,6 @@ except ModuleNotFoundError:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input', type=str, required=True,
-                        help='path to image / video or webcam ID (=cv2)')
     parser.add_argument('--output-path', type=str, default='',
                         help='output path, if the path provided is a directory '
                         'output files are "input_name +_result{extension}".')
@@ -87,9 +85,9 @@ if __name__ == "__main__":
     # output_path = args.output_path #! log 파일
     
     
-    src_dir = '/local_datasets/Penn_Action/videos'#! 비디오 폴더 
-    output_path = '/local_datasets/Penn_Action/skeleton'#! skeleton 합쳐진 영상 저장되는경로
-    json_path = '/local_datasets/Penn_Action/skeleton_json' #! skeleton 값들 json으로
+    src_dir = '/data/dataset/videocbm/dataset/penn_sub/'#! 비디오 폴더 
+    output_path = '/data/jongseo/project/PCBEAR/Pose_extraction/skeleton'#! skeleton 합쳐진 영상 저장되는경로
+    json_path = '/data/jongseo/project/PCBEAR/Pose_extraction/skeleton_json' #! skeleton 값들 json으로
     model = VitInference(args.model, yolo, args.model_name,
                         args.det_class, args.dataset,
                         args.yolo_size, is_video=is_video,
