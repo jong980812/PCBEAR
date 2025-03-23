@@ -329,14 +329,6 @@ def train_cbm_and_save(args):
         val_vlm_features /= torch.norm(val_vlm_features, dim=1, keepdim=True)
 
 
-    # if 's' in args.train_mode:
-    #     with open(args.s_concept_set, 'r') as f: 
-    #         s_concepts = (f.read()).split('\n')
-    #     s_concept_save_name=cbm_utils.save_text_features(args.s_concept_set,args,dual_encoder)
-    # if 'p' in args.train_mode:
-    #     with open(args.p_concept_set, 'r') as f: 
-    #         p_concepts = (f.read()).split('\n')
-    #     p_concept_save_name=cbm_utils.save_text_features(args.p_concept_set,args,dual_encoder)
             
 
 
@@ -415,6 +407,9 @@ def train_cbm_and_save(args):
     )
     print("✅ Aggregated classification training complete.")
 
+    
+    
+    
     
 #     with torch.no_grad():
 #     #! VLM Textual features
