@@ -35,7 +35,7 @@ class SSVideoClsDataset(Dataset):
         self.rand_erase = False
         self.center_frame = args.center_frame
         self.get_sample_path=False
-        self.no_aug = args.no_aug
+        self.no_aug = False
         self.visualize =False
         if self.mode in ['train']:
             self.aug = True

@@ -225,9 +225,21 @@ parser.add_argument('--loss_mode',default='concept',choices=['concept','sample',
 #!
 parser.add_argument('--backbone_features',type=str,default=None)
 parser.add_argument('--vlm_features',type=str,default=None)
-parser.add_argument('--train_mode', default='pose',type=str, help='set concept type')
+# parser.add_argument('--train_mode', default='pose',type=str, help='set concept type')
+parser.add_argument('--train_mode', nargs='+', default=['pose'], choices=['pose', 'spatial', 'temporal', 'place'],
+                    help='Concept types to train on')
 
-
+def setup_seed(seed):
+    import random, numpy as np, torch
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    
 def get_dynamic_save_name(args):
     def strip_txt(path):
         if path is None:
@@ -254,18 +266,7 @@ def get_dynamic_save_name(args):
 
 def train_cbm_and_save(args):
     video_utils.init_distributed_mode(args)
-    seed = args.seed
-    random.seed(seed)  # Python random seed 설정
-    np.random.seed(seed)  # NumPy random seed 설정
-    torch.manual_seed(seed)  # PyTorch random seed 설정 (CPU)
-    
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(seed)  # PyTorch random seed 설정 (CUDA)
-        torch.cuda.manual_seed_all(seed)  # 모든 GPU에 적용
-        
-    # cuDNN의 비결정적 동작을 방지 (성능에 약간의 영향을 줄 수 있음)
-    torch.backends.cudnn.deterministic = True  
-    torch.backends.cudnn.benchmark = False
+    setup_seed(args.seed)
     if not os.path.exists(args.save_dir):
         os.mkdir(args.save_dir)
 
@@ -303,18 +304,25 @@ def train_cbm_and_save(args):
         aggregated_concepts.extend([str(i) for i in range(pose_train_c.shape[1])])
         aggregated_train_c_features.append(pose_train_c)
         aggregated_val_c_features.append(pose_val_c)
+        # pose 학습 완료 후
+        pose_concepts = [str(i) for i in range(pose_train_c.shape[1])]
+        concepts_txt_path = os.path.join(pose_save_path, "concepts.txt")
+        with open(concepts_txt_path, "w") as f:
+            f.write(pose_concepts[0])
+            for concept in pose_concepts[1:]:
+                f.write('\n'+concept)
         if args.train_mode == 'pose':
             return
         
     # Define concept types
-    concept_types = {
-        'spatial': 'spatial',
-        'place': 'place',
-        'temporal': 'temporal'
-    }
+    # concept_types = {
+    #     'spatial': 'spatial',
+    #     'place': 'place',
+    #     'temporal': 'temporal'
+    # }
 
     # Filter active concept keys based on train_mode
-    active_concepts = [k for k in concept_types if k in args.train_mode]
+    active_concepts = [m for m in args.train_mode if m != 'pose'] #[k for k in concept_types if k in args.train_mode]
     
     print("🚀 Loading dual encoder...")
     dual_encoder = get_multi_modal_encoder(args,device).to(device).eval()
@@ -338,7 +346,7 @@ def train_cbm_and_save(args):
         with open(set_path, 'r') as f:
             concept_names[key] = f.read().split('\n')
 
-        print(f"📚 Encoding text features for {concept_types[key]} concepts...")
+        print(f"📚 Encoding text features for {key} concepts...")
         concept_save_paths[key] = cbm_utils.save_text_features(set_path, args, dual_encoder)
 
     # Compute concept matrices
@@ -353,7 +361,7 @@ def train_cbm_and_save(args):
             topk_mean = torch.mean(torch.topk(mat, dim=0, k=5)[0], dim=0)
             original_len = len(concept_names[key])
             concept_names[key] = [concept_names[key][i] for i in range(original_len) if topk_mean[i] > args.clip_cutoff]
-            print(f"🔍 {concept_types[key]} concept: {original_len} -> {len(concept_names[key])}")
+            print(f"🔍 {key} concept: {original_len} -> {len(concept_names[key])}")
 
             mat = mat[:, topk_mean > args.clip_cutoff]
             val_mat = val_mat[:, topk_mean > args.clip_cutoff]
@@ -365,10 +373,10 @@ def train_cbm_and_save(args):
 
     # Textual concepts 학습
     for key in active_concepts:
-        save_path = os.path.join(save_name, concept_types[key])
+        save_path = os.path.join(save_name, key)
         os.makedirs(save_path, exist_ok=True)
 
-        print(f"🎓 Learning {concept_types[key]} concept classifier...")
+        print(f"🎓 Learning {key} concept classifier...")
         W_c, updated_concepts, best_val_loss = train_cocept_layer(
             args=args,
             concepts=concept_names[key],

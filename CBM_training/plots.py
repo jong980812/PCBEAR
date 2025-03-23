@@ -72,7 +72,7 @@ def bar(contributions, feature_names, max_display=5, show=True, title=None, font
 
     # compute our figure size based on how many features we are showing
     row_height = 0.55
-    pl.gcf().set_size_inches(8, num_features * row_height + 1.5)  # * np.sqrt(len(values))
+    pl.gcf().set_size_inches(8, num_features * row_height + 1.5 )  # * np.sqrt(len(values))
 
     # if negative values are present then we draw a vertical line to mark 0, otherwise the axis does this for us...
     negative_values_present = np.sum(values[feature_order[:num_features]] < 0) > 0
@@ -88,7 +88,7 @@ def bar(contributions, feature_names, max_display=5, show=True, title=None, font
     pl.barh(
         y_pos, values[feature_inds],
         bar_width, align='center',
-        color = set_color(feature_inds, values, feature_names),
+        color = (140/255, 181/255, 217/255)#set_color(feature_inds, values, feature_names),
     #     color=[
     #     # comp_color if values[j] < 0 else '#e35f62' if feature_names[j][0] == 'O' else 'dodgerblue' if feature_names[j][0] == 'T' else 'C2' if feature_names[j][0] == 'S' else pos_color for j in feature_inds
     # ],

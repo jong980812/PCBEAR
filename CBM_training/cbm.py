@@ -145,46 +145,59 @@ class CBM_model_triple(torch.nn.Module):
         proj_c = torch.cat([s_proj_c,t_proj_c,p_proj_c],dim=1)
         x = self.final(proj_c)
         return x, proj_c
-class CBM_model_serial(torch.nn.Module):
-    def __init__(self, backbone_name, pre_W_c, post_W_c, W_g, b_g, pre_mean,pre_std,post_mean, post_std, device="cuda",args=None):
+class CBM_model_double(torch.nn.Module):
+    def __init__(self, backbone_name, a_W_c, b_W_c, W_g, b_g, proj_mean, proj_std, device="cuda", args=None):
         super().__init__()
-        model, _ = data_utils.get_target_model(backbone_name, device,args)
-        #remove final fully connected layer
-        if "clip" in backbone_name:
-            self.backbone = model
-        elif "cub" in backbone_name:
-            self.backbone = lambda x: model.features(x)
-        elif "vmae" or 'AIM' in backbone_name:
-            self.backbone = lambda x: model.forward_features(x)
-        else:
-            self.backbone = torch.nn.Sequential(*list(model.children())[:-1])
-            
-        self.pre_proj_layer = torch.nn.Linear(in_features=pre_W_c.shape[1], out_features=pre_W_c.shape[0], bias=False).to(device)
-        self.pre_proj_layer.load_state_dict({"weight":pre_W_c})
+        self.backbone_model, _ = data_utils.get_target_model(backbone_name, device, args)
+        self.backbone_model.eval()
 
-        self.post_proj_layer = torch.nn.Linear(in_features=post_W_c.shape[1], out_features=post_W_c.shape[0], bias=False).to(device)
-        self.post_proj_layer.load_state_dict({"weight":post_W_c})
-            
-        self.pre_proj_mean = pre_mean
-        self.pre_proj_std = pre_std
-        
-        self.post_proj_mean = post_mean
-        self.post_proj_std = post_std
-        
-        self.final = torch.nn.Linear(in_features = W_g.shape[1], out_features=W_g.shape[0]).to(device)
-        self.final.load_state_dict({"weight":W_g, "bias":b_g})
+        if "clip" in backbone_name:
+            self.backbone = self.backbone_model
+        elif "cub" in backbone_name:
+            self.backbone = lambda x: self.backbone_model.features(x)
+        elif "vmae" or 'AIM' in backbone_name:
+            self.backbone = lambda x: self.backbone_model.forward_features(x)
+        else:
+            self.backbone = torch.nn.Sequential(*list(self.backbone_model.children())[:-1])
+
+        self.a_proj_layer = torch.nn.Linear(a_W_c.shape[1], a_W_c.shape[0], bias=False).to(device)
+        self.a_proj_layer.load_state_dict({"weight": a_W_c})
+        self.b_proj_layer = torch.nn.Linear(b_W_c.shape[1], b_W_c.shape[0], bias=False).to(device)
+        self.b_proj_layer.load_state_dict({"weight": b_W_c})
+
+        self.a_proj_mean = proj_mean[0]
+        self.a_proj_std = proj_std[0]
+        self.b_proj_mean = proj_mean[1]
+        self.b_proj_std = proj_std[1]
+
+        self.final = torch.nn.Linear(W_g.shape[1], W_g.shape[0]).to(device)
+        self.final.load_state_dict({"weight": W_g, "bias": b_g})
         self.concepts = None
-        
-    def forward(self, x):
-        x = self.backbone(x)
+
+    def get_feature(self, x):
+        backbone_feat = self.backbone_model(x, only_feat=True)
+        backbone_feat = torch.flatten(backbone_feat, 1)
+        a_x = self.a_proj_layer(backbone_feat)
+        a_proj_c = (a_x - self.a_proj_mean) / self.a_proj_std
+
+        b_x = self.b_proj_layer(backbone_feat)
+        b_proj_c = (b_x - self.b_proj_mean) / self.b_proj_std
+
+        proj_c = torch.cat([a_proj_c, b_proj_c], dim=1)
+        return backbone_feat, proj_c
+
+    def forward(self, x, masking_sp=False):
+        x = self.backbone_model(x, True)
         x = torch.flatten(x, 1)
-        x = self.pre_proj_layer(x)
-        pre_proj_c = (x-self.pre_proj_mean)/self.pre_proj_std
-        
-        post_proj_c = self.post_proj_layer(pre_proj_c)
-        post_proj_c = (post_proj_c-self.post_proj_mean)/self.post_proj_std
-        x = self.final(post_proj_c)
-        return x, pre_proj_c,post_proj_c
+        a_x = self.a_proj_layer(x)
+        a_proj_c = (a_x - self.a_proj_mean) / self.a_proj_std
+
+        b_x = self.b_proj_layer(x)
+        b_proj_c = (b_x - self.b_proj_mean) / self.b_proj_std
+
+        proj_c = torch.cat([a_proj_c, b_proj_c], dim=1)
+        x = self.final(proj_c)
+        return x, proj_c
 class standard_model(torch.nn.Module):
     def __init__(self, backbone_name, W_g, b_g, proj_mean, proj_std, device="cuda"):
         super().__init__()
@@ -210,12 +223,25 @@ class standard_model(torch.nn.Module):
         proj_c = (x-self.proj_mean)/self.proj_std
         x = self.final(proj_c)
         return x, proj_c
+def load_cbm_dynamic(load_dir, device,args):
+
+
+    train_mode = args.train_mode
+
+
+    if len(train_mode) == 1:
+        load_sub_dir = os.path.join(load_dir,train_mode[0])
+        load_cbm(load_sub_dir,device,args)
+    if len(train_mode) == 2:
+        load_cbm_double(load_dir,device,args)
+    elif len(train_mode) ==3:
+        return load_cbm_triple(load_dir,device,args)
+    else:
+        raise ValueError(f"Unsupported train_mode: {train_mode}")
 
 
 
-def load_cbm(load_dir, device,argument):
-    with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
-        args = json.load(f)
+def load_cbm(load_dir, device,args):
 
     W_c = torch.load(os.path.join(load_dir ,"W_c.pt"), map_location=device)
     W_g = torch.load(os.path.join(load_dir, "W_g.pt"), map_location=device)
@@ -224,91 +250,52 @@ def load_cbm(load_dir, device,argument):
     proj_mean = torch.load(os.path.join(load_dir, "proj_mean.pt"), map_location=device)
     proj_std = torch.load(os.path.join(load_dir, "proj_std.pt"), map_location=device)
 
-    model = CBM_model(args['backbone'], W_c, W_g, b_g, proj_mean, proj_std, device,argument)
+    model = CBM_model(args.backbone, W_c, W_g, b_g, proj_mean, proj_std, device,args)
     return model
-def load_cbm_joint(load_dir, device,argument):
-    with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
-        args = json.load(f)
 
-    s_W_c = torch.load(os.path.join(load_dir,'spatial',"W_c.pt"), map_location=device)
-    t_W_c = torch.load(os.path.join(load_dir,'temporal',"W_c.pt"), map_location=device)
-    W_g = torch.load(os.path.join(load_dir,'spatio_temporal', "W_g.pt"), map_location=device)
-    b_g = torch.load(os.path.join(load_dir,'spatio_temporal', "b_g.pt"), map_location=device)
+def load_cbm_double(load_dir, device,args=None):
+    # with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
+    #     args = json.load(f)
+    concepts = args.train_mode
 
-    proj_mean = torch.load(os.path.join(load_dir,'spatio_temporal', "proj_mean.pt"), map_location=device)
-    proj_std = torch.load(os.path.join(load_dir,'spatio_temporal', "proj_std.pt"), map_location=device)
-
-    model = CBM_model_joint(args['backbone'], s_W_c,t_W_c, W_g, b_g, proj_mean, proj_std, device,argument)
-    return model,model
-def load_cbm_triple(load_dir, device,argument=None):
-    with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
-        args = json.load(f)
-
-    s_W_c = torch.load(os.path.join(load_dir,'spatial',"W_c.pt"), map_location=device)
-    s_proj_mean = torch.load(os.path.join(load_dir,'spatial', "proj_mean.pt"), map_location=device)
-    s_proj_std = torch.load(os.path.join(load_dir,'spatial', "proj_std.pt"), map_location=device)
+    a_W_c = torch.load(os.path.join(load_dir,concepts[0],"W_c.pt"), map_location=device)
+    a_proj_mean = torch.load(os.path.join(load_dir,concepts[0], "proj_mean.pt"), map_location=device)
+    a_proj_std = torch.load(os.path.join(load_dir,concepts[0], "proj_std.pt"), map_location=device)
     
-    t_W_c = torch.load(os.path.join(load_dir,'temporal',"W_c.pt"), map_location=device)
-    t_proj_mean = torch.load(os.path.join(load_dir,'temporal', "proj_mean.pt"), map_location=device)
-    t_proj_std = torch.load(os.path.join(load_dir,'temporal', "proj_std.pt"), map_location=device)
-    
-    p_W_c = torch.load(os.path.join(load_dir,'place',"W_c.pt"), map_location=device)
-    p_proj_mean = torch.load(os.path.join(load_dir,'place', "proj_mean.pt"), map_location=device)
-    p_proj_std = torch.load(os.path.join(load_dir,'place', "proj_std.pt"), map_location=device)
-    
-    W_g = torch.load(os.path.join(load_dir,'spatio_temporal_place', "W_g.pt"), map_location=device)
-    b_g = torch.load(os.path.join(load_dir,'spatio_temporal_place', "b_g.pt"), map_location=device)
+    b_W_c = torch.load(os.path.join(load_dir,concepts[1],"W_c.pt"), map_location=device)
+    b_proj_mean = torch.load(os.path.join(load_dir,concepts[1], "proj_mean.pt"), map_location=device)
+    b_proj_std = torch.load(os.path.join(load_dir,concepts[1], "proj_std.pt"), map_location=device)
+    W_g = torch.load(os.path.join(load_dir,'aggregated', "W_g.pt"), map_location=device)
+    b_g = torch.load(os.path.join(load_dir,'aggregated', "b_g.pt"), map_location=device)
 
 
-    model = CBM_model_triple(args['backbone'], s_W_c,t_W_c,p_W_c, W_g, b_g, [s_proj_mean,t_proj_mean,p_proj_mean], [s_proj_std,t_proj_std,p_proj_std], device,argument)
-    return model,model
-def load_cbm_serial(load_dir, device,argument):
-    with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
-        args = json.load(f)
-
-    s_W_c = torch.load(os.path.join(load_dir,"spatial","W_c.pt"), map_location=device)
-    t_W_c = torch.load(os.path.join(load_dir,"temporal","W_c.pt"), map_location=device)
-    W_g = torch.load(os.path.join(load_dir,"classification", "W_g.pt"), map_location=device)
-    b_g = torch.load(os.path.join(load_dir,"classification", "b_g.pt"), map_location=device)
-
-    pre_proj_mean = torch.load(os.path.join(load_dir,'temporal' ,"proj_mean.pt"), map_location=device)
-    pre_proj_std = torch.load(os.path.join(load_dir,'temporal', "proj_std.pt"), map_location=device)
-    post_proj_mean = torch.load(os.path.join(load_dir,'classification' ,"proj_mean.pt"), map_location=device)
-    post_proj_std = torch.load(os.path.join(load_dir,'classification', "proj_std.pt"), map_location=device)
-
-    model = CBM_model_serial(args['backbone'], s_W_c,t_W_c, W_g, b_g,pre_proj_mean,pre_proj_std, post_proj_mean, post_proj_std, device,argument)
+    model = CBM_model_double(args.backbone, a_W_c,b_W_c, W_g, b_g, [a_proj_mean,b_proj_mean], [a_proj_std,b_proj_std], device,args)
     return model
-def load_cbm_two_stream(load_dir, device,argument):
-    print('**********Load Spatio model***************')
-    with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
-        args = json.load(f)
-    W_c = torch.load(os.path.join(load_dir,'spatial' ,"W_c.pt"), map_location=device)
-    W_g = torch.load(os.path.join(load_dir,'spatial', "W_g.pt"), map_location=device)
-    b_g = torch.load(os.path.join(load_dir,'spatial', "b_g.pt"), map_location=device)
-    proj_mean = torch.load(os.path.join(load_dir,'spatial', "proj_mean.pt"), map_location=device)
-    proj_std = torch.load(os.path.join(load_dir,'spatial', "proj_std.pt"), map_location=device)
-    s_model = CBM_model(args['backbone'], W_c, W_g, b_g, proj_mean, proj_std, device,argument)
-    print('**********Load Temporal model***************')
-    W_c = torch.load(os.path.join(load_dir,'temporal' ,"W_c.pt"), map_location=device)
-    W_g = torch.load(os.path.join(load_dir,'temporal', "W_g.pt"), map_location=device)
-    b_g = torch.load(os.path.join(load_dir,'temporal', "b_g.pt"), map_location=device)
-    proj_mean = torch.load(os.path.join(load_dir,'temporal', "proj_mean.pt"), map_location=device)
-    proj_std = torch.load(os.path.join(load_dir,'temporal', "proj_std.pt"), map_location=device)
-    t_model = CBM_model(args['backbone'], W_c, W_g, b_g, proj_mean, proj_std, device,argument)
-    return s_model,t_model
-def load_std(load_dir, device):
-    with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
-        args = json.load(f)
+def load_cbm_triple(load_dir, device,args=None):
+    # with open(os.path.join(load_dir ,"args.txt"), 'r') as f:
+    #     args = json.load(f)
+    concepts = args.train_mode
 
-    W_g = torch.load(os.path.join(load_dir, "W_g.pt"), map_location=device)
-    b_g = torch.load(os.path.join(load_dir, "b_g.pt"), map_location=device)
+    a_W_c = torch.load(os.path.join(load_dir,concepts[0],"W_c.pt"), map_location=device)
+    a_proj_mean = torch.load(os.path.join(load_dir,concepts[0], "proj_mean.pt"), map_location=device)
+    a_proj_std = torch.load(os.path.join(load_dir,concepts[0], "proj_std.pt"), map_location=device)
+    
+    b_W_c = torch.load(os.path.join(load_dir,concepts[1],"W_c.pt"), map_location=device)
+    b_proj_mean = torch.load(os.path.join(load_dir,concepts[1], "proj_mean.pt"), map_location=device)
+    b_proj_std = torch.load(os.path.join(load_dir,concepts[1], "proj_std.pt"), map_location=device)
+    
+    c_W_c = torch.load(os.path.join(load_dir,concepts[2],"W_c.pt"), map_location=device)
+    c_proj_mean = torch.load(os.path.join(load_dir,concepts[2], "proj_mean.pt"), map_location=device)
+    c_proj_std = torch.load(os.path.join(load_dir,concepts[2], "proj_std.pt"), map_location=device)
+    
+    W_g = torch.load(os.path.join(load_dir,'aggregated', "W_g.pt"), map_location=device)
+    b_g = torch.load(os.path.join(load_dir,'aggregated', "b_g.pt"), map_location=device)
 
-    proj_mean = torch.load(os.path.join(load_dir, "proj_mean.pt"), map_location=device)
-    proj_std = torch.load(os.path.join(load_dir, "proj_std.pt"), map_location=device)
 
-    model = standard_model(args['backbone'], W_g, b_g, proj_mean, proj_std, device)
-    model.eval()
+    model = CBM_model_triple(args.backbone, a_W_c,b_W_c,c_W_c, W_g, b_g, [a_proj_mean,b_proj_mean,c_proj_mean], [a_proj_std,b_proj_std,c_proj_std], device,args)
     return model
+
+
 
 class MLP(nn.Module):
     def __init__(self, input_dim, num_classes, expand_dim):
