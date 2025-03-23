@@ -24,7 +24,7 @@ def make_attribute(args, result_gt,output_path):
             one_hot_vector[label] = 1  # 등장한 클러스터에 1 할당
         if args.dataset == "Penn_action" or args.dataset == "KTH":
             video_name = f"{video_id}.mp4"
-        elif args.dataset == "HAA49":
+        elif args.dataset == "HAA100":
             video_name = f"{video_id.rsplit('_', 1)[0]}/{video_id}.mp4"
         video_entry = {
             "video_name": video_name,
@@ -43,9 +43,9 @@ def hard_label(video_attributes, args, mode):
     output_json_path = os.path.join(args.save_path, f"hard_label_{mode}.json")
     output_pkl_path = os.path.join(args.save_path, f"hard_label_{mode}.pkl")
     csv_path = os.path.join(args.anno_path, f"{mode}.csv")
-    new_csv_path = os.path.join(args.save_path, f"{mode}_filtered.csv") 
+    new_csv_path = os.path.join(args.save_path, f"{mode}.csv") 
 
-    df = pd.read_csv(csv_path, header=None, names=["video_name", "class_label"], sep="\s+")
+    df = pd.read_csv(csv_path, header=None, names=["video_name", "class_label"], sep=",")
     video_list = df["video_name"].tolist()
 
     annotation_dict = {

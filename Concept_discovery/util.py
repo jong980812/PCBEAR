@@ -13,9 +13,9 @@ def load_class_list(anno_path):
     
 def load_json_files(base_path, class_list, dataset):
     """주어진 클래스 리스트를 기반으로 JSON 파일 리스트를 가져옴."""
-    if dataset == "Penn_action" or "KTH":
+    if dataset == "Penn_action" or dataset == "KTH":
         return glob.glob(os.path.join(base_path, "*_result.json"))
-    elif dataset == "HAA49":
+    elif dataset == "HAA100":
         json_files = []
         for class_name in class_list:
             class_folder = os.path.join(base_path, class_name)
@@ -67,9 +67,9 @@ def find_closest_to_centroid(features, cluster_labels):
 
 def remove_missing_videos(csv_path, missing_videos, output_csv_path):
     """누락된 비디오를 CSV에서 제거하고 새로운 CSV 파일로 저장"""
-    df = pd.read_csv(csv_path, header=None, names=["video_name", "class_label"], sep="\s+")
+    df = pd.read_csv(csv_path, header=None, names=["video_name", "class_label"], sep=",")
     df_filtered = df[~df["video_name"].isin(missing_videos)]  # ✅ 누락된 비디오 제외
-    df_filtered.to_csv(output_csv_path, header=False, index=False, sep=" ")
+    df_filtered.to_csv(output_csv_path, header=False, index=False, sep=",")
     print("--------Removed---------")
 
 def set_seed(seed=42):

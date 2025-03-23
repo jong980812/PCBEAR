@@ -18,12 +18,12 @@ parser.add_argument('--save_path', default='')
 parser.add_argument('--num_subsequence', type=int, default=10)
 parser.add_argument('--len_subsequence', type=int, default=16)
 parser.add_argument('--dataset', default='Penn_action', 
-                    choices=['Penn_action','KTH','HAA49'],type=str)
+                    choices=['Penn_action','KTH','HAA100'],type=str)
 parser.add_argument('--req_cluster',  type=int, default=500)
-parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1,ver2"])
-group_ver2 = parser.add_argument_group('subsampling_mode=ver2 settings')
-group_ver2.add_argument('--stride', type=int, default=1, 
-                        help='Confidence threshold for keypoints filtering (only for ver2)')
+parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2"])
+# group_ver2 = parser.add_argument_group('subsampling_mode=ver2 settings')
+# group_ver2.add_argument('--stride', type=int, default=1, 
+#                         help='Confidence threshold for keypoints filtering (only for ver2)')
 
 def concept_decovery(args):
     output_path = os.path.join(args.output_path,args.subsampling_mode)
