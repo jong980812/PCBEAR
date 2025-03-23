@@ -10,3 +10,4 @@ debugging/
 *.pyc
 __pycache__/
 .vscode
+video-keyframe-detector/
