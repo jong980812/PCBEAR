@@ -22,6 +22,8 @@ parser.add_argument('--dataset', default='Penn_action',
 parser.add_argument('--req_cluster',  type=int, default=500)
 
 def concept_decovery(args):
+    os.makedirs(args.output_path, exist_ok=True)
+    os.makedirs(args.save_path, exist_ok=True)
     subsampling.Keypointset(args)
     data, result_gt = clustering.clustering(args)
     closest_sample_indices = labeling.labeling(args,data,result_gt)
