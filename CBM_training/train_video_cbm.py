@@ -180,11 +180,11 @@ parser.add_argument('--dist_url', default='env://',
 parser.add_argument('--enable_deepspeed', action='store_true', default=False)
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 parser.add_argument("--dataset", type=str, default="cifar10")
-parser.add_argument("--s_concept_set", type=str, default=None, 
+parser.add_argument("--spatial_concept_set", type=str, default=None, 
                     help="path to concept set name")
-parser.add_argument("--t_concept_set", type=str, default=None, 
+parser.add_argument("--temporal_concept_set", type=str, default=None, 
                     help="path to concept set name")
-parser.add_argument("--p_concept_set", type=str, default=None, 
+parser.add_argument("--place_concept_set", type=str, default=None, 
                     help="path to concept set name")
 parser.add_argument("--backbone", type=str, default="clip_RN50", help="Which pretrained model to use as backbone")
 parser.add_argument("--clip_name", type=str, default="ViT-B/16", help="Which CLIP model to use")
@@ -225,8 +225,7 @@ parser.add_argument('--loss_mode',default='concept',choices=['concept','sample',
 #!
 parser.add_argument('--backbone_features',type=str,default=None)
 parser.add_argument('--vlm_features',type=str,default=None)
-parser.add_argument('--train_mode', default='pose', choices=['pose','pose_sp','sp','stp'],
-                    type=str, help='dataset')
+parser.add_argument('--train_mode', default='pose',type=str, help='set concept type')
 
 
 def get_dynamic_save_name(args):
@@ -239,19 +238,19 @@ def get_dynamic_save_name(args):
     if 'pose' in args.train_mode:
         pose_tag = strip_txt(args.pose_label)
         concept_tags.append(f"{pose_tag}")
-    if 's' in args.train_mode:
-        s_tag = strip_txt(args.s_concept_set)
+    if 'spatial' in args.train_mode:
+        s_tag = strip_txt(args.spatial_concept_set)
         concept_tags.append(f"{s_tag}")
-    if 'p' in args.train_mode:
-        p_tag = strip_txt(args.p_concept_set)
+    if 'place' in args.train_mode:
+        p_tag = strip_txt(args.place_concept_set)
         concept_tags.append(f"{p_tag}")
-    if 't' in args.train_mode:
-        t_tag = strip_txt(args.t_concept_set)
+    if 'temporal' in args.train_mode:
+        t_tag = strip_txt(args.temporal_concept_set)
         concept_tags.append(f"{t_tag}")
 
     tag_str = "+".join(concept_tags)
     timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
-    return os.path.join(args.save_dir, f"{args.data_set}_cbm_{tag_str}_{timestamp}")
+    return os.path.join(args.save_dir, f"{args.data_set}_{tag_str}_{timestamp}")
 
 def train_cbm_and_save(args):
     video_utils.init_distributed_mode(args)
@@ -309,9 +308,9 @@ def train_cbm_and_save(args):
         
     # Define concept types
     concept_types = {
-        's': 'spatial',
-        'p': 'place',
-        't': 'temporal'
+        'spatial': 'spatial',
+        'place': 'place',
+        'temporal': 'temporal'
     }
 
     # Filter active concept keys based on train_mode

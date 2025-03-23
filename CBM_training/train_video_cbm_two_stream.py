@@ -255,13 +255,13 @@ def train_cbm_and_save(args):
     # with open(cls_file, "r") as f:
     #     classes = f.read().split("\n")
     
-    with open(args.s_concept_set) as f:
+    with open(args.spatial_concept_set) as f:
         s_concepts = f.read().split("\n")
         # s_concepts = list(set(s_concepts))
-    with open(args.t_concept_set) as f:
+    with open(args.temporal_concept_set) as f:
         t_concepts = f.read().split("\n")
         # t_concepts = list(set(t_concepts))
-    with open(args.p_concept_set) as f:
+    with open(args.place_concept_set) as f:
         p_concepts = f.read().split("\n")
         # p_concepts = list(set(p_concepts))
     if args.debug is not None:
@@ -272,14 +272,14 @@ def train_cbm_and_save(args):
     for d_probe in [d_train, d_val]:
         cbm_utils.save_activations(clip_name = args.dual_encoder, target_name = args.backbone, 
                                target_layers = [args.feature_layer], d_probe = d_probe,
-                               concept_set = (args.s_concept_set, args.t_concept_set,args.p_concept_set), batch_size = args.batch_size, 
+                               concept_set = (args.spatial_concept_set, args.temporal_concept_set,args.place_concept_set), batch_size = args.batch_size, 
                                device =device, pool_mode = "avg", save_dir = args.activation_dir,
                                args=args)
         
     target_save_name, clip_save_name, s_text_save_name, t_text_save_name,p_text_save_name = cbm_utils.get_save_names(args.dual_encoder, args.backbone, 
-                                            args.feature_layer,d_train, (args.s_concept_set, args.t_concept_set, args.p_concept_set), "avg", args.activation_dir)
+                                            args.feature_layer,d_train, (args.spatial_concept_set, args.temporal_concept_set, args.place_concept_set), "avg", args.activation_dir)
     val_target_save_name, val_clip_save_name, s_text_save_name, t_text_save_name,_ =  cbm_utils.get_save_names(args.dual_encoder, args.backbone,
-                                            args.feature_layer, d_val, (args.s_concept_set, args.t_concept_set,args.p_concept_set), "avg", args.activation_dir)
+                                            args.feature_layer, d_val, (args.spatial_concept_set, args.temporal_concept_set,args.place_concept_set), "avg", args.activation_dir)
     
     feature_storage = '/data/dataset/videocbm/features'
     if args.saved_features:
@@ -439,7 +439,7 @@ def train_cbm_and_save(args):
     if args.pose_label:
         save_name = "{}/{}_cbm_{}{}".format(args.save_dir, args.data_set, args.pose_label.split("/")[-1],datetime.now().strftime("%M%S")) 
     else :
-        save_name = "{}/{}_cbm_{}".format(args.save_dir, args.data_set,args.s_concept_set.split("/")[-1])
+        save_name = "{}/{}_cbm_{}".format(args.save_dir, args.data_set,args.spatial_concept_set.split("/")[-1])
     os.makedirs(save_name,exist_ok=True)
     # save_spatial = os.path.join(save_name,'spatial')
     # save_temporal = os.path.join(save_name,'temporal')

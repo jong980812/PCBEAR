@@ -31,3 +31,4 @@ vit-explain-main/
 result_final/
 *.rar
 *.zip
+!/data/jongseo/project/PCBEAR/CBM_training/save_features.sh
