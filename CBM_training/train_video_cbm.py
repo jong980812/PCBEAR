@@ -1,3 +1,4 @@
+from video_dataloader import datasets
 from datetime import datetime
 import torch
 import os
@@ -376,8 +377,61 @@ def train_cbm_and_save(args):
     
     #! 얻어진 컨셉들은 interpretability cutoff적용된 새로운 것.
 
-    
+    aggregated_train_c=torch.cat([pose_train_c,spatial_train_c,place_train_c],dim=1)
+    aggregated_val_c=torch.cat([pose_val_c,spatial_val_c,place_val_c],dim=1)
 
+    # cls_file = data_utils.LABEL_FILES[args.data_set]
+    cls_file = os.path.join(args.video_anno_path, 'class_list.txt')
+    with open(cls_file, "r") as f:
+        classes = f.read().split("\n")
+    assert args.nb_classes == len(classes), f"Error: args.nb_classes ({args.nb_classes}) != len(classes) ({len(classes)})"
+    
+    
+    train_video_dataset, _ = datasets.build_dataset(True, False, args)
+    val_video_dataset,_ =   datasets.build_dataset(False, False, args)
+    # d_train = args.data_set + "_train"
+    # d_val = args.data_set + "_val"
+    train_targets = train_video_dataset.label_array
+    val_targets = val_video_dataset.label_array
+    train_y = torch.LongTensor(train_targets)
+    val_y = torch.LongTensor(val_targets)
+
+
+
+    indexed_train_ds = IndexedTensorDataset(aggregated_train_c, train_y)
+    val_ds = TensorDataset(aggregated_val_c,val_y)
+    indexed_train_loader = DataLoader(indexed_train_ds, batch_size=args.saga_batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=args.saga_batch_size, shuffle=False)
+
+    # Make linear model and zero initialize
+    linear = torch.nn.Linear(aggregated_train_c.shape[1],len(classes)).to(args.device)
+    linear.weight.data.zero_()
+    linear.bias.data.zero_()
+    
+    STEP_SIZE = 0.05
+    ALPHA = 0.99
+    metadata = {}
+    metadata['max_reg'] = {}
+    metadata['max_reg']['nongrouped'] = args.lam
+
+    # Solve the GLM path
+    #concept layer to classification
+    output_proj = glm_saga(linear, indexed_train_loader, STEP_SIZE, args.n_iters, ALPHA, epsilon=1, k=1,
+                    val_loader=val_loader, do_zero=False, metadata=metadata, n_ex=len(backbone_features), n_classes = len(classes),verbose=500)
+    W_g = output_proj['path'][0]['weight']
+    b_g = output_proj['path'][0]['bias']
+    
+    torch.save(W_g, os.path.join(save_name, "W_g.pt"))
+    torch.save(b_g, os.path.join(save_name, "b_g.pt"))
+    with open(os.path.join(save_name, "metrics.txt"), 'w') as f:
+        out_dict = {}
+        for key in ('lam', 'lr', 'alpha', 'time'):
+            out_dict[key] = float(output_proj['path'][0][key])
+        out_dict['metrics'] = output_proj['path'][0]['metrics']
+        nnz = (W_g.abs() > 1e-5).sum().item()
+        total = W_g.numel()
+        out_dict['sparsity'] = {"Non-zero weights":nnz, "Total weights":total, "Percentage non-zero":nnz/total}
+        json.dump(out_dict, f, indent=2)
 
 
 if __name__=='__main__':
