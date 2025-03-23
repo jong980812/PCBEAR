@@ -53,7 +53,7 @@ def extract_label(args,json_data, class_map):
 
 def run_finch_clustering(data, labels,args):
     """FINCH 클러스터링 실행 및 NMI 점수 계산."""
-    output_txt_path = os.path.join(args.output_path, "nmi_score.txt")
+    # output_txt_path = os.path.join(args.output_path, "nmi_score.txt")
     c, num_clust, req_c = FINCH(data, req_clust=args.req_cluster, use_ann_above_samples=(data.shape[0]-1000), verbose=True, seed=655)
     
     req_score = nmi(labels, req_c)
@@ -64,10 +64,10 @@ def run_finch_clustering(data, labels,args):
         #     f.write(score_text + "\n")
     print(req_score_text)
     return req_c
-def clustering(args):
+def clustering(args,output_path):
     """메인 실행 함수."""
     util.set_seed(42)  # 랜덤 시드 설정
-    data, json_data = util.load_data(args.output_path)
+    data, json_data = util.load_data(output_path)
     data = data.reshape(data.shape[0], -1)
     class_map = util.class_mapping(args.anno_path)
     labels = extract_label(args, json_data, class_map)

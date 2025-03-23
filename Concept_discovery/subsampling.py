@@ -29,13 +29,14 @@ def process_keypoints(json_file, scaler, confidence_threshold=0.1):
     return frames_data
 
 
-def subsampling(args, json_files, class_list):
-    """샘플링 및 데이터 저장."""
+def subsampling_ver1(args, json_files):
+    """샘플을 L등분하고, 각 등분에서 T등분하여 
+    랜덤으로 길이 T인 subsequence L개 만들기"""
     scaler = MinMaxScaler(feature_range=(0, 1))
     class_data = []
     class_metadata = []
     
-    L, T = args.num_sample, args.len_frame
+    L, T = args.num_subsequence, args.len_subsequence
     
     for json_file in tqdm(json_files, desc="Processing JSON files", leave=True):
         class_name = os.path.basename(os.path.dirname(json_file))
@@ -83,14 +84,53 @@ def subsampling(args, json_files, class_list):
         
         class_data.extend(all_clips)
     return class_data, class_metadata
-        
 
-def Keypointset(args):
-    processed_keypoints_path = os.path.join(args.output_path, "processed_keypoints.npy")
+def subsampling_ver2(args, json_files):
+    """기존 방식. (sliding window 방식) 
+    -> 한 칸(stride를 통해 변경 가능)씩 이동하며 샘플링링"""
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    class_data = []
+    class_metadata = []
+    
+    L, T, stride = args.num_subsequence, args.len_subsequence, args.stride
+    
+    for json_file in tqdm(json_files, desc="Processing JSON files", leave=True):
+        class_name = os.path.basename(os.path.dirname(json_file))
+        video_id = os.path.basename(json_file).replace("_result.json", "")
+        frames_data = process_keypoints(json_file, scaler)
+        
+        num_frames = len(frames_data)
+
+        if num_frames == 0:
+            print(f"Skipping {json_file} (No valid frames)")
+            continue
+    
+        # 부족한 프레임을 확장
+        if num_frames < T:
+            expanded_frames = util.expand_array(frames_data, T)
+            if expanded_frames is not None:
+                frames_data = expanded_frames
+                num_frames = len(frames_data)
+            else:
+                print(f"Skipping {json_file} (Unable to expand frames)")
+                continue
+        
+        for i in range(0, num_frames - T + 1, stride):  # stride만큼 이동동
+            clip = np.array(frames_data[i:i+T])  # (T, 17, 2)
+            class_data.append(clip)
+            class_metadata.append(video_id)
+
+    return class_data, class_metadata     
+
+def Keypointset(args, output_path):
+    processed_keypoints_path = os.path.join(output_path, "processed_keypoints.npy")
     if os.path.exists(processed_keypoints_path):
         print(f"✅ {processed_keypoints_path} 파일이 존재하므로 Keypointset()을 건너뜁니다.")
         return  
     class_list = util.load_class_list(args.anno_path)
     json_files = util.load_json_files(args.json_path, class_list, args.dataset)
-    class_data, class_metadata = subsampling(args, json_files, class_list)
-    util.save_data(args.output_path, class_data, class_metadata)
+    if args.subsampling_mode == "ver1":
+        class_data, class_metadata = subsampling_ver1(args, json_files)
+    elif args.subsampling_mode == "ver2":
+        class_data, class_metadata = subsampling_ver2(args, json_files)
+    util.save_data(output_path, class_data, class_metadata)
