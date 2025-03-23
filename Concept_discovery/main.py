@@ -26,12 +26,13 @@ group_ver2.add_argument('--stride', type=int, default=1,
                         help='Confidence threshold for keypoints filtering (only for ver2)')
 
 def concept_decovery(args):
-    os.makedirs(args.output_path, exist_ok=True)
+    output_path = os.path.join(args.output_path,args.subsampling_mode)
+    os.makedirs(output_path, exist_ok=True)
     os.makedirs(args.save_path, exist_ok=True)
-    subsampling.Keypointset(args)
-    data, result_gt = clustering.clustering(args)
-    closest_sample_indices = labeling.labeling(args,data,result_gt)
-    visualize.concept_visualize(args,data,result_gt,closest_sample_indices)
+    subsampling.Keypointset(args,output_path)
+    data, result_gt = clustering.clustering(args,output_path)
+    closest_sample_indices = labeling.labeling(args,data,result_gt,output_path)
+    visualize.concept_visualize(args,data,result_gt,closest_sample_indices,output_path)
 if __name__=='__main__':
     args = parser.parse_args()
     concept_decovery(args)

@@ -11,3 +11,4 @@ debugging/
 __pycache__/
 .vscode
 video-keyframe-detector/
+HAA_new.py

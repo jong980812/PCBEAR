@@ -81,11 +81,11 @@ def visualize_pose_by_index(args, original_index, processed_keypoints, sample_me
     print(f"✅ Saved: {save_file}")
     plt.close(fig)
 
-def concept_visualize(args,data,result_gt,closest_sample_indices):
-    with open(os.path.join(args.output_path, "sample_metadata.json"), "r") as f:
+def concept_visualize(args,data,result_gt,closest_sample_indices, output_path):
+    with open(os.path.join(output_path, "sample_metadata.json"), "r") as f:
         json_data = json.load(f)
 
-    processed_keypoints = np.load(os.path.join(args.output_path, 'processed_keypoints.npy'))
+    processed_keypoints = np.load(os.path.join(output_path, 'processed_keypoints.npy'))
 
     save_path = os.path.join(args.save_path, "concept")
     for concept, index in closest_sample_indices.items():
