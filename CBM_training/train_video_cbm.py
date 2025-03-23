@@ -14,7 +14,7 @@ from glm_saga.elasticnet import IndexedTensorDataset, glm_saga
 from torch.utils.data import DataLoader, TensorDataset
 from video_dataloader import video_utils
 import torch.distributed as dist
-from learning_concept_layer import train_classification_layer, train_cocept_layer, spatio_temporal_parallel,spatio_temporal_serial,spatio_temporal_joint,spatio_temporal_three_joint,only_pose,soft_label, spatio_temporal_single
+from learning_concept_layer import train_aggregated_classification_layer,train_classification_layer, train_cocept_layer, spatio_temporal_parallel,spatio_temporal_serial,spatio_temporal_joint,spatio_temporal_three_joint,only_pose,soft_label, spatio_temporal_single
 import debugging
 from save_features import get_multi_modal_encoder, frozen_all_parameters
 parser = argparse.ArgumentParser(description='Settings for creating CBM')
@@ -229,6 +229,29 @@ parser.add_argument('--train_mode', default='pose', choices=['pose','pose_sp','s
                     type=str, help='dataset')
 
 
+def get_dynamic_save_name(args):
+    def strip_txt(path):
+        if path is None:
+            return None
+        return os.path.splitext(os.path.basename(path))[0]
+
+    concept_tags = []
+    if 'pose' in args.train_mode:
+        pose_tag = strip_txt(args.pose_label)
+        concept_tags.append(f"{pose_tag}")
+    if 's' in args.train_mode:
+        s_tag = strip_txt(args.s_concept_set)
+        concept_tags.append(f"{s_tag}")
+    if 'p' in args.train_mode:
+        p_tag = strip_txt(args.p_concept_set)
+        concept_tags.append(f"{p_tag}")
+    if 't' in args.train_mode:
+        t_tag = strip_txt(args.t_concept_set)
+        concept_tags.append(f"{t_tag}")
+
+    tag_str = "+".join(concept_tags)
+    timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+    return os.path.join(args.save_dir, f"{args.data_set}_cbm_{tag_str}_{timestamp}")
 
 def train_cbm_and_save(args):
     video_utils.init_distributed_mode(args)
@@ -253,185 +276,234 @@ def train_cbm_and_save(args):
     assert args.data_set in args.backbone_features, f"Error: '{args.data_set}' not found in args.backbone_features ('{args.backbone_features}')"
     
 
+    save_name = get_dynamic_save_name(args)
+    os.makedirs(save_name,exist_ok=True)
+    cbm_utils.save_args(args,save_name)
 
-        
+    aggregated_train_c_features = []
+    aggregated_val_c_features = []
     
     backbone_features = torch.load(args.backbone_features,map_location="cpu").float()
     val_backbone_features=torch.load(args.backbone_features.replace(f'{args.data_set}_train',f'{args.data_set}_val'),map_location="cpu").float()
 
-    
-    if args.pose_label is not None:
-        save_name = "{}/{}_cbm_{}{}".format(args.save_dir, args.data_set, args.pose_label.split("/")[-1],datetime.now().strftime("%m-%d_%H-%M-%S") ) 
-    else :
-        save_name = "{}/{}_cbm_{}".format(args.save_dir, args.data_set,args.s_concept_set.split("/")[-1])
-    #load features
-    os.makedirs(save_name,exist_ok=True)
-    
-    if 'pose' in args.train_mode:  
-        cbm_utils.save_args(args,save_name)
-        pose_train_c,pose_val_c=only_pose(args,backbone_features,val_backbone_features,save_name)
-        if args.train_mode =='pose':
-            return
 
     
+    concept_save_paths = {}
+    concept_names = {}
+    concept_matrix = {}
+    val_concept_matrix = {}
+    aggregated_concepts = []
+    aggregated_train_c_features = []
+    aggregated_val_c_features = []
+    
+    if 'pose' in args.train_mode:
+        print("🧍‍♂️ Learning pose concepts...")
+        pose_save_path = os.path.join(save_name, 'pose')
+        os.makedirs(pose_save_path, exist_ok=True)
+        pose_train_c, pose_val_c = only_pose(args, backbone_features, val_backbone_features, pose_save_path)
+        aggregated_concepts.extend([str(i) for i in range(pose_train_c.shape[1])])
+        aggregated_train_c_features.append(pose_train_c)
+        aggregated_val_c_features.append(pose_val_c)
+        if args.train_mode == 'pose':
+            return
+        
+    # Define concept types
+    concept_types = {
+        's': 'spatial',
+        'p': 'place',
+        't': 'temporal'
+    }
+
+    # Filter active concept keys based on train_mode
+    active_concepts = [k for k in concept_types if k in args.train_mode]
+    
+    print("🚀 Loading dual encoder...")
     dual_encoder = get_multi_modal_encoder(args,device).to(device).eval()
     frozen_all_parameters(dual_encoder,args.dual_encoder)
 
-    if 's' in args.train_mode:
-        with open(args.s_concept_set, 'r') as f: 
-            s_concepts = (f.read()).split('\n')
-        s_concept_save_name=cbm_utils.save_text_features(args.s_concept_set,args,dual_encoder)
-    if 'p' in args.train_mode:
-        with open(args.p_concept_set, 'r') as f: 
-            p_concepts = (f.read()).split('\n')
-        p_concept_save_name=cbm_utils.save_text_features(args.p_concept_set,args,dual_encoder)
-            
-        
-
-            
-    vlm_features = torch.load(args.vlm_features,map_location="cpu").float()
-    val_vlm_features=torch.load(args.vlm_features.replace(f'{args.data_set}_train',f'{args.data_set}_val'),map_location="cpu").float()
-    
+    print("📦 Loading VLM visual features...")
     with torch.no_grad():
-    #! VLM Visual features
+        vlm_features = torch.load(args.vlm_features, map_location="cpu").float()
+        val_vlm_features = torch.load(args.vlm_features.replace(f'{args.data_set}_train', f'{args.data_set}_val'), map_location="cpu").float()
         vlm_features /= torch.norm(vlm_features, dim=1, keepdim=True)
         val_vlm_features /= torch.norm(val_vlm_features, dim=1, keepdim=True)
-    #! VLM Textual features
-        s_text_features = torch.load(s_concept_save_name, map_location="cpu").float()
-        s_text_features /= torch.norm(s_text_features, dim=1, keepdim=True)
-        p_text_features = torch.load(p_concept_save_name, map_location="cpu").float()
-        p_text_features /= torch.norm(p_text_features, dim=1, keepdim=True)
-    #! Concept matrix         
-        s_concept_matrix = vlm_features @ s_text_features.T
-        s_val_concept_matrix = val_vlm_features @ s_text_features.T
-        p_concept_matrix = vlm_features @ p_text_features.T
-        p_val_concept_matrix = val_vlm_features @ p_text_features.T
+
+
+    # if 's' in args.train_mode:
+    #     with open(args.s_concept_set, 'r') as f: 
+    #         s_concepts = (f.read()).split('\n')
+    #     s_concept_save_name=cbm_utils.save_text_features(args.s_concept_set,args,dual_encoder)
+    # if 'p' in args.train_mode:
+    #     with open(args.p_concept_set, 'r') as f: 
+    #         p_concepts = (f.read()).split('\n')
+    #     p_concept_save_name=cbm_utils.save_text_features(args.p_concept_set,args,dual_encoder)
+            
+
+
+
+    # Load and process each active concept
+    for key in active_concepts:
+        set_path = getattr(args, f"{key}_concept_set")
+        with open(set_path, 'r') as f:
+            concept_names[key] = f.read().split('\n')
+
+        print(f"📚 Encoding text features for {concept_types[key]} concepts...")
+        concept_save_paths[key] = cbm_utils.save_text_features(set_path, args, dual_encoder)
+
+    # Compute concept matrices
+    with torch.no_grad():
+        for key in active_concepts:
+            text_feat = torch.load(concept_save_paths[key], map_location="cpu").float()
+            text_feat /= torch.norm(text_feat, dim=1, keepdim=True)
+
+            mat = vlm_features @ text_feat.T
+            val_mat = val_vlm_features @ text_feat.T
+
+            topk_mean = torch.mean(torch.topk(mat, dim=0, k=5)[0], dim=0)
+            original_len = len(concept_names[key])
+            concept_names[key] = [concept_names[key][i] for i in range(original_len) if topk_mean[i] > args.clip_cutoff]
+            print(f"🔍 {concept_types[key]} concept: {original_len} -> {len(concept_names[key])}")
+
+            mat = mat[:, topk_mean > args.clip_cutoff]
+            val_mat = val_mat[:, topk_mean > args.clip_cutoff]
+
+            concept_matrix[key] = mat
+            val_concept_matrix[key] = val_mat
+
+
+
+    # Textual concepts 학습
+    for key in active_concepts:
+        save_path = os.path.join(save_name, concept_types[key])
+        os.makedirs(save_path, exist_ok=True)
+
+        print(f"🎓 Learning {concept_types[key]} concept classifier...")
+        W_c, updated_concepts, best_val_loss = train_cocept_layer(
+            args=args,
+            concepts=concept_names[key],
+            target_features=backbone_features,
+            val_target_features=val_backbone_features,
+            clip_feature=concept_matrix[key],
+            val_clip_features=val_concept_matrix[key],
+            save_name=save_path
+        )
+
+        train_c, val_c = train_classification_layer(
+            args=args,
+            W_c=W_c,
+            pre_concepts=None,
+            concepts=updated_concepts,
+            target_features=backbone_features,
+            val_target_features=val_backbone_features,
+            save_name=save_path,
+            joint=None,
+            best_val_loss=best_val_loss
+        )
+
+        aggregated_concepts.extend(updated_concepts)
+        aggregated_train_c_features.append(train_c)
+        aggregated_val_c_features.append(val_c)
+        
+# Aggregated classification 학습
+    print("🧠 Training aggregated concept classifier...")
+    train_aggregated_classification_layer(
+        args=args,
+        aggregated_train_c_features=aggregated_train_c_features,
+        aggregated_val_c_features=aggregated_val_c_features,
+        concepts=aggregated_concepts,
+        save_name=save_name
+    )
+    print("✅ Aggregated classification training complete.")
+
+    
+#     with torch.no_grad():
+#     #! VLM Textual features
+#         s_text_features = torch.load(s_concept_save_name, map_location="cpu").float()
+#         s_text_features /= torch.norm(s_text_features, dim=1, keepdim=True)
+#         p_text_features = torch.load(p_concept_save_name, map_location="cpu").float()
+#         p_text_features /= torch.norm(p_text_features, dim=1, keepdim=True)
+#     #! Concept matrix         
+#         s_concept_matrix = vlm_features @ s_text_features.T
+#         s_val_concept_matrix = val_vlm_features @ s_text_features.T
+#         p_concept_matrix = vlm_features @ p_text_features.T
+#         p_val_concept_matrix = val_vlm_features @ p_text_features.T
         
 
     
-    #filter concepts not activating highly
-    s_highest = torch.mean(torch.topk(s_concept_matrix, dim=0, k=5)[0], dim=0)
-    p_highest = torch.mean(torch.topk(p_concept_matrix, dim=0, k=5)[0], dim=0)
+#     #filter concepts not activating highly
+#     s_highest = torch.mean(torch.topk(s_concept_matrix, dim=0, k=5)[0], dim=0)
+#     p_highest = torch.mean(torch.topk(p_concept_matrix, dim=0, k=5)[0], dim=0)
 
 
-    if args.print:
-        for i, concept in enumerate(s_concepts):
-            if s_highest[i]<=args.clip_cutoff:
-                print("!**Spatial** Deleting {}, CLIP top5:{:.3f}".format(concept, s_highest[i]))
-        for i, concept in enumerate(p_concepts):
-            if p_highest[i]<=args.clip_cutoff:
-                print("!**Place** Deleting {}, CLIP top5:{:.3f}".format(concept, p_highest[i]))
-    original_n_concept = len(s_concepts)
-    s_concepts = [s_concepts[i] for i in range(len(s_concepts)) if s_highest[i]>args.clip_cutoff]
-    print(f"!**Spatial** Num concept: {original_n_concept} -> {len(s_concepts)}")
-    original_p_concept = len(p_concepts)
-    p_concepts = [p_concepts[i] for i in range(len(p_concepts)) if p_highest[i]>args.clip_cutoff]
-    print(f"!**Place** Num concept: {original_p_concept} -> {len(p_concepts)}")
+#     if args.print:
+#         for i, concept in enumerate(s_concepts):
+#             if s_highest[i]<=args.clip_cutoff:
+#                 print("!**Spatial** Deleting {}, CLIP top5:{:.3f}".format(concept, s_highest[i]))
+#         for i, concept in enumerate(p_concepts):
+#             if p_highest[i]<=args.clip_cutoff:
+#                 print("!**Place** Deleting {}, CLIP top5:{:.3f}".format(concept, p_highest[i]))
+#     original_n_concept = len(s_concepts)
+#     s_concepts = [s_concepts[i] for i in range(len(s_concepts)) if s_highest[i]>args.clip_cutoff]
+#     print(f"!**Spatial** Num concept: {original_n_concept} -> {len(s_concepts)}")
+#     original_p_concept = len(p_concepts)
+#     p_concepts = [p_concepts[i] for i in range(len(p_concepts)) if p_highest[i]>args.clip_cutoff]
+#     print(f"!**Place** Num concept: {original_p_concept} -> {len(p_concepts)}")
 
 
-    s_concept_matrix = s_concept_matrix[:, s_highest>args.clip_cutoff]
-    p_concept_matrix = p_concept_matrix[:, p_highest>args.clip_cutoff]
-    s_val_concept_matrix = s_val_concept_matrix[:, s_highest>args.clip_cutoff]
-    p_val_concept_matrix = p_val_concept_matrix[:, p_highest>args.clip_cutoff]
+#     s_concept_matrix = s_concept_matrix[:, s_highest>args.clip_cutoff]
+#     p_concept_matrix = p_concept_matrix[:, p_highest>args.clip_cutoff]
+#     s_val_concept_matrix = s_val_concept_matrix[:, s_highest>args.clip_cutoff]
+#     p_val_concept_matrix = p_val_concept_matrix[:, p_highest>args.clip_cutoff]
     
 
     
-    s_save_name = os.path.join(save_name,'spatial');os.makedirs(s_save_name,exist_ok=True)
-    p_save_name = os.path.join(save_name,'place');os.makedirs(p_save_name,exist_ok=True)
+#     s_save_name = os.path.join(save_name,'spatial');os.makedirs(s_save_name,exist_ok=True)
+#     p_save_name = os.path.join(save_name,'place');os.makedirs(p_save_name,exist_ok=True)
 
-#! Learning Spatial concepts
-    s_W_c, s_concepts, s_best_val_loss= train_cocept_layer(args=args,
-                                                            concepts=s_concepts,
-                                                            target_features=backbone_features,
-                                                            val_target_features=val_backbone_features,
-                                                            clip_feature=s_concept_matrix,
-                                                            val_clip_features=s_val_concept_matrix,
-                                                            save_name=s_save_name)
-    spatial_train_c,spatial_val_c=train_classification_layer(args=args,
-                               W_c=s_W_c,
-                               pre_concepts= None, 
-                               concepts=s_concepts,
-                               target_features=backbone_features,
-                               val_target_features=val_backbone_features,
-                               save_name=s_save_name,
-                               joint=None,
-                               best_val_loss=s_best_val_loss)
-#! Learning Place concepts
+# #! Learning Spatial concepts
+#     s_W_c, s_concepts, s_best_val_loss= train_cocept_layer(args=args,
+#                                                             concepts=s_concepts,
+#                                                             target_features=backbone_features,
+#                                                             val_target_features=val_backbone_features,
+#                                                             clip_feature=s_concept_matrix,
+#                                                             val_clip_features=s_val_concept_matrix,
+#                                                             save_name=s_save_name)
+#     spatial_train_c,spatial_val_c=train_classification_layer(args=args,
+#                                W_c=s_W_c,
+#                                pre_concepts= None, 
+#                                concepts=s_concepts,
+#                                target_features=backbone_features,
+#                                val_target_features=val_backbone_features,
+#                                save_name=s_save_name,
+#                                joint=None,
+#                                best_val_loss=s_best_val_loss)
+# #! Learning Place concepts
     
-    p_W_c, p_concepts, p_best_val_loss= train_cocept_layer(args=args,
-                                                            concepts=p_concepts,
-                                                            target_features=backbone_features,
-                                                            val_target_features=val_backbone_features,
-                                                            clip_feature=p_concept_matrix,
-                                                            val_clip_features=p_val_concept_matrix,
-                                                            save_name=p_save_name)
-    place_train_c,place_val_c=train_classification_layer(args=args,
-                               W_c=p_W_c,
-                               pre_concepts= None, 
-                               concepts=p_concepts,
-                               target_features=backbone_features,
-                               val_target_features=val_backbone_features,
-                               save_name=p_save_name,
-                               joint=None,
-                               best_val_loss=p_best_val_loss)
+#     p_W_c, p_concepts, p_best_val_loss= train_cocept_layer(args=args,
+#                                                             concepts=p_concepts,
+#                                                             target_features=backbone_features,
+#                                                             val_target_features=val_backbone_features,
+#                                                             clip_feature=p_concept_matrix,
+#                                                             val_clip_features=p_val_concept_matrix,
+#                                                             save_name=p_save_name)
+#     place_train_c,place_val_c=train_classification_layer(args=args,
+#                                W_c=p_W_c,
+#                                pre_concepts= None, 
+#                                concepts=p_concepts,
+#                                target_features=backbone_features,
+#                                val_target_features=val_backbone_features,
+#                                save_name=p_save_name,
+#                                joint=None,
+#                                best_val_loss=p_best_val_loss)
     
-    #! 얻어진 컨셉들은 interpretability cutoff적용된 새로운 것.
-
-    aggregated_train_c=torch.cat([pose_train_c,spatial_train_c,place_train_c],dim=1)
-    aggregated_val_c=torch.cat([pose_val_c,spatial_val_c,place_val_c],dim=1)
-
-    # cls_file = data_utils.LABEL_FILES[args.data_set]
-    cls_file = os.path.join(args.video_anno_path, 'class_list.txt')
-    with open(cls_file, "r") as f:
-        classes = f.read().split("\n")
-    assert args.nb_classes == len(classes), f"Error: args.nb_classes ({args.nb_classes}) != len(classes) ({len(classes)})"
+#     aggregated_concepts = [str(i) for i in range(pose_train_c.shape[1])]+s_concepts+p_concepts
+#     train_c_features=torch.cat(aggregated_train_c_features,dim=1)
     
     
-    train_video_dataset, _ = datasets.build_dataset(True, False, args)
-    val_video_dataset,_ =   datasets.build_dataset(False, False, args)
-    # d_train = args.data_set + "_train"
-    # d_val = args.data_set + "_val"
-    train_targets = train_video_dataset.label_array
-    val_targets = val_video_dataset.label_array
-    train_y = torch.LongTensor(train_targets)
-    val_y = torch.LongTensor(val_targets)
+#     #! 얻어진 컨셉들은 interpretability cutoff적용된 새로운 것.
 
-
-
-    indexed_train_ds = IndexedTensorDataset(aggregated_train_c, train_y)
-    val_ds = TensorDataset(aggregated_val_c,val_y)
-    indexed_train_loader = DataLoader(indexed_train_ds, batch_size=args.saga_batch_size, shuffle=True)
-    val_loader = DataLoader(val_ds, batch_size=args.saga_batch_size, shuffle=False)
-
-    # Make linear model and zero initialize
-    linear = torch.nn.Linear(aggregated_train_c.shape[1],len(classes)).to(args.device)
-    linear.weight.data.zero_()
-    linear.bias.data.zero_()
-    
-    STEP_SIZE = 0.05
-    ALPHA = 0.99
-    metadata = {}
-    metadata['max_reg'] = {}
-    metadata['max_reg']['nongrouped'] = args.lam
-
-    # Solve the GLM path
-    #concept layer to classification
-    output_proj = glm_saga(linear, indexed_train_loader, STEP_SIZE, args.n_iters, ALPHA, epsilon=1, k=1,
-                    val_loader=val_loader, do_zero=False, metadata=metadata, n_ex=len(backbone_features), n_classes = len(classes),verbose=500)
-    W_g = output_proj['path'][0]['weight']
-    b_g = output_proj['path'][0]['bias']
-    
-    torch.save(W_g, os.path.join(save_name, "W_g.pt"))
-    torch.save(b_g, os.path.join(save_name, "b_g.pt"))
-    with open(os.path.join(save_name, "metrics.txt"), 'w') as f:
-        out_dict = {}
-        for key in ('lam', 'lr', 'alpha', 'time'):
-            out_dict[key] = float(output_proj['path'][0][key])
-        out_dict['metrics'] = output_proj['path'][0]['metrics']
-        nnz = (W_g.abs() > 1e-5).sum().item()
-        total = W_g.numel()
-        out_dict['sparsity'] = {"Non-zero weights":nnz, "Total weights":total, "Percentage non-zero":nnz/total}
-        json.dump(out_dict, f, indent=2)
+#     train_aggregated_classification_layer(args=args,
+#                                           aggregated_train_c_features=aggregated_train_c_features)
 
 
 if __name__=='__main__':
