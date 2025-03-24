@@ -51,7 +51,7 @@ def train_cocept_layer(args,concepts, target_features,val_target_features,clip_f
         loss = torch.mean(loss)
         loss.backward()
         opt.step()
-        if i%50==0 or i==args.proj_steps-1:
+        if i%500==0 or i==args.proj_steps-1:
             with torch.no_grad():
                 val_output = proj_layer(val_target_features.to(args.device).detach())
                 val_loss = -similarity_fn(val_clip_features.to(args.device).detach(), val_output)
@@ -951,7 +951,7 @@ def only_pose(args,target_features, val_target_features,save_name):
         loss = torch.mean(loss)
         loss.backward()
         opt.step()
-        if i%10==0 or i==args.proj_steps-1:
+        if i%500==0 or i==args.proj_steps-1:
             with torch.no_grad():
                 val_output = proj_layer(val_target_features.to(args.device).detach())
                 if args.use_mlp:

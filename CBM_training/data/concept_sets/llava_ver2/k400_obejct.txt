@@ -864,7 +864,6 @@ horse
 diaper
 curtain
 joystick
-squat
 float
 audience
 charger
@@ -957,7 +956,6 @@ lid
 pencil
 mop
 cat
-pushup
 life jacket
 pot
 sandwich

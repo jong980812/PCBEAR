@@ -293,7 +293,7 @@ def train_saga(linear, loader, lr, nepochs, lam, alpha, group=True, verbose=None
         obj_history = []
         obj_best = None
         nni = 0
-        for t in tqdm(range(nepochs)): 
+        for t in tqdm(range(nepochs),mininterval=10.0): 
             total_loss = 0
             for batch in loader: 
                 if len(batch) == 3: 

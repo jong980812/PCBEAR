@@ -88,7 +88,7 @@ def bar(contributions, feature_names, max_display=5, show=True, title=None, font
     pl.barh(
         y_pos, values[feature_inds],
         bar_width, align='center',
-        color = (140/255, 181/255, 217/255)#set_color(feature_inds, values, feature_names),
+        color = (140/255, 181/255, 217/255),#set_color(feature_inds, values, feature_names),
     #     color=[
     #     # comp_color if values[j] < 0 else '#e35f62' if feature_names[j][0] == 'O' else 'dodgerblue' if feature_names[j][0] == 'T' else 'C2' if feature_names[j][0] == 'S' else pos_color for j in feature_inds
     # ],
