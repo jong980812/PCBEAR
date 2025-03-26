@@ -86,8 +86,8 @@ def video_class_mapping(args):
     class_list = load_class_list(args.anno_path)
     train_csv = os.path.join(args.anno_path,"train.csv")
     val_csv = os.path.join(args.anno_path,"val.csv")
-    train_df = pd.read_csv(train_csv, header=None, names=["video_name", "class_id"], sep="\s+")
-    val_df = pd.read_csv(val_csv, header=None, names=["video_name", "class_id"], sep="\s+")
+    train_df = pd.read_csv(train_csv, header=None, names=["video_name", "class_id"], sep=",")
+    val_df = pd.read_csv(val_csv, header=None, names=["video_name", "class_id"], sep=",")
     df = pd.concat([train_df, val_df], ignore_index=True)
     df["video_id"] = df["video_name"].str.replace(".mp4", "", regex=False)
 
