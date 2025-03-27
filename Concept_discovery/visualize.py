@@ -90,4 +90,4 @@ def concept_visualize(args,data,result_gt,closest_sample_indices, output_path):
     save_path = os.path.join(args.save_path, "concept")
     for concept, index in closest_sample_indices.items():
         print(f'Concept {concept}')
-        visualize_pose_by_index(args, index, processed_keypoints, json_data,save_path , frame_step=2, concept=concept)
+        visualize_pose_by_index(args, index, processed_keypoints, json_data,save_path , frame_step=1, concept=concept)

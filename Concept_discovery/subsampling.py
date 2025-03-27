@@ -192,7 +192,7 @@ def subsampling_ver4(args, json_files):
         with open(keyframe_path, 'r') as f:
             keyframes = [int(line.strip()) for line in f.readlines()]
             
-        if len(keyframes) == 0:
+        if len(keyframes) == 0 or keyframes[-1] > num_frames:
             print(f"Skipping {keyframe_path} (No valid frames)")
             continue
 
