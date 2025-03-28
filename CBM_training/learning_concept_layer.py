@@ -908,11 +908,11 @@ def only_pose(args,target_features, val_target_features,save_name):
         # torch.tensor로 변환
         
         val_result_tensor = torch.tensor(val_attribute,dtype=target_features.dtype)
-        # if not args.use_mlp:
-        # train_result_tensor[train_result_tensor == 0.] = 0.05
-        # train_result_tensor[train_result_tensor == 1.] = 0.3
-        # val_result_tensor[val_result_tensor == 0.] = 0.05
-        # val_result_tensor[val_result_tensor == 1.] = 0.3
+        if not args.use_mlp:
+            train_result_tensor[train_result_tensor == 0.] = 0.05
+            train_result_tensor[train_result_tensor == 1.] = 0.3
+            val_result_tensor[val_result_tensor == 0.] = 0.05
+            val_result_tensor[val_result_tensor == 1.] = 0.3
     
     
 
