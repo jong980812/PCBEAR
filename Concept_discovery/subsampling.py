@@ -228,8 +228,8 @@ def subsampling_ver4(args, json_files):
             else:
                 clip = frames_data[sampled_indices]
 
-            if np.array(clip).shape != (T,17,2):
-                print(np.array(clip).shape)
+            # if np.array(clip).shape != (T,17,2):
+            #     print(np.array(clip).shape)
 
             if len(clip) == T:
                 all_clips.append(clip)
