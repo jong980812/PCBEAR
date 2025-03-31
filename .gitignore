@@ -12,3 +12,6 @@ __pycache__/
 .vscode
 video-keyframe-detector/
 HAA_new.py
+*.json
+*.out
+*.err
