@@ -8,7 +8,7 @@ import pickle
 import util
 
 
-def make_attribute(args, result_gt,output_path):
+def make_attribute(args, result_gt,output_path,save_path):
     with open(os.path.join(output_path, "sample_metadata.json"), "r") as f :
         json_data = json.load(f)
     labels = result_gt
@@ -33,17 +33,17 @@ def make_attribute(args, result_gt,output_path):
         video_attributes.append(video_entry)
 
     # JSON 파일로 저장
-    output_annotation_path = os.path.join(args.save_path,"video_attributes.json")
+    output_annotation_path = os.path.join(save_path,"video_attributes.json")
     with open(output_annotation_path, "w") as f:
         json.dump(video_attributes, f, indent=4)
     return video_attributes
 
 
-def hard_label(video_attributes, args, mode):
-    output_json_path = os.path.join(args.save_path, f"hard_label_{mode}.json")
-    output_pkl_path = os.path.join(args.save_path, f"hard_label_{mode}.pkl")
+def hard_label(video_attributes, args, save_path, mode):
+    output_json_path = os.path.join(save_path, f"hard_label_{mode}.json")
+    output_pkl_path = os.path.join(save_path, f"hard_label_{mode}.pkl")
     csv_path = os.path.join(args.anno_path, f"{mode}.csv")
-    new_csv_path = os.path.join(args.save_path, f"{mode}.csv") 
+    new_csv_path = os.path.join(save_path, f"{mode}.csv") 
 
     df = pd.read_csv(csv_path, header=None, names=["video_name", "class_label"], sep=",")
     video_list = df["video_name"].tolist()
@@ -74,15 +74,15 @@ def hard_label(video_attributes, args, mode):
 
     return sorted_annotations
 
-def labeling(args, data, result_gt, output_path):
+def labeling(args, data, result_gt, output_path,save_path):
     # data, result_gt = clustering.clustering(args)
     closest_sample_indices = util.find_closest_to_centroid(data, result_gt)
-    with open(os.path.join(args.save_path,'concept_index.txt'), "w", encoding="utf-8") as f:
+    with open(os.path.join(save_path,'concept_index.txt'), "w", encoding="utf-8") as f:
         for key, value in closest_sample_indices.items():
             f.write(f"{key}: {value}\n") 
 
-    video_attributes = make_attribute(args, result_gt,output_path)
-    train_anno = hard_label(video_attributes, args, mode = "train")
-    val_anno = hard_label(video_attributes, args, mode = "val")
+    video_attributes = make_attribute(args, result_gt,output_path,save_path)
+    train_anno = hard_label(video_attributes, args,save_path, mode = "train")
+    val_anno = hard_label(video_attributes, args, save_path, mode = "val")
     return closest_sample_indices
 

@@ -47,7 +47,7 @@ def plot_pose(pose, ax=None, title="Pose Visualization", original_index=None, vi
     ax.set_xticks([])
     ax.set_yticks([])
 
-def visualize_pose_by_index(args, original_index, processed_keypoints, sample_metadata, save_path, frame_step=2, concept=-1):
+def visualize_pose_by_index(args, original_index, processed_keypoints, sample_metadata, save_path, concept=-1):
     if original_index >= len(processed_keypoints):
         print(f"❌ ERROR: Index {original_index} out of range!")
         return
@@ -64,6 +64,7 @@ def visualize_pose_by_index(args, original_index, processed_keypoints, sample_me
     else :
         video_name = video_name
     T = input_pose.shape[0]
+    frame_step = T//5
     selected_frames = list(range(0, T, frame_step))
     fig, axes_frames = plt.subplots(1, len(selected_frames), figsize=(len(selected_frames) * 3, 4))
 
@@ -81,13 +82,13 @@ def visualize_pose_by_index(args, original_index, processed_keypoints, sample_me
     print(f"✅ Saved: {save_file}")
     plt.close(fig)
 
-def concept_visualize(args,data,result_gt,closest_sample_indices, output_path):
+def concept_visualize(args,data,result_gt,closest_sample_indices, output_path, save_path):
     with open(os.path.join(output_path, "sample_metadata.json"), "r") as f:
         json_data = json.load(f)
 
     processed_keypoints = np.load(os.path.join(output_path, 'processed_keypoints.npy'))
 
-    save_path = os.path.join(args.save_path, "concept")
+    save_path = os.path.join(save_path, "concept")
     for concept, index in closest_sample_indices.items():
         print(f'Concept {concept}')
-        visualize_pose_by_index(args, index, processed_keypoints, json_data,save_path , frame_step=2, concept=concept)
+        visualize_pose_by_index(args, index, processed_keypoints, json_data,save_path , concept=concept)
