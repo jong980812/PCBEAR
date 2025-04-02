@@ -306,8 +306,8 @@ def subsampling_final(args, json_files):
     return class_data, class_metadata
 
 
-def Keypointset(args, output_path):
-    processed_keypoints_path = os.path.join(output_path, "processed_keypoints.npy")
+def Keypointset(args, save_path):
+    processed_keypoints_path = os.path.join(save_path, "processed_keypoints.npy")
     if os.path.exists(processed_keypoints_path):
         print(f"✅ {processed_keypoints_path} 파일이 존재하므로 Keypointset()을 건너뜁니다.")
         return  
@@ -323,7 +323,7 @@ def Keypointset(args, output_path):
         class_data, class_metadata = subsampling_ver4(args, json_files)
     elif args.subsampling_mode == "ver5":
         class_data, class_metadata = subsampling_final(args, json_files)
-    util.save_data(output_path, class_data, class_metadata)
+    util.save_data(save_path, class_data, class_metadata)
 
 # if __name__ == "__main__":
 #     import argparse

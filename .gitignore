@@ -12,3 +12,4 @@ __pycache__/
 .vscode
 video-keyframe-detector/
 dataset_utils
+scripts/
