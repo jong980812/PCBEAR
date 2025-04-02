@@ -1,3 +1,4 @@
+from scipy.io import loadmat
 import argparse
 import json
 import os
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     parser.add_argument('--output-path', type=str, default='',
                         help='output path, if the path provided is a directory '
                         'output files are "input_name +_result{extension}".')
-    parser.add_argument('--model', type=str, required=True,
+    parser.add_argument('--model', type=str,
                         help='checkpoint path of the model')
     parser.add_argument('--yolo', type=str, required=False, default=None,
                         help='checkpoint path of the yolo model')
@@ -85,9 +86,12 @@ if __name__ == "__main__":
     # output_path = args.output_path #! log 파일
     
     
-    src_dir = '/data/dataset/videocbm/dataset/penn_sub/'#! 비디오 폴더 
-    output_path = '/data/jongseo/project/PCBEAR/Pose_extraction/skeleton'#! skeleton 합쳐진 영상 저장되는경로
-    json_path = '/data/jongseo/project/PCBEAR/Pose_extraction/skeleton_json' #! skeleton 값들 json으로
+    src_dir = '/local_datasets/Penn_Action/videos/'#! 비디오 폴더 
+    # src_dir = '/data/jongseo/project/PCBEAR/Pose_extraction/test_video/370'
+    output_path = '/local_datasets/Penn_Action_GT_box_vitlarge/skeleton_video'#! skeleton 합쳐진 영상 저장되는경로
+    json_path = '/local_datasets/Penn_Action_GT_box_vitlarge/skeleton_json' #! skeleton 값들 json으로
+    # output_path = '/data/jongseo/project/PCBEAR/Pose_extraction/test_video/370/skeleton_video'#! skeleton 합쳐진 영상 저장되는경로
+    # json_path = '/data/jongseo/project/PCBEAR/Pose_extraction/test_video/370/skeleton_json' #! skeleton 값들 json으로
     model = VitInference(args.model, yolo, args.model_name,
                         args.det_class, args.dataset,
                         args.yolo_size, is_video=is_video,
@@ -203,10 +207,14 @@ if __name__ == "__main__":
     else:
             os.makedirs(output_path,exist_ok=True)
             os.makedirs(json_path,exist_ok=True)
-            input_files = [os.path.join(src_dir, f) for f in os.listdir(src_dir) if f.endswith(('.avi','.mp4', '.jpg', '.png'))]
-            for (i,input_path) in enumerate(input_files):
+            input_files = [ f for f in os.listdir(src_dir) if f.endswith(('.avi','.mp4', '.jpg', '.png'))]
+            for (i,video_pth) in enumerate(input_files):
+                input_path = os.path.join(src_dir,video_pth)
+                video_id = video_pth.split('.')[0]
                 print(f"****************{i}/{len(input_files)} ****************")
-                
+                mat_file_path = f'/data/dataset/Penn_Action_skeleton/Penn_Action/labels/{video_id}.mat'
+                # 파일 읽기
+                gt_bboxes = loadmat(mat_file_path)['bbox']
                 if os.path.isdir(output_path):
                     og_ext = input_path[input_path.rfind('.'):]
                     save_name_img = os.path.basename(input_path).replace(og_ext, f"_result{ext}")
@@ -254,11 +262,16 @@ if __name__ == "__main__":
                 keypoints = []
                 fps = []
                 tot_time = 0.
+                # If gt_bboxes is shorter than total_frames, pad with last bbox
+                if gt_bboxes.shape[0] < total_frames:
+                    last_bbox = gt_bboxes[-1:]
+                    pad_count = total_frames - gt_bboxes.shape[0]
+                    gt_bboxes = np.concatenate([gt_bboxes, np.repeat(last_bbox, pad_count, axis=0)], axis=0)
                 for (ith, img) in enumerate(reader):
                     t0 = time.time()
 
                     # Run inference
-                    frame_keypoints = model.inference(img)
+                    frame_keypoints = model.inference(img,gt_bboxes[ith:ith+1,:])
                     keypoints.append(frame_keypoints)
 
                     delta = time.time() - t0

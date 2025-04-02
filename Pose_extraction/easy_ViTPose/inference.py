@@ -218,7 +218,7 @@ class VitInference:
         """
         raise NotImplementedError
 
-    def inference(self, img: np.ndarray) -> dict[typing.Any, typing.Any]:
+    def inference(self, img: np.ndarray, gt_bbox: np.ndarray = None) -> dict[typing.Any, typing.Any]:
         """
         Perform inference on the input image.
 
@@ -239,6 +239,15 @@ class VitInference:
                                 classes=self.yolo_classes)[0]
             res_pd = np.array([r[:5].tolist() for r in  # TODO: Confidence threshold
                                results.boxes.data.cpu().numpy() if r[4] > 0.35]).reshape((-1, 5))
+        if gt_bbox is not None:# and res_pd.shape[0]>1:
+            # Expand bbox by 1.5x around its center
+            x1, y1, x2, y2 = gt_bbox[0]
+            cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+            w, h = (x2 - x1) * 1.5, (y2 - y1) * 1.5
+            x1_new, y1_new = cx - w / 2, cy - h / 2
+            x2_new, y2_new = cx + w / 2, cy + h / 2
+            new_bbox = np.array([[x1_new, y1_new, x2_new, y2_new]])
+            res_pd = np.concatenate([new_bbox, np.ones((1, 1))], axis=1)
         self.frame_counter += 1
 
         frame_keypoints = {}
