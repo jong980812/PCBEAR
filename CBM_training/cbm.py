@@ -231,14 +231,13 @@ def load_cbm_dynamic(load_dir, device,args):
 
     if len(train_mode) == 1:
         load_sub_dir = os.path.join(load_dir,train_mode[0])
-        load_cbm(load_sub_dir,device,args)
-    if len(train_mode) == 2:
-        load_cbm_double(load_dir,device,args)
+        return load_cbm(load_sub_dir,device,args)
+    elif len(train_mode) == 2:
+        return load_cbm_double(load_dir,device,args)
     elif len(train_mode) ==3:
         return load_cbm_triple(load_dir,device,args)
     else:
         raise ValueError(f"Unsupported train_mode: {train_mode}")
-
 
 
 def load_cbm(load_dir, device,args):
