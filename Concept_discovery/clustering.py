@@ -64,10 +64,10 @@ def run_finch_clustering(data, labels,args):
         #     f.write(score_text + "\n")
     print(req_score_text)
     return req_c
-def clustering(args,output_path):
+def clustering(args,save_path):
     """메인 실행 함수."""
     util.set_seed(42)  # 랜덤 시드 설정
-    data, json_data = util.load_data(output_path)
+    data, json_data = util.load_data(save_path)
     data = data.reshape(data.shape[0], -1)
     class_map = util.class_mapping(args.anno_path)
     labels = extract_label(args, json_data, class_map)
