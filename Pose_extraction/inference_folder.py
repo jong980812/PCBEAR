@@ -74,7 +74,8 @@ if __name__ == "__main__":
                         help='save json results')
     parser.add_argument('--class_folders', default=False, action='store_true',
                         help='video 폴더안에 class_folder들이 따로 있는 경우')
-
+    parser.add_argument('--allowed_classes', type=str, required=False, default=None,
+                        help='checkpoint path of the yolo model')
     args = parser.parse_args()
 
     use_mps = hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
@@ -109,14 +110,16 @@ if __name__ == "__main__":
     print(f">>> Model loaded: {args.model}")
     
     if args.class_folders:
-        with open('/data/jongseo/project/PCBEAR/dataset/HAA100/class_list.txt', 'r') as f:
-            allowed_classes = set(line.strip() for line in f if line.strip())
-        class_names = os.listdir(src_dir)
+        if args.allowed_classes is not None:
+            with open(args.allowed_classes, 'r') as f:
+                class_names = set(line.strip() for line in f if line.strip())
+        else:
+            class_names = os.listdir(src_dir)
                 # Initialize model
 
         for class_name in class_names:
-            if class_name not in allowed_classes:
-                continue
+            # if class_name not in allowed_classes:
+            #     continue
             print(f"****************Class {class_name} ****************")
             class_folder = os.path.join(src_dir,class_name)
             os.makedirs(os.path.join(output_path,class_name), exist_ok=True)
