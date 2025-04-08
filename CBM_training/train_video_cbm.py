@@ -293,17 +293,19 @@ def train_cbm_and_save(args):
     concept_matrix = {}
     val_concept_matrix = {}
     aggregated_concepts = []
-    aggregated_train_c_features = []
-    aggregated_val_c_features = []
+    # aggregated_train_c_features = []
+    # aggregated_val_c_features = []
+    aggregated_W_c = []
     
     if 'pose' in args.train_mode:
         print("🧍‍♂️ Learning pose concepts...")
         pose_save_path = os.path.join(save_name, 'pose')
         os.makedirs(pose_save_path, exist_ok=True)
-        pose_train_c, pose_val_c = only_pose(args, backbone_features, val_backbone_features, pose_save_path)
+        pose_W_c, pose_train_c, pose_val_c = only_pose(args, backbone_features, val_backbone_features, pose_save_path)
         aggregated_concepts.extend([str(i) for i in range(pose_train_c.shape[1])])
-        aggregated_train_c_features.append(pose_train_c)
-        aggregated_val_c_features.append(pose_val_c)
+        # aggregated_train_c_features.append(pose_train_c)
+        # aggregated_val_c_features.append(pose_val_c)
+        aggregated_W_c.extend(pose_W_c)
         # pose 학습 완료 후
         pose_concepts = [str(i) for i in range(pose_train_c.shape[1])]
         concepts_txt_path = os.path.join(pose_save_path, "concepts.txt")
@@ -377,7 +379,7 @@ def train_cbm_and_save(args):
         os.makedirs(save_path, exist_ok=True)
 
         print(f"🎓 Learning {key} concept classifier...")
-        W_c, updated_concepts, best_val_loss = train_cocept_layer(
+        text_W_c, updated_concepts, best_val_loss = train_cocept_layer(
             args=args,
             concepts=concept_names[key],
             target_features=backbone_features,
@@ -387,28 +389,33 @@ def train_cbm_and_save(args):
             save_name=save_path
         )
 
-        train_c, val_c = train_classification_layer(
-            args=args,
-            W_c=W_c,
-            pre_concepts=None,
-            concepts=updated_concepts,
-            target_features=backbone_features,
-            val_target_features=val_backbone_features,
-            save_name=save_path,
-            joint=None,
-            best_val_loss=best_val_loss
-        )
+        # train_c, val_c = train_classification_layer(
+        #     args=args,
+        #     W_c=text_W_c,
+        #     pre_concepts=None,
+        #     concepts=updated_concepts,
+        #     target_features=backbone_features,
+        #     val_target_features=val_backbone_features,
+        #     save_name=save_path,
+        #     joint=None,
+        #     best_val_loss=best_val_loss
+        # )
 
         aggregated_concepts.extend(updated_concepts)
-        aggregated_train_c_features.append(train_c)
-        aggregated_val_c_features.append(val_c)
+        # aggregated_train_c_features.append(train_c)
+        # aggregated_val_c_features.append(val_c)
+        aggregated_W_c.extend(text_W_c)
+        
         
 # Aggregated classification 학습
     print("🧠 Training aggregated concept classifier...")
     train_aggregated_classification_layer(
         args=args,
-        aggregated_train_c_features=aggregated_train_c_features,
-        aggregated_val_c_features=aggregated_val_c_features,
+        target_features=backbone_features,
+        val_target_features=val_backbone_features,
+        # aggregated_train_c_features=aggregated_train_c_features,
+        # aggregated_val_c_features=aggregated_val_c_features,
+        W_c = aggregated_W_c,
         concepts=aggregated_concepts,
         save_name=save_name
     )

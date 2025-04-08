@@ -175,16 +175,50 @@ def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=Non
 
     return train_c, val_c
 
+def get_concept_features(
+    args=None,W_c=None,concepts=None, 
+    target_features=None,val_target_features=None):
+            
+    proj_layer = torch.nn.Linear(target_features.shape[1], out_features=len(concepts), bias=False)
+    proj_layer.load_state_dict({"weight":W_c})
+    with torch.no_grad():
+        train_c = proj_layer(target_features.detach())
+        val_c = proj_layer(val_target_features.detach())
+        
+        train_mean = torch.mean(train_c, dim=0, keepdim=True)
+        train_std = torch.std(train_c, dim=0, keepdim=True)
+        
+        train_c -= train_mean
+        train_c /= train_std
+
+        val_c -= train_mean
+        val_c /= train_std
+    return train_c, val_c
+
 def train_aggregated_classification_layer(
     args=None,
-    aggregated_train_c_features=None,
-    aggregated_val_c_features=None,
+    # aggregated_train_c_features=None,
+    # aggregated_val_c_features=None,
+    target_features=None, 
+    val_target_features=None,
+    W_c = None,
     concepts=None,
     save_name=None
 ):
     # 통합 저장 폴더 생성
     save_name = os.path.join(save_name, 'aggregated')
     os.makedirs(save_name, exist_ok=True)
+    aggregated_train_c_features = []
+    aggregated_val_c_features = []
+    for i,W in enumerate(W_c):
+        train_c, val_c =  get_concept_features(args,
+                                W_c=W,
+                                concepts = concept,
+                                target_features=target_features,
+                                val_target_features=val_target_features
+                                )
+        aggregated_train_c_features.append(train_c)
+        aggregated_val_c_features.append(val_c)
 
     # Feature concat
     aggregated_train_c = torch.cat(aggregated_train_c_features, dim=1)
@@ -914,11 +948,25 @@ def only_pose(args,target_features, val_target_features,save_name):
             val_result_tensor[val_result_tensor == 0.] = 0.05
             val_result_tensor[val_result_tensor == 1.] = 0.3
     
+    '''
+    label에서 -1 아닌애들로 재구성 ( torch.where이나 이런거로 -1아닌 인덱스 얻음)
+    [0,,,,,99] -1인애들이 3,6,11
+    new_index = [0,1,2,4,5,7,,,,,99]
+    target_feat[new_index,:]
+    val_target_feat[val_new_index,:]
+    '''
+    train_valid_index = torch.where(train_result_tensor.max(dim=1).values != -1)[0]
+    val_valid_index = torch.where(val_result_tensor.max(dim=1).values != -1)[0]
     
+    target_features_indexed = target_features[train_valid_index]
+    train_result_tensor_indexed = train_result_tensor[train_valid_index]
+    
+    val_target_features_indexed = val_target_features[val_valid_index]
+    val_result_tensor_indexed = val_result_tensor[val_valid_index]
 
     if args.use_mlp:
         # proj_layer = cbm.ModelOracleCtoY(n_class_attr=2, input_dim=target_features.shape[1],num_classes=train_result_tensor.shape[1])
-        proj_layer =torch.nn.Linear(target_features.shape[1],train_result_tensor.shape[1])
+        proj_layer =torch.nn.Linear(target_features_indexed.shape[1],train_result_tensor_indexed.shape[1])
         proj_layer = proj_layer.cuda()
         opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-2)
         criterion = torch.nn.CrossEntropyLoss()
@@ -953,11 +1001,11 @@ def only_pose(args,target_features, val_target_features,save_name):
         opt.step()
         if i%500==0 or i==args.proj_steps-1:
             with torch.no_grad():
-                val_output = proj_layer(val_target_features.to(args.device).detach())
+                val_output = proj_layer(val_target_features_indexed.to(args.device).detach())
                 if args.use_mlp:
-                    val_loss = criterion(val_output, val_result_tensor.to(args.device).detach())
+                    val_loss = criterion(val_output, val_result_tensor_indexed.to(args.device).detach())
                 else:
-                    val_loss = -similarity_fn(val_result_tensor.to(args.device).detach(), val_output)
+                    val_loss = -similarity_fn(val_result_tensor_indexed.to(args.device).detach(), val_output)
                 
 
                 val_loss = torch.mean(val_loss)
@@ -1011,12 +1059,12 @@ def only_pose(args,target_features, val_target_features,save_name):
                                W_c=W_c,
                                pre_concepts=None,
                                concepts = train_result_tensor[0],
-                               target_features=target_features,
-                               val_target_features=val_target_features,
+                               target_features=target_features_indexed,
+                               val_target_features=val_target_features_indexed,
                                 save_name=save_name,
                                 best_val_loss=best_val_loss
                                )
-    return train_c,val_c
+    return W_c, train_c,val_c
 
 def soft_label(args,target_features, val_target_features,save_name):
     if args.loss_mode =='concept':

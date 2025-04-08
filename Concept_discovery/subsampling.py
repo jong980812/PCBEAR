@@ -419,7 +419,7 @@ def subsampling_considering_cos_sim(args, json_files):
             '''
             cos_sim = util.compute_pose_cosine_similarity(clip)
             if np.any(cos_sim < 0.92):
-                print(video_id)
+                print(f'{video_id}:{sampled_indices}')
                 continue
             # if np.mean(clip[:,:,2])<0.5:
             #     print(video_id)
