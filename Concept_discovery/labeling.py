@@ -53,7 +53,7 @@ def hard_label(video_attributes, args, save_path, mode):
         for item in video_attributes
     }
     sorted_annotations = []
-    missing_videos = []
+    #missing_videos = []
 
     for video_name in video_list:
         if video_name in annotation_dict:
@@ -62,7 +62,12 @@ def hard_label(video_attributes, args, save_path, mode):
                 "attribute_label" : annotation_dict[video_name]
             })
         else :
-            missing_videos.append(video_name)
+            # missing_videos.append(video_name)
+            print(f"Missing video: {video_name}")
+            sorted_annotations.append({
+            "video_name": video_name,
+            "attribute_label": [-1] * args.req_cluster
+        })
 
     with open(output_json_path, "w") as f:
         json.dump(sorted_annotations, f, indent=4)
@@ -70,7 +75,7 @@ def hard_label(video_attributes, args, save_path, mode):
     # ✅ Pickle 파일로 저장
     with open(output_pkl_path, "wb") as f:
         pickle.dump(sorted_annotations, f)
-    util.remove_missing_videos(csv_path, missing_videos, new_csv_path)
+    # util.remove_missing_videos(csv_path, missing_videos, new_csv_path)
 
     return sorted_annotations
 

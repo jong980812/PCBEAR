@@ -44,6 +44,16 @@ def process_keypoints(json_file, scaler, confidence_threshold=0.1):
             frames_data.append(pose_normalized)
     return frames_data
 
+def normalized_keypoints(clip, scaler):
+    frames_data = []
+    for t in range(clip.shape[0]):  # 각 프레임에 대해
+        pose = clip[t]  # shape: (17, 2)
+        mean_pose = np.mean(pose, axis=0)  # (2,)
+        pose_centered = pose - mean_pose  # (17, 2)
+        pose_normalized = scaler.fit_transform(pose_centered)  # (17, 2)
+        frames_data.append(pose_normalized)
+    return np.array(frames_data)
+
 
 def subsampling_ver1(args, json_files):
     """샘플을 L등분하고, 각 등분에서 T등분하여 
@@ -254,7 +264,7 @@ def subsampling_ver4(args, json_files):
         class_data.extend(all_clips)
     return class_data, class_metadata
 
-def subsampling_final(args, json_files):
+def subsampling_ver5(args, json_files):
     """Keyframe을 중심으로 일정 구간을 샘플링
     keyframe 개수에 따라 샘플링 개수 다르게
     """
@@ -338,12 +348,18 @@ def subsampling_considering_cos_sim(args, json_files):
         video_id = os.path.basename(json_file).replace("_result.json", "")
         frames_data, missing_index,og_num_frames = get_keypoints(json_file)
         
-        num_frames = len(frames_data)
+        pose = np.array(frames_data)[:, :,:2]
+        
+        num_frames = len(pose)
         all_clips = []
 
         if num_frames == 0:
             print(f"Skipping {json_file} (No valid frames)")
             continue
+        elif num_frames < T:
+            pose = util.repeat_to_min_length(pose, T)
+            print(f"Original frame len : {num_frames}")
+            print(f"Expanding frames to {len(pose)}")
         
         keyframe_path = os.path.join(args.keyframe_path, video_id, "csvFile", f"{video_id}.txt")
         with open(keyframe_path, 'r') as f:
@@ -380,7 +396,7 @@ def subsampling_considering_cos_sim(args, json_files):
         else:  # L == len(keyframes)
             selected_keyframes = keyframes
         
-        frames_data = np.array(frames_data)
+        
         
         for keyframe in selected_keyframes:
             # keyframe을 중심으로 앞뒤로 T//2개씩 샘플링
@@ -396,12 +412,12 @@ def subsampling_considering_cos_sim(args, json_files):
             sampled_indices = np.arange(start, end)
             
             # 샘플링한 인덱스로 클립 생성
-            clip = frames_data[sampled_indices]
+            clip = pose[sampled_indices]
             
             '''
             Compute cos sim
             '''
-            cos_sim = util.compute_pose_cosine_similarity(clip[:,:,:2])
+            cos_sim = util.compute_pose_cosine_similarity(clip)
             if np.any(cos_sim < 0.92):
                 print(video_id)
                 continue
@@ -413,7 +429,8 @@ def subsampling_considering_cos_sim(args, json_files):
                 '''
                 여기서 스케일링해줘야됌.
                 '''
-                all_clips.append(clip[:,:,:2])
+                clip_normalized = normalized_keypoints(clip, scaler)
+                all_clips.append(clip_normalized)
                 class_metadata.append(video_id)
 
         
@@ -437,32 +454,30 @@ def Keypointset(args, save_path):
     elif args.subsampling_mode == "ver4":
         class_data, class_metadata = subsampling_ver4(args, json_files)
     elif args.subsampling_mode == "ver5":
-<<<<<<< HEAD
-        class_data, class_metadata = subsampling_final(args, json_files)
+        class_data, class_metadata = subsampling_ver5(args, json_files)
+    elif args.subsampling_mode == "ver6":
+        class_data, class_metadata = subsampling_considering_cos_sim(args, json_files)
     print(np.array(class_data).shape)
     print(np.array(class_metadata).shape)
-=======
-        class_data, class_metadata = subsampling_considering_cos_sim(args, json_files)
->>>>>>> 5c7d9d54aaa5fac0c475b408c40a05874fd593e2
     util.save_data(save_path, class_data, class_metadata)
 
-if __name__ == "__main__":
-    import argparse
+# if __name__ == "__main__":
+#     import argparse
 
-    # Argument parser 설정
-    parser = argparse.ArgumentParser(description='Settings for creating conceptset')
-    parser.add_argument('--anno_path', default='')
-    parser.add_argument('--json_path', default='')
-    parser.add_argument('--output_path', default='')
-    # parser.add_argument('--save_path', default='')
-    parser.add_argument('--keyframe_path', default='')
-    parser.add_argument('--num_subsequence', type=int, default=10)
-    parser.add_argument('--len_subsequence', type=int, default=16)
-    parser.add_argument('--dataset', default='Penn_action', 
-                        choices=['Penn_action','KTH','HAA100'],type=str)
-    # parser.add_argument('--req_cluster',  type=int, default=500)
-    parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5"])
+#     # Argument parser 설정
+#     parser = argparse.ArgumentParser(description='Settings for creating conceptset')
+#     parser.add_argument('--anno_path', default='')
+#     parser.add_argument('--json_path', default='')
+#     parser.add_argument('--output_path', default='')
+#     # parser.add_argument('--save_path', default='')
+#     parser.add_argument('--keyframe_path', default='')
+#     parser.add_argument('--num_subsequence', type=int, default=10)
+#     parser.add_argument('--len_subsequence', type=int, default=16)
+#     parser.add_argument('--dataset', default='Penn_action', 
+#                         choices=['Penn_action','KTH','HAA100'],type=str)
+#     # parser.add_argument('--req_cluster',  type=int, default=500)
+#     parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","ver6"])
 
-    args = parser.parse_args()
-    output_path = os.path.join(args.output_path,args.subsampling_mode)
-    Keypointset(args,output_path)
+#     args = parser.parse_args()
+#     output_path = os.path.join(args.output_path,args.subsampling_mode)
+#     Keypointset(args,output_path)
