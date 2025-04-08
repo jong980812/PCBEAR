@@ -258,6 +258,10 @@ def subsampling_final(args, json_files):
         if num_frames == 0:
             print(f"Skipping {json_file} (No valid frames)")
             continue
+        elif num_frames < T:
+            frames_data = util.repeat_to_clip(num_frames, T)
+            print(f"Original frame len : {num_frames}")
+            print(f"Expanding frames to {len(frames_data)}")
         
         keyframe_path = os.path.join(args.keyframe_path, video_id, "csvFile", f"{video_id}.txt")
         with open(keyframe_path, 'r') as f:
@@ -323,6 +327,8 @@ def Keypointset(args, save_path):
         class_data, class_metadata = subsampling_ver4(args, json_files)
     elif args.subsampling_mode == "ver5":
         class_data, class_metadata = subsampling_final(args, json_files)
+    print(np.array(class_data).shape)
+    print(np.array(class_metadata).shape)
     util.save_data(save_path, class_data, class_metadata)
 
 # if __name__ == "__main__":

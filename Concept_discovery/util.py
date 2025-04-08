@@ -4,6 +4,7 @@ import numpy as np
 import json
 import random
 import pandas as pd
+import math
 
 def load_class_list(anno_path):
     """클래스 리스트를 파일에서 불러옴."""
@@ -48,7 +49,18 @@ def save_data(output_path, class_data, class_metadata):
     np.save(processed_keypoints_path, np.array(class_data))
     with open(sample_metadata_path, "w") as f:
         json.dump(class_metadata, f, indent=4)
-
+        
+def repeat_to_min_length(arr, min_len):
+    """
+    주어진 시퀀스를 복제하여 최소 min_len 이상이 되도록
+    가장 작은 정수 배수로 반복 (모든 프레임을 동일하게 반복)
+    """
+    n = len(arr)
+    if n == 0:
+        return arr  # 빈 배열이면 그대로 반환
+    k = math.ceil(min_len / n)  # 최소 반복 횟수
+    repeated = np.repeat(arr, k, axis=0)
+    return repeated
 def find_closest_to_centroid(features, cluster_labels):
     unique_clusters = np.unique(cluster_labels)  # 클러스터 ID 찾기
     closest_indices = {}  # 각 클러스터의 대표 샘플 인덱스 저장

@@ -9,6 +9,7 @@ import subsampling
 import clustering
 import labeling
 import visualize
+from datetime import datetime
 
 parser = argparse.ArgumentParser(description='Settings for creating conceptset')
 parser.add_argument('--anno_path', default='')
@@ -30,7 +31,8 @@ def concept_decovery(args):
     last_folder = os.path.basename(args.keyframe_path)
     output_path = os.path.join(args.output_path,args.subsampling_mode,last_folder)
     os.makedirs(output_path, exist_ok=True)
-    save_path = os.path.join(output_path, f"result_{args.req_cluster}_L:{args.len_subsequence}_N:{args.num_subsequence}")
+    timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+    save_path = os.path.join(output_path, f"result_{args.req_cluster}_L:{args.len_subsequence}_N:{args.num_subsequence}_{timestamp}")
     os.makedirs(save_path, exist_ok=True)
     subsampling.Keypointset(args,save_path)
     data, result_gt = clustering.clustering(args,save_path)
