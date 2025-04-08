@@ -93,3 +93,20 @@ def video_class_mapping(args):
 
     df["class_name"] = df["class_id"].apply(lambda x: class_list[int(x)])
     return dict(zip(df["video_id"], df["class_name"]))
+
+
+def compute_pose_cosine_similarity(xy_sequence: np.ndarray) -> np.ndarray:
+    """
+    포즈 시퀀스에서 인접한 프레임 간 cosine similarity 계산
+
+    Args:
+        xy_sequence (np.ndarray): (T, K, 2) 형태의 keypoint 시퀀스
+
+    Returns:
+        similarities (np.ndarray): (T-1,) 크기의 cosine similarity 배열
+    """
+    flat_poses = xy_sequence.reshape((xy_sequence.shape[0], -1))  # shape: (T, K*2)
+    norms = np.linalg.norm(flat_poses, axis=1, keepdims=True) + 1e-8
+    normalized = flat_poses / norms
+    similarities = np.sum(normalized[1:] * normalized[:-1], axis=1)
+    return similarities
