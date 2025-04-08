@@ -7,7 +7,23 @@ from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 import util
 
-    
+def get_keypoints(json_file, confidence_threshold=0.1):
+    """JSON 파일에서 keypoints를 추출하고 정규화."""
+    with open(json_file, "r") as f:
+        keypoints_data = json.load(f).get("keypoints", [])
+    no_keyponit_index = []
+    frames_data = []
+    for i, frame in enumerate(keypoints_data):
+        if "0" in frame:
+            keypoints = np.array(frame["0"])  # (17, 3)
+            mean_confidence = np.mean(keypoints[:, 2])
+            if mean_confidence < confidence_threshold:
+                continue
+            # pose = keypoints[:, :2]
+            frames_data.append(keypoints)
+        else:
+            no_keyponit_index.append(i)
+    return frames_data,no_keyponit_index, len(keypoints_data)
 
 def process_keypoints(json_file, scaler, confidence_threshold=0.1):
     """JSON 파일에서 keypoints를 추출하고 정규화."""
@@ -300,7 +316,7 @@ def subsampling_final(args, json_files):
             
             # 샘플링한 인덱스로 클립 생성
             clip = frames_data[sampled_indices]
-            
+
             if len(clip) == T:
                 all_clips.append(clip)
                 class_metadata.append(video_id)
@@ -308,7 +324,102 @@ def subsampling_final(args, json_files):
         class_data.extend(all_clips)
     
     return class_data, class_metadata
+def subsampling_considering_cos_sim(args, json_files):
+    """Keyframe을 중심으로 일정 구간을 샘플링
+    keyframe 개수에 따라 샘플링 개수 다르게
+    """
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    class_data = []
+    class_metadata = []
 
+    L, T = args.num_subsequence, args.len_subsequence
+    
+    for json_file in tqdm(json_files, desc="Processing JSON files", leave=True):
+        video_id = os.path.basename(json_file).replace("_result.json", "")
+        frames_data, missing_index,og_num_frames = get_keypoints(json_file)
+        
+        num_frames = len(frames_data)
+        all_clips = []
+
+        if num_frames == 0:
+            print(f"Skipping {json_file} (No valid frames)")
+            continue
+        
+        keyframe_path = os.path.join(args.keyframe_path, video_id, "csvFile", f"{video_id}.txt")
+        with open(keyframe_path, 'r') as f:
+            keyframes = [int(line.strip()) for line in f.readlines()]
+            
+        # ✅ missing_index 있는 경우
+        if len(missing_index) > 0:
+            # 1. usable 인덱스 만들기
+            valid_indices = [i for i in range(og_num_frames) if i not in missing_index]
+
+            # 2. keyframes 중 usable 한 것만 남기고, frames_data 기준 인덱스로 재매핑
+            remapped_keyframes = []
+            for kf in keyframes:
+                if kf in valid_indices:
+                    remapped_keyframes.append(valid_indices.index(kf))  # usable index 기준으로 바꿔줌
+                else:
+                    print(f"Keyframe {kf} in {video_id} is missing and will be skipped.")
+
+            keyframes = remapped_keyframes
+
+            if len(keyframes) == 0:
+                print(f"Skipping {video_id} (All keyframes are invalid after remapping)")
+                continue
+            
+        # L, keyframe 개수 관계에 따른 처리
+        selected_keyframes = []
+        
+        if L > len(keyframes):
+            # L > keyframe: keyframe 개수만큼만
+            selected_keyframes = keyframes
+        elif L < len(keyframes):
+            indices = np.linspace(0, len(keyframes)-1, L, dtype=int)
+            selected_keyframes = [keyframes[i] for i in indices]
+        else:  # L == len(keyframes)
+            selected_keyframes = keyframes
+        
+        frames_data = np.array(frames_data)
+        
+        for keyframe in selected_keyframes:
+            # keyframe을 중심으로 앞뒤로 T//2개씩 샘플링
+            start = max(keyframe - T//2, 0)  # T개 샘플을 위해 앞뒤로 T//2개씩 선택
+            end = min(keyframe + T//2 + 1, num_frames)  # 마지막 프레임을 넘지 않도록
+
+            if end - start < T:
+                if start == 0:
+                    end = min(start+T, num_frames)
+                else:
+                    start = max(end-T, 0)
+            
+            sampled_indices = np.arange(start, end)
+            
+            # 샘플링한 인덱스로 클립 생성
+            clip = frames_data[sampled_indices]
+            
+            '''
+            Compute cos sim
+            '''
+            cos_sim = util.compute_pose_cosine_similarity(clip[:,:,:2])
+            if np.any(cos_sim < 0.92):
+                print(video_id)
+                continue
+            # if np.mean(clip[:,:,2])<0.5:
+            #     print(video_id)
+            #     continue
+                
+            if len(clip) == T:
+                '''
+                여기서 스케일링해줘야됌.
+                '''
+                all_clips.append(clip[:,:,:2])
+                class_metadata.append(video_id)
+
+        
+        class_data.extend(all_clips)
+    
+    return class_data, class_metadata
 
 def Keypointset(args, save_path):
     processed_keypoints_path = os.path.join(save_path, "processed_keypoints.npy")
@@ -326,28 +437,32 @@ def Keypointset(args, save_path):
     elif args.subsampling_mode == "ver4":
         class_data, class_metadata = subsampling_ver4(args, json_files)
     elif args.subsampling_mode == "ver5":
+<<<<<<< HEAD
         class_data, class_metadata = subsampling_final(args, json_files)
     print(np.array(class_data).shape)
     print(np.array(class_metadata).shape)
+=======
+        class_data, class_metadata = subsampling_considering_cos_sim(args, json_files)
+>>>>>>> 5c7d9d54aaa5fac0c475b408c40a05874fd593e2
     util.save_data(save_path, class_data, class_metadata)
 
-# if __name__ == "__main__":
-#     import argparse
+if __name__ == "__main__":
+    import argparse
 
-#     # Argument parser 설정
-#     parser = argparse.ArgumentParser(description='Settings for creating conceptset')
-#     parser.add_argument('--anno_path', default='')
-#     parser.add_argument('--json_path', default='')
-#     parser.add_argument('--output_path', default='')
-#     parser.add_argument('--save_path', default='')
-#     parser.add_argument('--keyframe_path', default='')
-#     parser.add_argument('--num_subsequence', type=int, default=10)
-#     parser.add_argument('--len_subsequence', type=int, default=16)
-#     parser.add_argument('--dataset', default='Penn_action', 
-#                         choices=['Penn_action','KTH','HAA100'],type=str)
-#     # parser.add_argument('--req_cluster',  type=int, default=500)
-#     parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4"])
+    # Argument parser 설정
+    parser = argparse.ArgumentParser(description='Settings for creating conceptset')
+    parser.add_argument('--anno_path', default='')
+    parser.add_argument('--json_path', default='')
+    parser.add_argument('--output_path', default='')
+    # parser.add_argument('--save_path', default='')
+    parser.add_argument('--keyframe_path', default='')
+    parser.add_argument('--num_subsequence', type=int, default=10)
+    parser.add_argument('--len_subsequence', type=int, default=16)
+    parser.add_argument('--dataset', default='Penn_action', 
+                        choices=['Penn_action','KTH','HAA100'],type=str)
+    # parser.add_argument('--req_cluster',  type=int, default=500)
+    parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5"])
 
-#     args = parser.parse_args()
-#     output_path = os.path.join(args.output_path,args.subsampling_mode)
-#     Keypointset(args,output_path)
+    args = parser.parse_args()
+    output_path = os.path.join(args.output_path,args.subsampling_mode)
+    Keypointset(args,output_path)

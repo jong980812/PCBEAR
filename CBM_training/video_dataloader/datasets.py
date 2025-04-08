@@ -69,7 +69,7 @@ def build_dataset(is_train, test_mode, args):
             new_width=320,
             args=args)
         nb_classes = 400
-    elif args.data_set == 'haa49':
+    elif args.data_set == 'haa100':
         mode = None
         anno_path = None
         if is_train is True:
@@ -97,7 +97,7 @@ def build_dataset(is_train, test_mode, args):
             new_height=256,
             new_width=320,
             args=args)
-        nb_classes = 49
+        nb_classes = 100
     elif args.data_set == 'kinetics100':
         mode = None
         anno_path = None

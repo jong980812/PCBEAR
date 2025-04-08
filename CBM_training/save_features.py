@@ -130,7 +130,7 @@ parser.add_argument('--imagenet_default_mean_and_std', default=True, action='sto
 parser.add_argument('--num_segments', type=int, default= 1)
 parser.add_argument('--num_frames', type=int, default= 16)
 parser.add_argument('--sampling_rate', type=int, default= 4)
-parser.add_argument('--data_set', default='Kinetics-400', choices=['kth','kth-5','kth-2','penn-action','haa49','kinetics100','kinetics400','kinetics400_scratch', 'mini-SSV2','SSV2', 'UCF101', 'HMDB51','image_folder'],
+parser.add_argument('--data_set', default='Kinetics-400', choices=['kth','kth-5','kth-2','penn-action','haa100','kinetics100','kinetics400','kinetics400_scratch', 'mini-SSV2','SSV2', 'UCF101', 'HMDB51','image_folder'],
                     type=str, help='dataset')
 parser.add_argument('--output_dir', default='',
                     help='path where to save, empty for no saving')

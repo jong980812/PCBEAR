@@ -70,11 +70,11 @@ def get_data(dataset_name, preprocess=None,args = None):
         data, _= build_dataset(is_train=True, test_mode=False, args=args)
     elif dataset_name == "penn-action_val":
         data, _= build_dataset(is_train=False, test_mode=False, args=args)
-    elif dataset_name == "haa49_train":
+    elif dataset_name == "haa100_train":
         data, _= build_dataset(is_train=True, test_mode=False, args=args)
-    elif dataset_name == "haa49_val":
+    elif dataset_name == "haa100_val":
         data, _= build_dataset(is_train=False, test_mode=False, args=args)
-    elif dataset_name == "haa49_test":
+    elif dataset_name == "haa100_test":
         data, _= build_dataset(is_train=False, test_mode=False, args=args)
     elif dataset_name == "mini-SSV2_train":
         data, _= build_dataset(is_train=True, test_mode=False, args=args)

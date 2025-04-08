@@ -26,6 +26,15 @@ if __name__ == "__main__":
     parser.add_argument('--output-path', type=str, default='',
                         help='output path, if the path provided is a directory '
                         'output files are "input_name +_result{extension}".')
+    parser.add_argument('--skeleton_json_dir', type=str, default='',
+                        help='output path, if the path provided is a directory '
+                        'output files are "input_name +_result{extension}".')
+    parser.add_argument('--skeleton_video_dir', type=str, default='',
+                        help='output path, if the path provided is a directory '
+                        'output files are "input_name +_result{extension}".')
+    parser.add_argument('--src_dir', type=str, default='',
+                        help='output path, if the path provided is a directory '
+                        'output files are "input_name +_result{extension}".')
     parser.add_argument('--model', type=str,
                         help='checkpoint path of the model')
     parser.add_argument('--yolo', type=str, required=False, default=None,
@@ -65,7 +74,8 @@ if __name__ == "__main__":
                         help='save json results')
     parser.add_argument('--class_folders', default=False, action='store_true',
                         help='video 폴더안에 class_folder들이 따로 있는 경우')
-
+    parser.add_argument('--allowed_classes', type=str, required=False, default=None,
+                        help='checkpoint path of the yolo model')
     args = parser.parse_args()
 
     use_mps = hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
@@ -81,15 +91,15 @@ if __name__ == "__main__":
 
     is_video = True
     ext = '.mp4' if is_video else '.png'
-    assert not (args.save_img or args.save_json) or args.output_path, \
+    assert not (args.save_img or args.save_json) or args.skeleton_json_dir, \
         'Specify an output path if using save-img or save-json flags'
     # output_path = args.output_path #! log 파일
     
     
-    src_dir = '/local_datasets/Penn_Action/videos/'#! 비디오 폴더 
+    src_dir = args.src_dir#'/local_datasets/haa500/video'#! 비디오 폴더 
     # src_dir = '/data/jongseo/project/PCBEAR/Pose_extraction/test_video/370'
-    output_path = '/local_datasets/Penn_Action_GT_box_vitlarge/skeleton_video'#! skeleton 합쳐진 영상 저장되는경로
-    json_path = '/local_datasets/Penn_Action_GT_box_vitlarge/skeleton_json' #! skeleton 값들 json으로
+    output_path = args.skeleton_video_dir#'/data/dataset/haa500/large_skeleton_video'#! skeleton 합쳐진 영상 저장되는경로
+    json_path = args.skeleton_json_dir#'/data/dataset/haa500/large_skeleton_json' #! skeleton 값들 json으로
     # output_path = '/data/jongseo/project/PCBEAR/Pose_extraction/test_video/370/skeleton_video'#! skeleton 합쳐진 영상 저장되는경로
     # json_path = '/data/jongseo/project/PCBEAR/Pose_extraction/test_video/370/skeleton_json' #! skeleton 값들 json으로
     model = VitInference(args.model, yolo, args.model_name,
@@ -100,17 +110,23 @@ if __name__ == "__main__":
     print(f">>> Model loaded: {args.model}")
     
     if args.class_folders:
-        class_names = os.listdir(src_dir)
+        if args.allowed_classes is not None:
+            with open(args.allowed_classes, 'r') as f:
+                class_names = set(line.strip() for line in f if line.strip())
+        else:
+            class_names = os.listdir(src_dir)
                 # Initialize model
 
         for class_name in class_names:
+            # if class_name not in allowed_classes:
+            #     continue
             print(f"****************Class {class_name} ****************")
             class_folder = os.path.join(src_dir,class_name)
             os.makedirs(os.path.join(output_path,class_name), exist_ok=True)
             os.makedirs(os.path.join(json_path,class_name), exist_ok=True)
             input_files = [os.path.join(class_folder, f) for f in os.listdir(class_folder) if f.endswith(('.avi','.mp4', '.jpg', '.png'))]
             for (i,input_path) in enumerate(input_files):
-                print(f"****************{i}/{len(input_files)} ****************")
+                print(f"****************{i}/{len(input_files)}: {input_path} ****************")
                 
                 if os.path.isdir(output_path):
                     og_ext = input_path[input_path.rfind('.'):]
@@ -211,10 +227,10 @@ if __name__ == "__main__":
             for (i,video_pth) in enumerate(input_files):
                 input_path = os.path.join(src_dir,video_pth)
                 video_id = video_pth.split('.')[0]
-                print(f"****************{i}/{len(input_files)} ****************")
-                mat_file_path = f'/data/dataset/Penn_Action_skeleton/Penn_Action/labels/{video_id}.mat'
-                # 파일 읽기
-                gt_bboxes = loadmat(mat_file_path)['bbox']
+                print(f"****************{i}/{len(input_files)}: {video_pth} ****************")
+                # mat_file_path = f'/data/dataset/Penn_Action_skeleton/Penn_Action/labels/{video_id}.mat'
+                # # 파일 읽기
+                # gt_bboxes = loadmat(mat_file_path)['bbox']
                 if os.path.isdir(output_path):
                     og_ext = input_path[input_path.rfind('.'):]
                     save_name_img = os.path.basename(input_path).replace(og_ext, f"_result{ext}")
@@ -263,15 +279,16 @@ if __name__ == "__main__":
                 fps = []
                 tot_time = 0.
                 # If gt_bboxes is shorter than total_frames, pad with last bbox
-                if gt_bboxes.shape[0] < total_frames:
-                    last_bbox = gt_bboxes[-1:]
-                    pad_count = total_frames - gt_bboxes.shape[0]
-                    gt_bboxes = np.concatenate([gt_bboxes, np.repeat(last_bbox, pad_count, axis=0)], axis=0)
+                # if gt_bboxes.shape[0] < total_frames:
+                #     last_bbox = gt_bboxes[-1:]
+                #     pad_count = total_frames - gt_bboxes.shape[0]
+                #     gt_bboxes = np.concatenate([gt_bboxes, np.repeat(last_bbox, pad_count, axis=0)], axis=0)
                 for (ith, img) in enumerate(reader):
                     t0 = time.time()
 
                     # Run inference
-                    frame_keypoints = model.inference(img,gt_bboxes[ith:ith+1,:])
+                    # frame_keypoints = model.inference(img,gt_bboxes[ith:ith+1,:])
+                    frame_keypoints = model.inference(img)
                     keypoints.append(frame_keypoints)
 
                     delta = time.time() - t0

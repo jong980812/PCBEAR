@@ -238,7 +238,11 @@ class VitInference:
                                 device=self.device if self.device != 'cuda' else 0,
                                 classes=self.yolo_classes)[0]
             res_pd = np.array([r[:5].tolist() for r in  # TODO: Confidence threshold
-                               results.boxes.data.cpu().numpy() if r[4] > 0.35]).reshape((-1, 5))
+                               results.boxes.data.cpu().numpy() if r[4] > 0.25]).reshape((-1, 5))
+        if res_pd.shape[0] > 1:
+            areas = (res_pd[:, 2] - res_pd[:, 0]) * (res_pd[:, 3] - res_pd[:, 1])
+            max_idx = np.argmax(areas)
+            res_pd = res_pd[max_idx:max_idx+1]
         if gt_bbox is not None:# and res_pd.shape[0]>1:
             # Expand bbox by 1.5x around its center
             x1, y1, x2, y2 = gt_bbox[0]
