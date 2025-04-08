@@ -213,7 +213,7 @@ def train_aggregated_classification_layer(
     for i,W in enumerate(W_c):
         train_c, val_c =  get_concept_features(args,
                                 W_c=W,
-                                concepts = concept,
+                                concepts = concepts[i],
                                 target_features=target_features,
                                 val_target_features=val_target_features
                                 )
@@ -265,6 +265,7 @@ def train_aggregated_classification_layer(
     torch.save(b_g, os.path.join(save_name, "b_g.pt"))
 
     # ✅ 개념 리스트 저장
+    concepts = [item for sublist in concepts for item in sublist]
     if concepts:
         with open(os.path.join(save_name, "concepts.txt"), 'w') as f:
             f.write(concepts[0])
@@ -971,29 +972,29 @@ def only_pose(args,target_features, val_target_features,save_name):
         opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-2)
         criterion = torch.nn.CrossEntropyLoss()
     else:
-        proj_layer = torch.nn.Linear(in_features=target_features.shape[1], out_features=train_result_tensor.shape[1],
+        proj_layer = torch.nn.Linear(in_features=target_features_indexed.shape[1], out_features=train_result_tensor_indexed.shape[1],
                                   bias=False).to(args.device)
         # proj_layer.weight.data.zero_()
         # proj_layer.bias.data.zero_()
         opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-3)    
-    indices = [ind for ind in range(len(target_features))]
+    indices = [ind for ind in range(len(target_features_indexed))]
     
     best_val_loss = float("inf")
     best_step = 0
     best_weights = None
-    proj_batch_size = min(args.proj_batch_size, len(target_features))
+    proj_batch_size = min(args.proj_batch_size, len(target_features_indexed))
     # import pickle
     # result_tensor /= torch.norm(result_tensor,dim=1,keepdim=True)
 
     # 결과 출력
     for i in range(args.proj_steps):
         batch = torch.LongTensor(random.sample(indices, k=proj_batch_size))
-        outs = proj_layer(target_features[batch].to(args.device).detach())
+        outs = proj_layer(target_features_indexed[batch].to(args.device).detach())
         # if args.pose_label is not None:
         if args.use_mlp:
             loss = criterion(outs, train_result_tensor[batch].to(args.device).detach())
         else:
-            loss = -similarity_fn(train_result_tensor[batch].to(args.device).detach(), outs)
+            loss = -similarity_fn(train_result_tensor_indexed[batch].to(args.device).detach(), outs)
    
         
         loss = torch.mean(loss)
@@ -1059,8 +1060,8 @@ def only_pose(args,target_features, val_target_features,save_name):
                                W_c=W_c,
                                pre_concepts=None,
                                concepts = train_result_tensor[0],
-                               target_features=target_features_indexed,
-                               val_target_features=val_target_features_indexed,
+                               target_features=target_features,
+                               val_target_features=val_target_features,
                                 save_name=save_name,
                                 best_val_loss=best_val_loss
                                )

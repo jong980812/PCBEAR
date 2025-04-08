@@ -280,8 +280,8 @@ def train_cbm_and_save(args):
     os.makedirs(save_name,exist_ok=True)
     cbm_utils.save_args(args,save_name)
 
-    aggregated_train_c_features = []
-    aggregated_val_c_features = []
+    # aggregated_train_c_features = []
+    # aggregated_val_c_features = []
     
     backbone_features = torch.load(args.backbone_features,map_location="cpu").float()
     val_backbone_features=torch.load(args.backbone_features.replace(f'{args.data_set}_train',f'{args.data_set}_val'),map_location="cpu").float()
@@ -302,10 +302,10 @@ def train_cbm_and_save(args):
         pose_save_path = os.path.join(save_name, 'pose')
         os.makedirs(pose_save_path, exist_ok=True)
         pose_W_c, pose_train_c, pose_val_c = only_pose(args, backbone_features, val_backbone_features, pose_save_path)
-        aggregated_concepts.extend([str(i) for i in range(pose_train_c.shape[1])])
+        aggregated_concepts.append([str(i) for i in range(pose_train_c.shape[1])])
         # aggregated_train_c_features.append(pose_train_c)
         # aggregated_val_c_features.append(pose_val_c)
-        aggregated_W_c.extend(pose_W_c)
+        aggregated_W_c.append(pose_W_c)
         # pose 학습 완료 후
         pose_concepts = [str(i) for i in range(pose_train_c.shape[1])]
         concepts_txt_path = os.path.join(pose_save_path, "concepts.txt")
@@ -401,10 +401,10 @@ def train_cbm_and_save(args):
         #     best_val_loss=best_val_loss
         # )
 
-        aggregated_concepts.extend(updated_concepts)
+        aggregated_concepts.append(updated_concepts)
         # aggregated_train_c_features.append(train_c)
         # aggregated_val_c_features.append(val_c)
-        aggregated_W_c.extend(text_W_c)
+        aggregated_W_c.append(text_W_c)
         
         
 # Aggregated classification 학습
