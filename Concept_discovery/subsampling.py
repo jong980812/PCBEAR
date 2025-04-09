@@ -341,7 +341,8 @@ def subsampling_considering_cos_sim(args, json_files):
     scaler = MinMaxScaler(feature_range=(0, 1))
     class_data = []
     class_metadata = []
-
+    cnt = 0
+    missing_video =[]
     L, T = args.num_subsequence, args.len_subsequence
     
     for json_file in tqdm(json_files, desc="Processing JSON files", leave=True):
@@ -355,11 +356,14 @@ def subsampling_considering_cos_sim(args, json_files):
 
         if num_frames == 0:
             print(f"Skipping {json_file} (No valid frames)")
+            missing_video.append(json_file)
+            cnt += 1
             continue
         elif num_frames < T:
             pose = util.repeat_to_min_length(pose, T)
             print(f"Original frame len : {num_frames}")
             print(f"Expanding frames to {len(pose)}")
+            num_frames = len(pose)
         
         keyframe_path = os.path.join(args.keyframe_path, video_id, "csvFile", f"{video_id}.txt")
         with open(keyframe_path, 'r') as f:
@@ -382,6 +386,7 @@ def subsampling_considering_cos_sim(args, json_files):
 
             if len(keyframes) == 0:
                 print(f"Skipping {video_id} (All keyframes are invalid after remapping)")
+                cnt+=1
                 continue
             
         # L, keyframe 개수 관계에 따른 처리
@@ -397,18 +402,35 @@ def subsampling_considering_cos_sim(args, json_files):
             selected_keyframes = keyframes
         
         
-        
+        cnt_cos_sim = 0
         for keyframe in selected_keyframes:
-            # keyframe을 중심으로 앞뒤로 T//2개씩 샘플링
-            start = max(keyframe - T//2, 0)  # T개 샘플을 위해 앞뒤로 T//2개씩 선택
-            end = min(keyframe + T//2 + 1, num_frames)  # 마지막 프레임을 넘지 않도록
+            half_T = T // 2
 
-            if end - start < T:
-                if start == 0:
-                    end = min(start+T, num_frames)
-                else:
-                    start = max(end-T, 0)
-            
+            if T % 2 == 0:
+                start = keyframe - half_T
+                end = keyframe + half_T
+            else:
+                start = keyframe - half_T
+                end = keyframe + half_T + 1
+
+            # 범위 초과 시 조정 (T개 유지)
+            if start < 0:
+                end += -start
+                start = 0
+            elif end > num_frames:
+                start -= (end - num_frames)
+                end = num_frames
+
+            # 여전히 start가 음수일 수도 있음
+            start = max(start, 0)
+
+            # 마지막 체크: 길이가 정확히 T 아니면 강제로 맞춤
+            if end - start != T:
+                end = start + T  # or start = end - T (선택지)
+                if end > num_frames:
+                    end = num_frames
+                    start = end - T
+                    start = max(start, 0)
             sampled_indices = np.arange(start, end)
             
             # 샘플링한 인덱스로 클립 생성
@@ -419,7 +441,11 @@ def subsampling_considering_cos_sim(args, json_files):
             '''
             cos_sim = util.compute_pose_cosine_similarity(clip)
             if np.any(cos_sim < 0.92):
+                #print(f"Pose_len : {len(pose)},Keyframe_len : {len(keyframes)}")
                 print(f'{video_id}:{sampled_indices}')
+                cnt_cos_sim+=1
+                if cnt_cos_sim == len(selected_keyframes):
+                    cnt+=1
                 continue
             # if np.mean(clip[:,:,2])<0.5:
             #     print(video_id)
@@ -432,10 +458,13 @@ def subsampling_considering_cos_sim(args, json_files):
                 clip_normalized = normalized_keypoints(clip, scaler)
                 all_clips.append(clip_normalized)
                 class_metadata.append(video_id)
+            else:
+                missing_video.append(video_id)
 
         
         class_data.extend(all_clips)
-    
+    # print(missing_video)
+    print(f"Number of missing video : {cnt}")
     return class_data, class_metadata
 
 def Keypointset(args, save_path):

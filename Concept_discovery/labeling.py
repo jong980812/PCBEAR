@@ -44,6 +44,7 @@ def hard_label(video_attributes, args, save_path, mode):
     output_pkl_path = os.path.join(save_path, f"hard_label_{mode}.pkl")
     csv_path = os.path.join(args.anno_path, f"{mode}.csv")
     new_csv_path = os.path.join(save_path, f"{mode}.csv") 
+    cnt = 0
 
     df = pd.read_csv(csv_path, header=None, names=["video_name", "class_label"], sep=",")
     video_list = df["video_name"].tolist()
@@ -64,11 +65,12 @@ def hard_label(video_attributes, args, save_path, mode):
         else :
             # missing_videos.append(video_name)
             print(f"Missing video: {video_name}")
+            cnt+=1
             sorted_annotations.append({
             "video_name": video_name,
             "attribute_label": [-1] * args.req_cluster
         })
-
+    print(f"Number of missing video : {cnt}")
     with open(output_json_path, "w") as f:
         json.dump(sorted_annotations, f, indent=4)
 
