@@ -20,7 +20,7 @@ parser.add_argument('--keyframe_path', default='')
 parser.add_argument('--num_subsequence', type=int, default=10)
 parser.add_argument('--len_subsequence', type=int, default=16)
 parser.add_argument('--dataset', default='Penn_action', 
-                    choices=['Penn_action','KTH','HAA100'],type=str)
+                    choices=['Penn_action','KTH','HAA100','UCF101'],type=str)
 parser.add_argument('--req_cluster',  type=int, default=500)
 parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","ver6"])
 # group_ver2 = parser.add_argument_group('subsampling_mode=ver2 settings')

@@ -16,7 +16,7 @@ def load_json_files(base_path, class_list, dataset):
     """주어진 클래스 리스트를 기반으로 JSON 파일 리스트를 가져옴."""
     if dataset == "Penn_action" or dataset == "KTH":
         return glob.glob(os.path.join(base_path, "*_result.json"))
-    elif dataset == "HAA100":
+    elif dataset == "HAA100" or dataset == "UCF101":
         json_files = []
         for class_name in class_list:
             class_folder = os.path.join(base_path, class_name)

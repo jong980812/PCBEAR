@@ -24,7 +24,7 @@ def make_attribute(args, result_gt,save_path):
             one_hot_vector[label] = 1  # 등장한 클러스터에 1 할당
         if args.dataset == "Penn_action" or args.dataset == "KTH":
             video_name = f"{video_id}.mp4"
-        elif args.dataset == "HAA100":
+        elif args.dataset == "HAA100" or args.dataset == "UCF101":
             video_name = f"{video_id.rsplit('_', 1)[0]}/{video_id}.mp4"
         video_entry = {
             "video_name": video_name,
