@@ -36,7 +36,7 @@ def extract_label(args,json_data, class_map):
 
         labels = np.array([get_label(video_id) for video_id in json_data])
     
-    elif args.dataset == "HAA100":
+    elif args.dataset == "HAA100" or "UCF101":
         def extract_class_name(label):
             return re.sub(r"_\d+$", "", label)
         labels = np.array([class_map.get(extract_class_name(item), -1) for item in json_data])
