@@ -36,9 +36,18 @@ def extract_label(args,json_data, class_map):
 
         labels = np.array([get_label(video_id) for video_id in json_data])
     
-    elif args.dataset == "HAA100" or "UCF101":
+    elif args.dataset == "HAA100" :
         def extract_class_name(label):
             return re.sub(r"_\d+$", "", label)
+        labels = np.array([class_map.get(extract_class_name(item), -1) for item in json_data])
+    
+    elif args.dataset == "UCF101":
+        def extract_class_name(label):
+            match = re.match(r"v_(.+?)_g\d+_c\d+", label)
+            if match:
+                return match.group(1)
+            else:
+                return "unknown"
         labels = np.array([class_map.get(extract_class_name(item), -1) for item in json_data])
 
     elif args.dataset == "KTH":
@@ -54,7 +63,10 @@ def extract_label(args,json_data, class_map):
 def run_finch_clustering(data, labels,args):
     """FINCH 클러스터링 실행 및 NMI 점수 계산."""
     # output_txt_path = os.path.join(args.output_path, "nmi_score.txt")
-    c, num_clust, req_c = FINCH(data, req_clust=args.req_cluster, use_ann_above_samples=(data.shape[0]-1000), verbose=True, seed=655)
+    if data.shape[0] > 50000:
+        c, num_clust, req_c = FINCH(data, req_clust=args.req_cluster, use_ann_above_samples=50000, verbose=True, seed=655)
+    else :
+        c, num_clust, req_c = FINCH(data, req_clust=args.req_cluster, use_ann_above_samples=(data.shape[0]-1000), verbose=True, seed=655)
     
     req_score = nmi(labels, req_c)
     req_score_text = f'NMI Score for req_cluster : {req_score*100:2f}'
@@ -64,11 +76,13 @@ def run_finch_clustering(data, labels,args):
         #     f.write(score_text + "\n")
     print(req_score_text)
     return req_c
-def clustering(args,save_path):
+def clustering(args,output_path):
     """메인 실행 함수."""
     util.set_seed(42)  # 랜덤 시드 설정
-    data, json_data = util.load_data(save_path)
+    data, json_data = util.load_data(output_path)
     data = data.reshape(data.shape[0], -1)
+    print(data.shape)
+    print(len(json_data))
     class_map = util.class_mapping(args.anno_path)
     labels = extract_label(args, json_data, class_map)
     result_gt = run_finch_clustering(data, labels,args)

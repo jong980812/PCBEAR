@@ -101,7 +101,10 @@ def video_class_mapping(args):
     train_df = pd.read_csv(train_csv, header=None, names=["video_name", "class_id"], sep=",")
     val_df = pd.read_csv(val_csv, header=None, names=["video_name", "class_id"], sep=",")
     df = pd.concat([train_df, val_df], ignore_index=True)
-    df["video_id"] = df["video_name"].str.replace(".mp4", "", regex=False)
+    if args.dataset == "UCF101":
+        df["video_id"] = df["video_name"].str.replace(".avi", "", regex=False)
+    else :
+        df["video_id"] = df["video_name"].str.replace(".mp4", "", regex=False)
 
     df["class_name"] = df["class_id"].apply(lambda x: class_list[int(x)])
     return dict(zip(df["video_id"], df["class_name"]))

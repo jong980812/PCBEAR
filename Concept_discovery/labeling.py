@@ -8,8 +8,8 @@ import pickle
 import util
 
 
-def make_attribute(args, result_gt,save_path):
-    with open(os.path.join(save_path, "sample_metadata.json"), "r") as f :
+def make_attribute(args, result_gt,save_path,output_path):
+    with open(os.path.join(output_path, "sample_metadata.json"), "r") as f :
         json_data = json.load(f)
     labels = result_gt
     num_cluster = args.req_cluster
@@ -81,14 +81,14 @@ def hard_label(video_attributes, args, save_path, mode):
 
     return sorted_annotations
 
-def labeling(args, data, result_gt,save_path):
+def labeling(args, data, result_gt,save_path,output_path):
     # data, result_gt = clustering.clustering(args)
     closest_sample_indices = util.find_closest_to_centroid(data, result_gt)
     with open(os.path.join(save_path,'concept_index.txt'), "w", encoding="utf-8") as f:
         for key, value in closest_sample_indices.items():
             f.write(f"{key}: {value}\n") 
 
-    video_attributes = make_attribute(args, result_gt,save_path)
+    video_attributes = make_attribute(args, result_gt,save_path,output_path)
     train_anno = hard_label(video_attributes, args,save_path, mode = "train")
     val_anno = hard_label(video_attributes, args, save_path, mode = "val")
     return closest_sample_indices

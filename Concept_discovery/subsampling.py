@@ -349,17 +349,19 @@ def subsampling_considering_cos_sim(args, json_files):
         video_id = os.path.basename(json_file).replace("_result.json", "")
         frames_data, missing_index,og_num_frames = get_keypoints(json_file)
         
-        pose = np.array(frames_data)[:, :,:2]
         
-        num_frames = len(pose)
+        
+        
         all_clips = []
 
-        if num_frames == 0:
+        if len(frames_data) == 0:
             print(f"Skipping {json_file} (No valid frames)")
             missing_video.append(json_file)
             cnt += 1
             continue
-        elif num_frames < T:
+        pose = np.array(frames_data)[:, :,:2]
+        num_frames = len(pose)
+        if num_frames < T:
             pose = util.repeat_to_min_length(pose, T)
             print(f"Original frame len : {num_frames}")
             print(f"Expanding frames to {len(pose)}")
@@ -467,8 +469,8 @@ def subsampling_considering_cos_sim(args, json_files):
     print(f"Number of missing video : {cnt}")
     return class_data, class_metadata
 
-def Keypointset(args, save_path):
-    processed_keypoints_path = os.path.join(save_path, "processed_keypoints.npy")
+def Keypointset(args, output_path):
+    processed_keypoints_path = os.path.join(output_path, "processed_keypoints.npy")
     if os.path.exists(processed_keypoints_path):
         print(f"✅ {processed_keypoints_path} 파일이 존재하므로 Keypointset()을 건너뜁니다.")
         return  
@@ -488,7 +490,7 @@ def Keypointset(args, save_path):
         class_data, class_metadata = subsampling_considering_cos_sim(args, json_files)
     print(np.array(class_data).shape)
     print(np.array(class_metadata).shape)
-    util.save_data(save_path, class_data, class_metadata)
+    util.save_data(output_path, class_data, class_metadata)
 
 # if __name__ == "__main__":
 #     import argparse
