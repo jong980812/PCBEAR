@@ -389,17 +389,17 @@ def train_cbm_and_save(args):
             save_name=save_path
         )
 
-        # train_c, val_c = train_classification_layer(
-        #     args=args,
-        #     W_c=text_W_c,
-        #     pre_concepts=None,
-        #     concepts=updated_concepts,
-        #     target_features=backbone_features,
-        #     val_target_features=val_backbone_features,
-        #     save_name=save_path,
-        #     joint=None,
-        #     best_val_loss=best_val_loss
-        # )
+        train_c, val_c = train_classification_layer(
+            args=args,
+            W_c=text_W_c,
+            pre_concepts=None,
+            concepts=updated_concepts,
+            target_features=backbone_features,
+            val_target_features=val_backbone_features,
+            save_name=save_path,
+            joint=None,
+            best_val_loss=best_val_loss
+        )
 
         aggregated_concepts.append(updated_concepts)
         # aggregated_train_c_features.append(train_c)
