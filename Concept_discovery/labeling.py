@@ -24,12 +24,23 @@ def make_attribute(args, result_gt,save_path,output_path):
             one_hot_vector[label] = 1  # 등장한 클러스터에 1 할당
         if args.dataset == "Penn_action" or args.dataset == "KTH":
             video_name = f"{video_id}.mp4"
-        elif args.dataset == "HAA100" or args.dataset == "UCF101":
+        elif args.dataset == "HAA100" :
             video_name = f"{video_id.rsplit('_', 1)[0]}/{video_id}.mp4"
+        elif args.dataset == "UCF101":
+    # video_id 예시: v_ApplyEyeMakeup_g10_c03
+            if video_id.startswith("v_"):
+                # v_ 제거 → ApplyEyeMakeup_g10_c03
+                no_prefix = video_id[2:]
+                # 클래스 이름만 추출: ApplyEyeMakeup
+                class_name = no_prefix.split('_')[0]
+                video_name = f"{class_name}/{video_id}.avi"
+            else:
+                video_name = f"{video_id}.avi"  # fallback
         video_entry = {
             "video_name": video_name,
             "attribute_label": one_hot_vector.tolist()
         }
+        
         video_attributes.append(video_entry)
 
     # JSON 파일로 저장
