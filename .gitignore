@@ -26,3 +26,4 @@ dataset_utils
 >>>>>>> 9d10cb27663de7c582619c6c2927705e5b4045b9
 scripts/
 experiments/
+*.gif
