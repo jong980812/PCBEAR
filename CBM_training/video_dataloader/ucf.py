@@ -52,7 +52,7 @@ class UCFVideoClsDataset(Dataset):
         cleaned = pd.read_csv(self.anno_path, header=None, delimiter=',')
         self.dataset_samples = list(cleaned.values[:, 0])
         self.label_array = list(cleaned.values[:, 1])
-        self.label_array = [label - 1 for label in self.label_array]
+        # self.label_array = [label - 1 for label in self.label_array]
         if (mode == 'train'):
             pass
 
