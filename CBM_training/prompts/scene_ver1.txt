@@ -1,0 +1,8 @@
+For the action "riding a bicycle", list the most common places or background scenes where this action typically occurs. Do not include objects or equipment.
+Examples:
+- park trail  
+- neighborhood street  
+- mountain path  
+- cycling track  
+
+Now, for the action "{}", list the most common places or background scenes where this action typically occurs. Do not include objects or equipment.:

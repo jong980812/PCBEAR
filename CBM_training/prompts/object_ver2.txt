@@ -1,0 +1,9 @@
+For the action "drinking water", list the most important physical objects that commonly appear when this action occurs. Focus only on tangible items involved in the action. Do not include human body parts, poses, or background scenes.
+
+Examples:
+- a water bottle  
+- a glass  
+- a straw  
+- a cup  
+
+Now, for the action "{}", list the most important physical objects that commonly appear when this action occurs.Do not include human body parts, poses, or background scenes:

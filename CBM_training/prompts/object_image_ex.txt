@@ -1,0 +1,10 @@
+For the action "drinking water", list the most visually important elements that help you recognize this action. Focus only on visible cues such as involved objects, human poses, or body interactions. Do not include background scenes or environment.
+
+Examples:
+- a water bottle  
+- a tilted head  
+- a hand near the mouth  
+- visible water  
+- lips touching a glass  
+
+Now, for the action "{}", list the most visually important elements that help you recognize this action:

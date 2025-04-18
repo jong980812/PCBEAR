@@ -1,0 +1,98 @@
+	•	baseball
+	•	baseball glove
+	•	pitcher’s mound
+	•	cleats
+	•	baseball cap
+	•	barbell
+	•	weight plates
+	•	lifting belt
+	•	chalk
+	•	lifting platform
+	•	pull-up bar
+	•	gym frame
+	•	gloves
+	•	resistance band
+	•	chalk
+	•	acoustic guitar
+	•	guitar pick
+	•	music stand
+	•	amplifier
+	•	capo
+	•	baseball bat
+	•	baseball
+	•	batting helmet
+	•	batting gloves
+	•	batting tee
+
+	•	golf club
+	•	golf ball
+	•	golf tee
+	•	golf glove
+	•	fairway grass
+
+	•	exercise mat
+	•	floor surface
+	•	gym shoes
+	•	timer
+	•	workout bench (optional use)
+
+
+	•	tennis racket
+	•	tennis ball
+	•	tennis net
+	•	grip tape
+	•	tennis shoes
+
+
+	•	bench
+	•	barbell
+	•	weight plates
+	•	safety rack
+	•	lifting belt
+
+
+	•	exercise mat
+	•	athletic shoes
+	•	workout clothes
+	•	heart rate monitor
+	•	timer/watch
+
+	•	exercise mat
+	•	medicine ball
+	•	ab roller (optional)
+	•	foam pad
+	•	ankle straps
+
+⸻
+
+tennis_serve
+	•	tennis racket
+	•	tennis ball
+	•	tennis net
+	•	ball toss tool (for training)
+	•	wristband
+
+
+	•	bowling ball
+	•	bowling lane
+	•	bowling pins
+	•	bowling shoes
+	•	ball return system
+
+⸻
+
+jump_rope
+	•	jump rope
+	•	exercise mat
+	•	athletic shoes
+	•	timer
+	•	jump rope handles
+
+⸻
+
+squat
+	•	barbell
+	•	squat rack
+	•	weight plates
+	•	lifting belt
+	•	gym shoes
