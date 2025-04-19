@@ -29,6 +29,9 @@ def load_all_concepts_by_type(load_dir, train_mode):
 
 
 parser = argparse.ArgumentParser(description='Evaluatin ours')
+parser.add_argument('--load_dir',required=True,type=str, default='', help='Trained model path')
+parser.add_argument('--batch_size',type=int, default=32, help='Inference batch size')
+
 def main(train_args, test_args):
     # video_utils.init_distributed_mode(test_args)
     train_video_cbm.setup_seed(train_args.seed)
@@ -40,7 +43,7 @@ def main(train_args, test_args):
     
     cls_file = os.path.join(train_args.video_anno_path, 'class_list.txt')
     with open(cls_file, "r") as f:
-        classes = f.read().split("\n")
+        class_names = f.read().split("\n")
 
     # 사용 예시
     concept_dict = load_all_concepts_by_type(load_dir, train_args.train_mode)
@@ -50,7 +53,14 @@ def main(train_args, test_args):
     print(f"Concept number: {len(aggregated_concepts)}")
 
     val_video_dataset,_ =   datasets.build_dataset(False, False, train_args)
-    accuracy = cbm_utils.get_accuracy_cbm(model, val_video_dataset, device,test_args.batch_size,8)
+    # accuracy = cbm_utils.get_accuracy_cbm(model, val_video_dataset, device,test_args.batch_size,8)
+    report, cm = cbm_utils.get_detailed_metrics_cbm(model, val_video_dataset, device, batch_size=test_args.batch_size, class_names=class_names)
+    # Save classification report to text file
+    report_path = os.path.join(load_dir, "classification_report.txt")
+    with open(report_path, "w") as f:
+        f.write(report)
+    print(f"📄 Saved classification report to {report_path}")
+    
 
 
 if __name__=='__main__':

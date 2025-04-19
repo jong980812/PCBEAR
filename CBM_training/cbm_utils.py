@@ -317,6 +317,31 @@ def get_accuracy_cbm(model, dataset, device, batch_size=250, num_workers=10):
             correct += torch.sum(pred.cpu()==labels)
             total += len(labels)
     return correct/total
+
+
+from sklearn.metrics import classification_report, confusion_matrix
+import numpy as np
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+def get_detailed_metrics_cbm(model, dataset, device, batch_size=250, num_workers=10, class_names=None):
+    all_preds = []
+    all_labels = []
+    model.eval()
+    for images, labels in tqdm(DataLoader(dataset, batch_size, num_workers=num_workers, pin_memory=True)):
+        with torch.no_grad():
+            outputs, _ = model(images.to(device))
+            preds = torch.argmax(outputs, dim=1)
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.numpy())
+
+    # confusion matrix
+    cm = confusion_matrix(all_labels, all_preds)
+
+    # classification report
+    report = classification_report(all_labels, all_preds, target_names=class_names, digits=3)
+    return report, cm
+
 def get_accuracy_and_concept_distribution_cbm(model,k,dataset, device, batch_size=250, num_workers=10,save_name=None):
     correct = 0
     total = 0

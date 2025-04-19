@@ -909,7 +909,7 @@ def spatio_temporal_single(args,
 
 
 
-def only_pose(args,target_features, val_target_features,save_name):
+def train_pose_cocept_layer(args,target_features, val_target_features,save_name):
     if args.loss_mode =='concept':
         similarity_fn = similarity.cos_similarity_cubed_single_concept
     elif args.loss_mode =='sample':
@@ -1054,18 +1054,9 @@ def only_pose(args,target_features, val_target_features,save_name):
     torch.save(W_c, os.path.join(save_name ,"W_c.pt"))
 
     # save_classification = os.path.join(save_name,'classification')
-
+    return W_c, best_val_loss
     # os.mkdir(save_classification)
-    train_c, val_c =  train_classification_layer(args,
-                               W_c=W_c,
-                               pre_concepts=None,
-                               concepts = train_result_tensor[0],
-                               target_features=target_features,
-                               val_target_features=val_target_features,
-                                save_name=save_name,
-                                best_val_loss=best_val_loss
-                               )
-    return W_c, train_c,val_c
+
 
 def soft_label(args,target_features, val_target_features,save_name):
     if args.loss_mode =='concept':

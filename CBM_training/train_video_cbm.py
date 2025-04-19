@@ -14,7 +14,7 @@ from glm_saga.elasticnet import IndexedTensorDataset, glm_saga
 from torch.utils.data import DataLoader, TensorDataset
 from video_dataloader import video_utils
 import torch.distributed as dist
-from learning_concept_layer import train_aggregated_classification_layer,train_classification_layer, train_cocept_layer, spatio_temporal_parallel,spatio_temporal_serial,spatio_temporal_joint,spatio_temporal_three_joint,only_pose,soft_label, spatio_temporal_single
+from learning_concept_layer import train_aggregated_classification_layer,train_classification_layer, train_cocept_layer, train_pose_cocept_layer
 import debugging
 from save_features import get_multi_modal_encoder, frozen_all_parameters
 parser = argparse.ArgumentParser(description='Settings for creating CBM')
@@ -224,6 +224,7 @@ parser.add_argument('--debug',default=None)
 parser.add_argument('--loss_mode',default='concept',choices=['concept','sample','second','first_concept','first_sample'])
 #!
 parser.add_argument('--backbone_features',type=str,default=None)
+parser.add_argument('--learn_each_cls',action='store_true')
 parser.add_argument('--vlm_features',type=str,default=None)
 # parser.add_argument('--train_mode', default='pose',type=str, help='set concept type')
 parser.add_argument('--train_mode', nargs='+', default=['pose'], choices=['pose', 'spatial', 'temporal', 'place'],
@@ -301,13 +302,22 @@ def train_cbm_and_save(args):
         print("🧍‍♂️ Learning pose concepts...")
         pose_save_path = os.path.join(save_name, 'pose')
         os.makedirs(pose_save_path, exist_ok=True)
-        pose_W_c, pose_train_c, pose_val_c = only_pose(args, backbone_features, val_backbone_features, pose_save_path)
-        aggregated_concepts.append([str(i) for i in range(pose_train_c.shape[1])])
-        # aggregated_train_c_features.append(pose_train_c)
-        # aggregated_val_c_features.append(pose_val_c)
+        pose_W_c, best_val_loss = train_pose_cocept_layer(args, backbone_features, val_backbone_features, pose_save_path)
+        pose_concepts = [str(i) for i in range(pose_W_c.shape[0])]
+        if len(args.train_mode)<2 or args.learn_each_cls:
+            pose_train_c, pose_val_c =  train_classification_layer(args,
+                                W_c=pose_W_c,
+                                pre_concepts=None,
+                                concepts =pose_concepts ,
+                                target_features=backbone_features,
+                                val_target_features=val_backbone_features,
+                                save_name=pose_save_path,
+                                best_val_loss=best_val_loss
+                                )
+        
+        aggregated_concepts.append(pose_concepts)
         aggregated_W_c.append(pose_W_c)
         # pose 학습 완료 후
-        pose_concepts = [str(i) for i in range(pose_train_c.shape[1])]
         concepts_txt_path = os.path.join(pose_save_path, "concepts.txt")
         with open(concepts_txt_path, "w") as f:
             f.write(pose_concepts[0])
@@ -388,18 +398,18 @@ def train_cbm_and_save(args):
             val_clip_features=val_concept_matrix[key],
             save_name=save_path
         )
-
-        train_c, val_c = train_classification_layer(
-            args=args,
-            W_c=text_W_c,
-            pre_concepts=None,
-            concepts=updated_concepts,
-            target_features=backbone_features,
-            val_target_features=val_backbone_features,
-            save_name=save_path,
-            joint=None,
-            best_val_loss=best_val_loss
-        )
+        if len(args.train_mode)<2 or args.learn_each_cls:
+            train_c, val_c = train_classification_layer(
+                args=args,
+                W_c=text_W_c,
+                pre_concepts=None,
+                concepts=updated_concepts,
+                target_features=backbone_features,
+                val_target_features=val_backbone_features,
+                save_name=save_path,
+                joint=None,
+                best_val_loss=best_val_loss
+            )
 
         aggregated_concepts.append(updated_concepts)
         # aggregated_train_c_features.append(train_c)
