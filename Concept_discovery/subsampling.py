@@ -42,7 +42,7 @@ def process_keypoints(json_file, scaler, confidence_threshold=0.1):
             pose_centered = pose - mean_pose
             pose_normalized = scaler.fit_transform(pose_centered)
             frames_data.append(pose_normalized)
-    return frames_data
+    return frames_data, mean_confidence
 
 def normalized_keypoints(clip, scaler):
     frames_data = []
@@ -360,9 +360,11 @@ def subsampling_considering_cos_sim(args, json_files):
             cnt += 1
             continue
         pose = np.array(frames_data)[:, :,:2]
+        confidence = np.array(frames_data)[:, :, 2] 
         num_frames = len(pose)
         if num_frames < T:
             pose = util.repeat_to_min_length(pose, T)
+            confidence = util.repeat_to_min_length(confidence, T)
             print(f"Original frame len : {num_frames}")
             print(f"Expanding frames to {len(pose)}")
             num_frames = len(pose)
@@ -403,7 +405,6 @@ def subsampling_considering_cos_sim(args, json_files):
         else:  # L == len(keyframes)
             selected_keyframes = keyframes
         
-        
         cnt_cos_sim = 0
         for keyframe in selected_keyframes:
             half_T = T // 2
@@ -437,6 +438,8 @@ def subsampling_considering_cos_sim(args, json_files):
             
             # 샘플링한 인덱스로 클립 생성
             clip = pose[sampled_indices]
+            clip_confidence = confidence[sampled_indices]
+            mean_confidence = np.mean(clip_confidence)
             
             '''
             Compute cos sim
@@ -449,9 +452,9 @@ def subsampling_considering_cos_sim(args, json_files):
                 if cnt_cos_sim == len(selected_keyframes):
                     cnt+=1
                 continue
-            # if np.mean(clip[:,:,2])<0.5:
-            #     print(video_id)
-            #     continue
+            if mean_confidence<args.confidence:
+                print(video_id)
+                continue
                 
             if len(clip) == T:
                 '''
@@ -492,23 +495,24 @@ def Keypointset(args, output_path):
     print(np.array(class_metadata).shape)
     util.save_data(output_path, class_data, class_metadata)
 
-# if __name__ == "__main__":
-#     import argparse
+if __name__ == "__main__":
+    import argparse
 
-#     # Argument parser 설정
-#     parser = argparse.ArgumentParser(description='Settings for creating conceptset')
-#     parser.add_argument('--anno_path', default='')
-#     parser.add_argument('--json_path', default='')
-#     parser.add_argument('--output_path', default='')
-#     # parser.add_argument('--save_path', default='')
-#     parser.add_argument('--keyframe_path', default='')
-#     parser.add_argument('--num_subsequence', type=int, default=10)
-#     parser.add_argument('--len_subsequence', type=int, default=16)
-#     parser.add_argument('--dataset', default='Penn_action', 
-#                         choices=['Penn_action','KTH','HAA100'],type=str)
-#     # parser.add_argument('--req_cluster',  type=int, default=500)
-#     parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","ver6"])
+    # Argument parser 설정
+    parser = argparse.ArgumentParser(description='Settings for creating conceptset')
+    parser.add_argument('--anno_path', default='')
+    parser.add_argument('--json_path', default='')
+    parser.add_argument('--output_path', default='')
+    # parser.add_argument('--save_path', default='')
+    parser.add_argument('--keyframe_path', default='')
+    parser.add_argument('--num_subsequence', type=int, default=10)
+    parser.add_argument('--len_subsequence', type=int, default=16)
+    parser.add_argument('--dataset', default='Penn_action', 
+                        choices=['Penn_action','KTH','HAA100',"UCF101"],type=str)
+    # parser.add_argument('--req_cluster',  type=int, default=500)
+    parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","ver6"])
+    parser.add_argument('--confidence', type=float, default="0.5")
 
-#     args = parser.parse_args()
-#     output_path = os.path.join(args.output_path,args.subsampling_mode)
-#     Keypointset(args,output_path)
+    args = parser.parse_args()
+    output_path = os.path.join(args.output_path,args.subsampling_mode)
+    Keypointset(args,output_path)
