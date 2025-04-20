@@ -22,7 +22,7 @@ parser.add_argument('--len_subsequence', type=int, default=16)
 parser.add_argument('--dataset', default='Penn_action', 
                     choices=['Penn_action','KTH','HAA100','UCF101'],type=str)
 parser.add_argument('--req_cluster',  type=int, default=500)
-parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","ver6"])
+parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","sim+conf","wo_cos_sim"])
 parser.add_argument('--confidence', type=float, default="0.5")
 
 def concept_decovery(args):
