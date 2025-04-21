@@ -1,0 +1,15 @@
+Outdoor
+Indoor
+Outdoor Grass
+Outdoor Water
+Outdoor Ocean/Lake
+Outdoor Court
+Outdoor Sky
+Outdoor Street/Road
+Outdoor Track
+Indoor Pool
+Indoor Office
+Indoor Court
+Indoor Gym
+Indoor Home
+Indoor Track
