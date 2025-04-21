@@ -37,7 +37,7 @@ class UCFVideoClsDataset(Dataset):
         self.aug = False
         self.rand_erase = False
         self.center_frame = args.center_frame
-        self.no_aug = args.no_aug
+        self.no_aug = False
         self.get_sample_path = False
         self.visualize=False
         self.end_point = 2

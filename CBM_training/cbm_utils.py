@@ -323,8 +323,79 @@ from sklearn.metrics import classification_report, confusion_matrix
 import numpy as np
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from sklearn.metrics import precision_score, recall_score, f1_score
+import numpy as np
+import numpy as np
+from sklearn.metrics import confusion_matrix
 
-def get_detailed_metrics_cbm(model, dataset, device, batch_size=250, num_workers=10, class_names=None):
+def get_off_diagonal_confusion_rate(y_true, y_pred, class_names, subset_labels):
+    """
+    주어진 클래스 subset에 대해 confusion matrix의 off-diagonal 합과 혼동률 계산
+
+    Args:
+        y_true (List[int] or np.array): ground-truth 레이블들
+        y_pred (List[int] or np.array): 예측값들
+        class_names (List[str]): 전체 클래스 이름 리스트
+        subset_labels (List[str]): 보고 싶은 클래스 이름들
+
+    Returns:
+        dict: {
+            'subset_labels': [...],
+            'off_diagonal_sum': int,
+            'total': int,
+            'confusion_rate': float,
+            'confusion_matrix': np.ndarray
+        }
+    """
+    subset_indices = [class_names.index(cls) for cls in subset_labels]
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    # subset만 필터링
+    mask = np.isin(y_true, subset_indices)
+    y_true_subset = y_true[mask]
+    y_pred_subset = y_pred[mask]
+
+    cm = confusion_matrix(y_true_subset, y_pred_subset, labels=subset_indices)
+
+    correct = np.trace(cm)
+    total = cm.sum()
+    off_diagonal = total - correct
+    confusion_rate = off_diagonal / total if total > 0 else 0.0
+
+    return {
+        'subset_labels': subset_labels,
+        'off_diagonal_sum': off_diagonal,
+        'total': total,
+        'confusion_rate': confusion_rate,
+        'confusion_matrix': cm
+    }
+def get_class_subset_confusion(y_true, y_pred, class_names, target_classes):
+    """
+    주어진 클래스 subset에 대해 confusion matrix 및 classification report 반환
+    
+    Args:
+        y_true, y_pred: 전체 예측 결과
+        class_names: 전체 클래스 이름 리스트
+        target_classes: ['pushup', 'pullup', 'situp'] 등 관심 클래스
+    
+    Returns:
+        cm (N x N confusion matrix), report (str)
+    """
+    target_indices = [class_names.index(cls) for cls in target_classes]
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    # 해당 클래스만 필터링
+    mask = np.isin(y_true, target_indices)
+    y_true_filtered = y_true[mask]
+    y_pred_filtered = y_pred[mask]
+
+    cm = confusion_matrix(y_true_filtered, y_pred_filtered, labels=target_indices)
+    report = classification_report(y_true_filtered, y_pred_filtered, labels=target_indices, target_names=target_classes, digits=3)
+
+    return cm, report
+def get_detailed_metrics_cbm(model, dataset, device, batch_size=250, num_workers=10, class_names=None, return_raw=False):
     all_preds = []
     all_labels = []
     model.eval()
@@ -335,12 +406,13 @@ def get_detailed_metrics_cbm(model, dataset, device, batch_size=250, num_workers
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.numpy())
 
-    # confusion matrix
     cm = confusion_matrix(all_labels, all_preds)
-
-    # classification report
     report = classification_report(all_labels, all_preds, target_names=class_names, digits=3)
-    return report, cm
+
+    if return_raw:
+        return report, cm, all_labels, all_preds
+    else:
+        return report, cm
 
 def get_accuracy_and_concept_distribution_cbm(model,k,dataset, device, batch_size=250, num_workers=10,save_name=None):
     correct = 0

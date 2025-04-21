@@ -225,6 +225,7 @@ parser.add_argument('--loss_mode',default='concept',choices=['concept','sample',
 #!
 parser.add_argument('--backbone_features',type=str,default=None)
 parser.add_argument('--learn_each_cls',action='store_true')
+parser.add_argument('--with_cls_attr',action='store_true')
 parser.add_argument('--vlm_features',type=str,default=None)
 # parser.add_argument('--train_mode', default='pose',type=str, help='set concept type')
 parser.add_argument('--train_mode', nargs='+', default=['pose'], choices=['pose', 'spatial', 'temporal', 'place'],
@@ -304,6 +305,7 @@ def train_cbm_and_save(args):
         os.makedirs(pose_save_path, exist_ok=True)
         pose_W_c, best_val_loss = train_pose_cocept_layer(args, backbone_features, val_backbone_features, pose_save_path)
         pose_concepts = [str(i) for i in range(pose_W_c.shape[0])]
+        print(f'Pose concept num: {len(pose_concepts)}')
         if len(args.train_mode)<2 or args.learn_each_cls:
             pose_train_c, pose_val_c =  train_classification_layer(args,
                                 W_c=pose_W_c,
@@ -418,6 +420,8 @@ def train_cbm_and_save(args):
         
         
 # Aggregated classification 학습
+    if len(args.train_mode)<2: 
+        return
     print("🧠 Training aggregated concept classifier...")
     train_aggregated_classification_layer(
         args=args,

@@ -31,6 +31,168 @@ from video_dataloader import video_utils
 import torch.distributed as dist
 
 
+def train_pose_cocept_layer(args,target_features, val_target_features,save_name):
+    if args.loss_mode =='concept':
+        similarity_fn = similarity.cos_similarity_cubed_single_concept
+    elif args.loss_mode =='sample':
+        similarity_fn = similarity.cos_similarity_cubed_single_sample
+    elif args.loss_mode =='second':
+        similarity_fn = similarity.cos_similarity_cubed_single_secondpower
+    elif args.loss_mode =='first_concept':
+        similarity_fn = similarity.cos_similarity_cubed_single_firstpower_concept
+    elif args.loss_mode =='first_sample':
+        similarity_fn = similarity.cos_similarity_cubed_single_firstpower_sample
+    else:
+        exit()
+    # similarity_fn = similarity.cos_similarity_cubed_single_sample
+    if args.pose_label is not None:
+        # pkl 파일 경로
+        file_path = args.pose_label
+
+        # 파일 로드
+        with open(os.path.join(file_path,'hard_label_train.pkl'), "rb") as file:
+            hard_label_train = pickle.load(file)  # data는 리스트이며, 각 요소는 dict로 구성
+        with open(os.path.join(file_path,'hard_label_val.pkl'), "rb") as file:
+            hard_label_val = pickle.load(file)  # data는 리스트이며, 각 요소는 dict로 구성
+        # 'attribute_label' 키의 value를 추출하고 모두 모음
+        train_attribute = [item['attribute_label'] for item in hard_label_train]
+        
+        # torch.tensor로 변환
+        train_result_tensor = torch.tensor(train_attribute,dtype=target_features.dtype)
+        
+        val_attribute = [item['attribute_label'] for item in hard_label_val]
+        
+        # torch.tensor로 변환
+        
+        val_result_tensor = torch.tensor(val_attribute,dtype=target_features.dtype)
+        if not args.use_mlp:
+            train_result_tensor[train_result_tensor == 0.] = 0.05
+            train_result_tensor[train_result_tensor == 1.] = 0.3
+            val_result_tensor[val_result_tensor == 0.] = 0.05
+            val_result_tensor[val_result_tensor == 1.] = 0.3
+        if args.with_cls_attr:
+            train_result_tensor[train_result_tensor == -1.] = 0.01
+            val_result_tensor[val_result_tensor == -1.] = 0.01
+
+    
+    '''
+    label에서 -1 아닌애들로 재구성 ( torch.where이나 이런거로 -1아닌 인덱스 얻음)
+    [0,,,,,99] -1인애들이 3,6,11
+    new_index = [0,1,2,4,5,7,,,,,99]
+    target_feat[new_index,:]
+    val_target_feat[val_new_index,:]
+    '''
+    train_valid_index = torch.where(train_result_tensor.max(dim=1).values != -1)[0]
+    val_valid_index = torch.where(val_result_tensor.max(dim=1).values != -1)[0]
+    
+    target_features_indexed = target_features[train_valid_index]
+    train_result_tensor_indexed = train_result_tensor[train_valid_index]
+    
+    val_target_features_indexed = val_target_features[val_valid_index]
+    val_result_tensor_indexed = val_result_tensor[val_valid_index]
+
+    if args.use_mlp:
+        # proj_layer = cbm.ModelOracleCtoY(n_class_attr=2, input_dim=target_features.shape[1],num_classes=train_result_tensor.shape[1])
+        proj_layer =torch.nn.Linear(target_features_indexed.shape[1],train_result_tensor_indexed.shape[1],bias=False).to(args.device)
+        torch.nn.init.xavier_uniform_(proj_layer.weight)
+        opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-3)
+        criterion =nn.BCEWithLogitsLoss()# torch.nn.CrossEntropyLoss()
+    else:
+        proj_layer = torch.nn.Linear(in_features=target_features_indexed.shape[1], out_features=train_result_tensor_indexed.shape[1],
+                                  bias=False).to(args.device)
+        # proj_layer.weight.data.zero_()
+        # proj_layer.bias.data.zero_()
+        opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-3)    
+    indices = [ind for ind in range(len(target_features_indexed))]
+    
+    best_val_loss = float("inf")
+    best_step = 0
+    best_weights = None
+    proj_batch_size = min(args.proj_batch_size, len(target_features_indexed))
+    # import pickle
+    # result_tensor /= torch.norm(result_tensor,dim=1,keepdim=True)
+
+    # 결과 출력
+    for i in range(args.proj_steps):
+        batch = torch.LongTensor(random.sample(indices, k=proj_batch_size))
+        outs = proj_layer(target_features_indexed[batch].to(args.device).detach())
+        # if args.pose_label is not None:
+        if args.use_mlp:
+            loss = criterion(outs, train_result_tensor_indexed[batch].to(args.device).detach())
+        else:
+            loss = -similarity_fn(train_result_tensor_indexed[batch].to(args.device).detach(), outs)
+   
+        
+        loss = torch.mean(loss)
+        loss.backward()
+        opt.step()
+        if i%500==0 or i==args.proj_steps-1:
+            with torch.no_grad():
+                val_output = proj_layer(val_target_features_indexed.to(args.device).detach())
+                if args.use_mlp:
+                    val_loss = criterion(val_output, val_result_tensor_indexed.to(args.device).detach())
+                else:
+                    val_loss = -similarity_fn(val_result_tensor_indexed.to(args.device).detach(), val_output)
+                
+
+                val_loss = torch.mean(val_loss)
+            if i==0:
+                best_val_loss = val_loss
+                best_step = i
+                if args.use_mlp:
+                    best_weights = proj_layer.weight.clone()
+                    # best_weights = {
+                    # "linear.weight": proj_layer.linear.weight.clone(),
+                    # "linear.bias": proj_layer.linear.bias.clone(),
+                    # "linear2.weight": proj_layer.linear2.weight.clone(),
+                    # "linear2.bias": proj_layer.linear2.bias.clone()
+                # }
+                else:
+                    best_weights = proj_layer.weight.clone()
+
+            elif val_loss <= best_val_loss:
+                best_val_loss = val_loss
+                best_step = i
+                if args.use_mlp:
+                    best_weights = proj_layer.weight.clone()
+
+                #     best_weights = {
+                #     "linear.weight": proj_layer.linear.weight.clone(),
+                #     "linear.bias": proj_layer.linear.bias.clone(),
+                #     "linear2.weight": proj_layer.linear2.weight.clone(),
+                #     "linear2.bias": proj_layer.linear2.bias.clone()
+                # }
+                else:
+                    best_weights = proj_layer.weight.clone()
+            else: #stop if val loss starts increasing
+                # break
+                # print(loss)
+                pass
+            if args.use_mlp:
+                print("Step:{}, Avg train similarity:{:.4f}, Avg val similarity:{:.4f}".format(i, loss.cpu(),
+                                                                                            val_loss.cpu()))
+            else:
+                print("Step:{}, Avg train similarity:{:.4f}, Avg val similarity:{:.4f}".format(i, -loss.cpu(),
+                                                                                            -val_loss.cpu()))
+        opt.zero_grad()
+    if args.use_mlp:
+        proj_layer.load_state_dict({"weight":best_weights})
+    else:
+        proj_layer.load_state_dict({"weight":best_weights})
+    print("Best step:{}, Avg val similarity:{:.4f}".format(best_step, -best_val_loss.cpu()))
+    with torch.no_grad():
+        train_c = proj_layer(target_features.detach())
+        train_mean = torch.mean(train_c, dim=0, keepdim=True)
+        train_std = torch.std(train_c, dim=0, keepdim=True)
+    torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
+    torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
+    W_c = proj_layer.weight[:]
+    torch.save(W_c, os.path.join(save_name ,"W_c.pt"))
+
+    # save_classification = os.path.join(save_name,'classification')
+    return W_c, best_val_loss
+    # os.mkdir(save_classification)
+
 def train_cocept_layer(args,concepts, target_features,val_target_features,clip_feature,val_clip_features,save_name):
     similarity_fn = similarity.cos_similarity_cubed_single_concept
     proj_layer = torch.nn.Linear(in_features=target_features.shape[1], out_features=len(concepts),
@@ -80,7 +242,12 @@ def train_cocept_layer(args,concepts, target_features,val_target_features,clip_f
         outs = proj_layer(val_target_features.to(args.device).detach())
         sim = similarity_fn(val_clip_features.to(args.device).detach(), outs)
         interpretable = sim > args.interpretability_cutoff
-        
+    with torch.no_grad():
+        train_c = proj_layer(target_features.detach())
+        train_mean = torch.mean(train_c, dim=0, keepdim=True)
+        train_std = torch.std(train_c, dim=0, keepdim=True)
+    torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
+    torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
     if args.print:
         for i, concept in enumerate(concepts):
             if sim[i]<=args.interpretability_cutoff:
@@ -157,9 +324,9 @@ def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=Non
     W_g = output_proj['path'][0]['weight']
     b_g = output_proj['path'][0]['bias']
     
-    if joint is None:
-        torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
-        torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
+    # if joint is None:
+    torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
+    torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
     torch.save(W_g, os.path.join(save_name, "W_g.pt"))
     torch.save(b_g, os.path.join(save_name, "b_g.pt"))
     with open(os.path.join(save_name, "metrics.txt"), 'w') as f:
@@ -908,154 +1075,6 @@ def spatio_temporal_single(args,
     # print("?****? Accuracy: {:.2f}%".format(accuracy*100))
 
 
-
-def train_pose_cocept_layer(args,target_features, val_target_features,save_name):
-    if args.loss_mode =='concept':
-        similarity_fn = similarity.cos_similarity_cubed_single_concept
-    elif args.loss_mode =='sample':
-        similarity_fn = similarity.cos_similarity_cubed_single_sample
-    elif args.loss_mode =='second':
-        similarity_fn = similarity.cos_similarity_cubed_single_secondpower
-    elif args.loss_mode =='first_concept':
-        similarity_fn = similarity.cos_similarity_cubed_single_firstpower_concept
-    elif args.loss_mode =='first_sample':
-        similarity_fn = similarity.cos_similarity_cubed_single_firstpower_sample
-    else:
-        exit()
-    # similarity_fn = similarity.cos_similarity_cubed_single_sample
-    if args.pose_label is not None:
-        # pkl 파일 경로
-        file_path = args.pose_label
-
-        # 파일 로드
-        with open(os.path.join(file_path,'hard_label_train.pkl'), "rb") as file:
-            hard_label_train = pickle.load(file)  # data는 리스트이며, 각 요소는 dict로 구성
-        with open(os.path.join(file_path,'hard_label_val.pkl'), "rb") as file:
-            hard_label_val = pickle.load(file)  # data는 리스트이며, 각 요소는 dict로 구성
-        # 'attribute_label' 키의 value를 추출하고 모두 모음
-        train_attribute = [item['attribute_label'] for item in hard_label_train]
-        
-        # torch.tensor로 변환
-        train_result_tensor = torch.tensor(train_attribute,dtype=target_features.dtype)
-        
-        val_attribute = [item['attribute_label'] for item in hard_label_val]
-        
-        # torch.tensor로 변환
-        
-        val_result_tensor = torch.tensor(val_attribute,dtype=target_features.dtype)
-        if not args.use_mlp:
-            train_result_tensor[train_result_tensor == 0.] = 0.05
-            train_result_tensor[train_result_tensor == 1.] = 0.3
-            val_result_tensor[val_result_tensor == 0.] = 0.05
-            val_result_tensor[val_result_tensor == 1.] = 0.3
-    
-    '''
-    label에서 -1 아닌애들로 재구성 ( torch.where이나 이런거로 -1아닌 인덱스 얻음)
-    [0,,,,,99] -1인애들이 3,6,11
-    new_index = [0,1,2,4,5,7,,,,,99]
-    target_feat[new_index,:]
-    val_target_feat[val_new_index,:]
-    '''
-    train_valid_index = torch.where(train_result_tensor.max(dim=1).values != -1)[0]
-    val_valid_index = torch.where(val_result_tensor.max(dim=1).values != -1)[0]
-    
-    target_features_indexed = target_features[train_valid_index]
-    train_result_tensor_indexed = train_result_tensor[train_valid_index]
-    
-    val_target_features_indexed = val_target_features[val_valid_index]
-    val_result_tensor_indexed = val_result_tensor[val_valid_index]
-
-    if args.use_mlp:
-        # proj_layer = cbm.ModelOracleCtoY(n_class_attr=2, input_dim=target_features.shape[1],num_classes=train_result_tensor.shape[1])
-        proj_layer =torch.nn.Linear(target_features_indexed.shape[1],train_result_tensor_indexed.shape[1])
-        proj_layer = proj_layer.cuda()
-        opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-2)
-        criterion = torch.nn.CrossEntropyLoss()
-    else:
-        proj_layer = torch.nn.Linear(in_features=target_features_indexed.shape[1], out_features=train_result_tensor_indexed.shape[1],
-                                  bias=False).to(args.device)
-        # proj_layer.weight.data.zero_()
-        # proj_layer.bias.data.zero_()
-        opt = torch.optim.Adam(proj_layer.parameters(), lr=1e-3)    
-    indices = [ind for ind in range(len(target_features_indexed))]
-    
-    best_val_loss = float("inf")
-    best_step = 0
-    best_weights = None
-    proj_batch_size = min(args.proj_batch_size, len(target_features_indexed))
-    # import pickle
-    # result_tensor /= torch.norm(result_tensor,dim=1,keepdim=True)
-
-    # 결과 출력
-    for i in range(args.proj_steps):
-        batch = torch.LongTensor(random.sample(indices, k=proj_batch_size))
-        outs = proj_layer(target_features_indexed[batch].to(args.device).detach())
-        # if args.pose_label is not None:
-        if args.use_mlp:
-            loss = criterion(outs, train_result_tensor[batch].to(args.device).detach())
-        else:
-            loss = -similarity_fn(train_result_tensor_indexed[batch].to(args.device).detach(), outs)
-   
-        
-        loss = torch.mean(loss)
-        loss.backward()
-        opt.step()
-        if i%500==0 or i==args.proj_steps-1:
-            with torch.no_grad():
-                val_output = proj_layer(val_target_features_indexed.to(args.device).detach())
-                if args.use_mlp:
-                    val_loss = criterion(val_output, val_result_tensor_indexed.to(args.device).detach())
-                else:
-                    val_loss = -similarity_fn(val_result_tensor_indexed.to(args.device).detach(), val_output)
-                
-
-                val_loss = torch.mean(val_loss)
-            if i==0:
-                best_val_loss = val_loss
-                best_step = i
-                if args.use_mlp:
-                    best_weights = proj_layer.weight.clone()
-                    # best_weights = {
-                    # "linear.weight": proj_layer.linear.weight.clone(),
-                    # "linear.bias": proj_layer.linear.bias.clone(),
-                    # "linear2.weight": proj_layer.linear2.weight.clone(),
-                    # "linear2.bias": proj_layer.linear2.bias.clone()
-                # }
-                else:
-                    best_weights = proj_layer.weight.clone()
-
-            elif val_loss <= best_val_loss:
-                best_val_loss = val_loss
-                best_step = i
-                if args.use_mlp:
-                    best_weights = proj_layer.weight.clone()
-
-                #     best_weights = {
-                #     "linear.weight": proj_layer.linear.weight.clone(),
-                #     "linear.bias": proj_layer.linear.bias.clone(),
-                #     "linear2.weight": proj_layer.linear2.weight.clone(),
-                #     "linear2.bias": proj_layer.linear2.bias.clone()
-                # }
-                else:
-                    best_weights = proj_layer.weight.clone()
-            else: #stop if val loss starts increasing
-                # break
-                # print(loss)
-                pass
-            print("Step:{}, Avg train similarity:{:.4f}, Avg val similarity:{:.4f}".format(i, -loss.cpu(),
-                                                                                            -val_loss.cpu()))
-        opt.zero_grad()
-    if args.use_mlp:
-        proj_layer.load_state_dict(best_weights)
-    else:
-        proj_layer.load_state_dict({"weight":best_weights})
-    print("Best step:{}, Avg val similarity:{:.4f}".format(best_step, -best_val_loss.cpu()))
-    W_c = proj_layer.weight[:]
-    torch.save(W_c, os.path.join(save_name ,"W_c.pt"))
-
-    # save_classification = os.path.join(save_name,'classification')
-    return W_c, best_val_loss
-    # os.mkdir(save_classification)
 
 
 def soft_label(args,target_features, val_target_features,save_name):
