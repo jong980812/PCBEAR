@@ -1,0 +1,8 @@
+For the action "drinking water", describe the temporal dynamics of the action. Focus on how the action unfolds over time in a short sequence of steps. Do not include background scenes, objects, or body part descriptions. Keep each step concise and action-focused.
+
+Example:
+- reach for the container  
+- lift it toward the mouth  
+- tilt and drink  
+
+Now, for the action "{}", describe the temporal dynamics of the action as a short sequence of steps:

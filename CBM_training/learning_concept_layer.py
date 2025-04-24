@@ -181,6 +181,7 @@ def train_pose_cocept_layer(args,target_features, val_target_features,save_name)
         proj_layer.load_state_dict({"weight":best_weights})
     print("Best step:{}, Avg val similarity:{:.4f}".format(best_step, -best_val_loss.cpu()))
     with torch.no_grad():
+        proj_layer = proj_layer.cpu()
         train_c = proj_layer(target_features.detach())
         train_mean = torch.mean(train_c, dim=0, keepdim=True)
         train_std = torch.std(train_c, dim=0, keepdim=True)
@@ -242,12 +243,6 @@ def train_cocept_layer(args,concepts, target_features,val_target_features,clip_f
         outs = proj_layer(val_target_features.to(args.device).detach())
         sim = similarity_fn(val_clip_features.to(args.device).detach(), outs)
         interpretable = sim > args.interpretability_cutoff
-    with torch.no_grad():
-        train_c = proj_layer(target_features.detach())
-        train_mean = torch.mean(train_c, dim=0, keepdim=True)
-        train_std = torch.std(train_c, dim=0, keepdim=True)
-    torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
-    torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
     if args.print:
         for i, concept in enumerate(concepts):
             if sim[i]<=args.interpretability_cutoff:
@@ -262,6 +257,15 @@ def train_cocept_layer(args,concepts, target_features,val_target_features,clip_f
         f.write(concepts[0])
         for concept in concepts[1:]:
             f.write('\n'+concept)
+    proj_layer = torch.nn.Linear(target_features.shape[1], out_features=len(concepts), bias=False)
+    proj_layer.load_state_dict({"weight":W_c})
+    with torch.no_grad():
+        proj_layer = proj_layer.cpu()
+        train_c = proj_layer(target_features.detach())
+        train_mean = torch.mean(train_c, dim=0, keepdim=True)
+        train_std = torch.std(train_c, dim=0, keepdim=True)
+    torch.save(train_mean, os.path.join(save_name, "proj_mean.pt"))
+    torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
     return W_c,concepts,best_val_loss
 
 def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=None, target_features=None,val_target_features=None,save_name=None,joint=None,best_val_loss=None):

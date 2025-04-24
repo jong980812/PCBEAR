@@ -1,0 +1,8 @@
+For the action "riding a bicycle", describe how the action typically unfolds over time using short, simple sentences. Do not include objects, background scenes, or human body parts. Focus only on the temporal sequence of movements.
+
+Example:
+- The person mounts the bicycle and begins to pedal.  
+- They maintain a steady pace while balancing.  
+- Eventually, they slow down and come to a stop before dismounting.
+
+Now, for the action "{}", describe how the action typically unfolds over time using short, simple sentences. Do not include objects, background scenes, or human body parts:

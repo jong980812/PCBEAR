@@ -27,3 +27,4 @@ dataset_utils
 scripts/
 experiments/
 *.gif
+*.jpg
