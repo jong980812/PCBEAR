@@ -28,3 +28,4 @@ scripts/
 experiments/
 *.gif
 *.jpg
+*.npy
