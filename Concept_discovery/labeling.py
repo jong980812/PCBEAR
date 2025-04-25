@@ -101,6 +101,9 @@ def labeling(args, data, result_gt,save_path,output_path):
 
     video_attributes = make_attribute(args, result_gt,save_path,output_path)
     train_anno = hard_label(video_attributes, args,save_path, mode = "train")
-    val_anno = hard_label(video_attributes, args, save_path, mode = "val")
+    if args.dataset == "UCF101":
+        val_anno = hard_label(video_attributes, args, save_path, mode = "test")
+    else :
+        val_anno = hard_label(video_attributes, args, save_path, mode = "val")
     return closest_sample_indices
 
