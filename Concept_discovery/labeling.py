@@ -8,18 +8,17 @@ import pickle
 import util
 
 
-def make_attribute(args, result_gt,save_path,output_path):
+def make_attribute(args, result_gt,save_path,output_path,num_concept):
     with open(os.path.join(output_path, "sample_metadata.json"), "r") as f :
         json_data = json.load(f)
     labels = result_gt
-    num_cluster = args.req_cluster
     video_frames = defaultdict(list)
     for idx, item in enumerate(json_data):
-        video_id = item
+        video_id = item.split('[')[0]
         video_frames[video_id].append(labels[idx])
     video_attributes = []
     for video_id, labels_ in video_frames.items():
-        one_hot_vector = np.zeros(num_cluster, dtype=int)
+        one_hot_vector = np.zeros(num_concept, dtype=int)
         for label in labels_:
             one_hot_vector[label] = 1  # 등장한 클러스터에 1 할당
         if args.dataset == "Penn_action" or args.dataset == "KTH":
@@ -50,7 +49,7 @@ def make_attribute(args, result_gt,save_path,output_path):
     return video_attributes
 
 
-def hard_label(video_attributes, args, save_path, mode):
+def hard_label(video_attributes, args, save_path, num_concept, mode):
     output_json_path = os.path.join(save_path, f"hard_label_{mode}.json")
     output_pkl_path = os.path.join(save_path, f"hard_label_{mode}.pkl")
     csv_path = os.path.join(args.anno_path, f"{mode}.csv")
@@ -79,7 +78,7 @@ def hard_label(video_attributes, args, save_path, mode):
             cnt+=1
             sorted_annotations.append({
             "video_name": video_name,
-            "attribute_label": [-1] * args.req_cluster
+            "attribute_label": [-1] * num_concept
         })
     print(f"Number of missing video : {cnt}")
     with open(output_json_path, "w") as f:
@@ -92,18 +91,18 @@ def hard_label(video_attributes, args, save_path, mode):
 
     return sorted_annotations
 
-def labeling(args, data, result_gt,save_path,output_path):
+def labeling(args, data, result_gt,save_path,output_path,num_concept):
     # data, result_gt = clustering.clustering(args)
     closest_sample_indices = util.find_closest_to_centroid(data, result_gt)
     with open(os.path.join(save_path,'concept_index.txt'), "w", encoding="utf-8") as f:
         for key, value in closest_sample_indices.items():
             f.write(f"{key}: {value}\n") 
 
-    video_attributes = make_attribute(args, result_gt,save_path,output_path)
-    train_anno = hard_label(video_attributes, args,save_path, mode = "train")
+    video_attributes = make_attribute(args, result_gt,save_path,output_path,num_concept)
+    train_anno = hard_label(video_attributes, args, save_path, num_concept,mode = "train")
     if args.dataset == "UCF101":
-        val_anno = hard_label(video_attributes, args, save_path, mode = "test")
+        val_anno = hard_label(video_attributes, args, save_path,num_concept, mode = "test")
     else :
-        val_anno = hard_label(video_attributes, args, save_path, mode = "val")
+        val_anno = hard_label(video_attributes, args, save_path,num_concept, mode = "val")
     return closest_sample_indices
 

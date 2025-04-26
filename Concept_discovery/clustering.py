@@ -13,6 +13,7 @@ import util
 
 
 def extract_label(args,json_data, class_map):
+    video_ids = [item.split('[')[0] for item in json_data]
     if args.dataset == "Penn_action":
         # class_list = subsampling.load_class_list(args.anno_path)
         # df_list = []
@@ -34,12 +35,12 @@ def extract_label(args,json_data, class_map):
             class_name = label_dict.get(video_id, "unknown")  # 매칭되지 않으면 "unknown"
             return class_map.get(class_name, -1)
 
-        labels = np.array([get_label(video_id) for video_id in json_data])
+        labels = np.array([get_label(video_id) for video_id in video_ids])
     
     elif args.dataset == "HAA100" :
         def extract_class_name(label):
             return re.sub(r"_\d+$", "", label)
-        labels = np.array([class_map.get(extract_class_name(item), -1) for item in json_data])
+        labels = np.array([class_map.get(extract_class_name(item), -1) for item in video_ids])
     
     elif args.dataset == "UCF101":
         def extract_class_name(label):
@@ -48,7 +49,7 @@ def extract_label(args,json_data, class_map):
                 return match.group(1)
             else:
                 return "unknown"
-        labels = np.array([class_map.get(extract_class_name(item), -1) for item in json_data])
+        labels = np.array([class_map.get(extract_class_name(item), -1) for item in video_ids])
 
     elif args.dataset == "KTH":
         def extract_class_name(item):
@@ -57,25 +58,37 @@ def extract_label(args,json_data, class_map):
                 if part in class_map:
                     return class_map[part]
             return -1 
-        labels = np.array([extract_class_name(item) for item in json_data])
+        labels = np.array([extract_class_name(item) for item in video_ids])
     return labels
 
-def run_finch_clustering(data, labels,args):
-    """FINCH 클러스터링 실행 및 NMI 점수 계산."""
-    # output_txt_path = os.path.join(args.output_path, "nmi_score.txt")
-    if data.shape[0] > 50000:
-        c, num_clust, req_c = FINCH(data, req_clust=args.req_cluster, use_ann_above_samples=50000, verbose=True, seed=655)
-    else :
-        c, num_clust, req_c = FINCH(data, req_clust=args.req_cluster, use_ann_above_samples=(data.shape[0]-1000), verbose=True, seed=655)
+def run_finch_clustering(data, labels, args, output_path):
+    """FINCH 클러스터링 후 원하는 partition의 결과로 NMI 계산."""
+    use_partition_num = args.use_partition_num
+    c, num_clust, req_c = FINCH(
+        data,
+        req_clust=None,
+        use_ann_above_samples=(data.shape[0]-1000),
+        verbose=True,
+        seed=655
+    )
     
-    req_score = nmi(labels, req_c)
-    req_score_text = f'NMI Score for req_cluster : {req_score*100:2f}'
-        # for i in range(c.shape[1]):
-        #     score = nmi(labels, c[:, i])
-        #     score_text = f'NMI Score {i} : {score*100:2f}'
-        #     f.write(score_text + "\n")
-    print(req_score_text)
-    return req_c
+
+    for i in range(c.shape[1]):
+        score = nmi(labels, c[:, i])
+        print('NMI Score {}: {:.2f}'.format(i, score * 100))
+
+    result_gt = c[:, use_partition_num]
+    num_concept = num_clust[use_partition_num]
+    selected_score = nmi(labels, result_gt)
+    output_txt_path = os.path.join(output_path, f"{num_concept}_output.txt")
+
+    with open(output_txt_path, 'w') as f:
+        text = 'Selected Partition: {}, num_concept :{} NMI Score: {:.2f}'.format(use_partition_num, num_concept, selected_score * 100)
+        f.write(text + '\n')
+
+    
+    
+    return result_gt, num_concept
 def clustering(args,output_path):
     """메인 실행 함수."""
     util.set_seed(42)  # 랜덤 시드 설정
@@ -85,5 +98,5 @@ def clustering(args,output_path):
     print(len(json_data))
     class_map = util.class_mapping(args.anno_path)
     labels = extract_label(args, json_data, class_map)
-    result_gt = run_finch_clustering(data, labels,args)
-    return data,result_gt
+    result_gt, num_concept = run_finch_clustering(data, labels,args,output_path)
+    return data,result_gt,num_concept
