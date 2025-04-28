@@ -48,6 +48,7 @@ def main(train_args, test_args):
     preds_path = os.path.join(inference_dir, "preds.npy")
     labels_path = os.path.join(inference_dir, "labels.npy")
     report_path = os.path.join(inference_dir, "report.txt")
+    class_acc_path = os.path.join(inference_dir, "class_acc.txt")
     model = cbm.load_cbm_dynamic(load_dir, device,train_args)
     cls_file = os.path.join(train_args.video_anno_path, 'class_list.txt')
     with open(cls_file, "r") as f:
@@ -62,8 +63,12 @@ def main(train_args, test_args):
         # inference 수행
         val_video_dataset,_ =   datasets.build_dataset(False, False, train_args)
         # accuracy = cbm_utils.get_accuracy_cbm(model, val_video_dataset, device,test_args.batch_size,8)
-        report, cm, all_labels, all_preds = cbm_utils.get_detailed_metrics_cbm(model, val_video_dataset, device, batch_size=test_args.batch_size, class_names=class_names,return_raw=True)
+        report, cm, all_labels, all_preds,class_acc = cbm_utils.get_detailed_metrics_cbm(model, val_video_dataset, device, batch_size=test_args.batch_size, class_names=class_names,return_raw=True)
             # 저장
+        with open(class_acc_path, "w") as f:
+            for class_name, acc in sorted(class_acc.items(), key=lambda x: x[1], reverse=True):
+                f.write(f"{class_name}: {acc:.4f}\n")
+        print(f"✅ 클래스별 accuracy 저장 완료: {save_path}")
         np.save(preds_path, np.array(all_preds))
         np.save(labels_path, np.array(all_labels))
         with open(report_path, "w") as f:

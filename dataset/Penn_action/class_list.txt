@@ -12,4 +12,4 @@ situp
 tennis_serve
 bowl
 jump_rope
-squat
+squat   

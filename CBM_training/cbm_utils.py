@@ -319,7 +319,7 @@ def get_accuracy_cbm(model, dataset, device, batch_size=250, num_workers=10):
     return correct/total
 
 
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import numpy as np
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -395,24 +395,58 @@ def get_class_subset_confusion(y_true, y_pred, class_names, target_classes):
     report = classification_report(y_true_filtered, y_pred_filtered, labels=target_indices, target_names=target_classes, digits=3)
 
     return cm, report
+# def get_detailed_metrics_cbm(model, dataset, device, batch_size=250, num_workers=10, class_names=None, return_raw=False):
+#     all_preds = []
+#     all_labels = []
+#     model.eval()
+#     for images, labels in tqdm(DataLoader(dataset, batch_size, num_workers=num_workers, pin_memory=True)):
+#         with torch.no_grad():
+#             outputs, _ = model(images.to(device))
+#             preds = torch.argmax(outputs, dim=1)
+#             all_preds.extend(preds.cpu().numpy())
+#             all_labels.extend(labels.numpy())
+
+#     cm = confusion_matrix(all_labels, all_preds)
+#     report = classification_report(all_labels, all_preds, target_names=class_names, digits=3)
+
+#     if return_raw:
+#         return report, cm, all_labels, all_preds
+#     else:
+#         return report, cm
 def get_detailed_metrics_cbm(model, dataset, device, batch_size=250, num_workers=10, class_names=None, return_raw=False):
     all_preds = []
     all_labels = []
+
     model.eval()
-    for images, labels in tqdm(DataLoader(dataset, batch_size, num_workers=num_workers, pin_memory=True)):
+    dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
+
+    for images, labels in tqdm(dataloader):
         with torch.no_grad():
             outputs, _ = model(images.to(device))
             preds = torch.argmax(outputs, dim=1)
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.numpy())
 
+    # 전체 confusion matrix
     cm = confusion_matrix(all_labels, all_preds)
+
+    # classification report
     report = classification_report(all_labels, all_preds, target_names=class_names, digits=3)
 
-    if return_raw:
-        return report, cm, all_labels, all_preds
+    # 클래스별 accuracy 계산
+    class_accuracies = cm.diagonal() / cm.sum(axis=1)
+    class_accuracy_dict = {}
+    if class_names is not None:
+        for idx, class_name in enumerate(class_names):
+            class_accuracy_dict[class_name] = class_accuracies[idx]
     else:
-        return report, cm
+        for idx in range(len(class_accuracies)):
+            class_accuracy_dict[f"Class_{idx}"] = class_accuracies[idx]
+
+    if return_raw:
+        return report, cm, all_labels, all_preds, class_accuracy_dict
+    else:
+        return report, cm, class_accuracy_dict
 
 def get_accuracy_and_concept_distribution_cbm(model,k,dataset, device, batch_size=250, num_workers=10,save_name=None):
     correct = 0
@@ -713,3 +747,42 @@ def save_args(args,save_name):
         json.dump(args.__dict__, f, indent=2)
     
 
+import torch
+import numpy as np
+from PIL import Image
+from IPython.display import display, Image as IPImage
+# Dataloader로부터 얻은 tensor (C, T, H, W)
+
+def visualize_gif(image,label,path,index,img_ind):
+    tensor = image
+    if len(tensor.shape)>4:
+        tensor = tensor[index]
+    video_name = path.split('/')[-1].split('.')[0]
+    # image_folder = f'./gif/{img_ind}_{video_name}'
+    # os.makedirs(image_folder, exist_ok=True)
+    gif_path = f'./gif/{img_ind}_{video_name}_{index}.gif'
+
+    # if not os.path.exists(gif_path):
+    # 텐서를 (T, H, W, C)로 변환
+    tensor = tensor.permute(1, 2, 3, 0)  # (T, H, W, C)
+
+    # 텐서를 numpy 배열로 변환
+    tensor_np = tensor.numpy()
+
+    # 이미지 리스트 생성
+    images = []
+    for i in range(tensor_np.shape[0]):
+        # 각 프레임을 (H, W, C) 형태로 변환 후 0~255 범위로 스케일링
+        frame = ((tensor_np[i] - tensor_np[i].min()) / (tensor_np[i].max() - tensor_np[i].min()) * 255).astype(np.uint8)
+        frame_image = Image.fromarray(frame)
+        images.append(frame_image)
+        # frame_image_path = os.path.join(image_folder, f'77688_0000{i+10}.png')
+        # frame_image.save(frame_image_path)
+    # GIF로 저장 (duration은 각 프레임 사이의 시간, 100ms = 0.1초)
+    
+
+    images[0].save(gif_path, save_all=True, append_images=images[1:], duration=100, loop=0)
+    # else:
+    #     pass
+    # Jupyter에서 GIF 표시
+    display(IPImage(filename=gif_path))
