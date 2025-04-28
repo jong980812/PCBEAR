@@ -749,15 +749,6 @@ def save_args(args,save_name):
         json.dump(args.__dict__, f, indent=2)
     
 
-<<<<<<< HEAD
-import torch
-import numpy as np
-from PIL import Image
-from IPython.display import display, Image as IPImage
-# Dataloader로부터 얻은 tensor (C, T, H, W)
-
-=======
->>>>>>> 8e110c9ff42edbe7ce486c5d257aab505542ce3f
 def visualize_gif(image,label,path,index,img_ind):
     tensor = image
     if len(tensor.shape)>4:

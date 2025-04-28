@@ -333,16 +333,7 @@ def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=Non
     torch.save(train_std, os.path.join(save_name, "proj_std.pt"))
     torch.save(W_g, os.path.join(save_name, "W_g.pt"))
     torch.save(b_g, os.path.join(save_name, "b_g.pt"))
-    with open(os.path.join(save_name, "metrics.txt"), 'w') as f:
-        out_dict = {}
-        for key in ('lam', 'lr', 'alpha', 'time'):
-            out_dict[key] = float(output_proj['path'][0][key])
-        out_dict['metrics'] = output_proj['path'][0]['metrics']
-        nnz = (W_g.abs() > 1e-5).sum().item()
-        total = W_g.numel()
-        out_dict['sparsity'] = {"Non-zero weights":nnz, "Total weights":total, "Percentage non-zero":nnz/total}
-        out_dict['concept_layer_best_loss'] = -(best_val_loss.item())
-        json.dump(out_dict, f, indent=2)
+ 
 
     return train_c, val_c
 
