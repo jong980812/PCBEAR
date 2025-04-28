@@ -16,6 +16,8 @@ from transforms import Permute
 import torchvision.transforms as transforms
 import torchvision.transforms._transforms_video as transforms_video
 from video_dataloader import video_utils
+from PIL import Image
+from IPython.display import display, Image as IPImage
 PM_SUFFIX = {"max":"_max", "avg":""}
 
 def save_target_activations(target_model, dataset, save_name, target_layers = ["layer4"], batch_size = 1000,
@@ -713,3 +715,36 @@ def save_args(args,save_name):
         json.dump(args.__dict__, f, indent=2)
     
 
+def visualize_gif(image,label,path,index,img_ind):
+    tensor = image
+    if len(tensor.shape)>4:
+        tensor = tensor[index]
+    video_name = path.split('/')[-1].split('.')[0]
+    # image_folder = f'./gif/{img_ind}_{video_name}'
+    # os.makedirs(image_folder, exist_ok=True)
+    gif_path = f'./gif/{img_ind}_{video_name}_{index}.gif'
+
+    # if not os.path.exists(gif_path):
+    # 텐서를 (T, H, W, C)로 변환
+    tensor = tensor.permute(1, 2, 3, 0)  # (T, H, W, C)
+
+    # 텐서를 numpy 배열로 변환
+    tensor_np = tensor.numpy()
+
+    # 이미지 리스트 생성
+    images = []
+    for i in range(tensor_np.shape[0]):
+        # 각 프레임을 (H, W, C) 형태로 변환 후 0~255 범위로 스케일링
+        frame = ((tensor_np[i] - tensor_np[i].min()) / (tensor_np[i].max() - tensor_np[i].min()) * 255).astype(np.uint8)
+        frame_image = Image.fromarray(frame)
+        images.append(frame_image)
+        # frame_image_path = os.path.join(image_folder, f'77688_0000{i+10}.png')
+        # frame_image.save(frame_image_path)
+    # GIF로 저장 (duration은 각 프레임 사이의 시간, 100ms = 0.1초)
+    
+
+    images[0].save(gif_path, save_all=True, append_images=images[1:], duration=100, loop=0)
+    # else:
+    #     pass
+    # Jupyter에서 GIF 표시
+    display(IPImage(filename=gif_path))
