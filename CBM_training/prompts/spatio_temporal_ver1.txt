@@ -1,0 +1,8 @@
+For the action “drinking water”, describe the most important visual concepts that typically appear when this action occurs. Write several short descriptive sentences that include tangible objects, typical background scenes, and key stages of the action. Focus on meaningful and visible elements, not abstract ideas.
+
+Examples:
+	•	“A person holds a water bottle while sitting at a kitchen table.”
+	•	“A glass of water is placed on a dining table in a bright kitchen.”
+	•	“The person raises the glass to their mouth to take a sip.”
+
+Now, for the action “{}”, write several short descriptive sentences that capture the important visual concepts involved. Include objects, scenes, and key actions.

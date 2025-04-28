@@ -1,0 +1,279 @@
+Aerobics studio
+Airplane or airport
+Airport tarmac
+Airport terminal
+Amusement park
+Archaeological site
+Athletic club
+Athletic track
+Backyard
+Backyard baseball setup
+Backyard court
+Backyard lawn
+Backyard patio
+Balcony
+Ballet stage
+Batting cage
+Beach area
+Beach at sunrise or sunset
+Beach boardwalk
+Beach or lakeside area
+Beach or waterfront
+Beach promenade
+Beach soccer area
+Beach tennis area
+Beach volleyball court
+Beachfront
+Bedroom
+Boxing ring
+Boxing studio
+Calisthenics park
+Calm waterway
+Campground
+Canal
+Ceremonial event
+Cheerleading practice area
+Circus arena
+City sidewalk
+Coastal bay
+Coastal path
+College baseball field
+College campus
+College campus field
+Community center court
+Community center grounds
+Community center gym
+Community center space
+Community center tennis court
+Community park baseball field
+Community park basketball area
+Competition arena
+Competition ground
+Concert hall
+Construction site
+Countryside road
+CrossFit box
+Cultural center
+Cultural heritage site
+Cycling track
+Dance competition venue
+Dance studio
+Dance workshop space
+Diplomatic meeting room
+Driveway
+Driveway basketball hoop
+Driveway basketball setup
+Driving range
+Educational camp
+Educational demonstration site
+Estuary
+Family gathering or party
+Festival or fairgrounds
+Fire station
+Fitness center
+Fitness class
+Flag-raising ceremony
+Forest clearing
+Forest trail
+Formal event hall
+Garden
+Garden or backyard
+Golf course bunker
+Golf course clubhouse area
+Golf course fairway
+Golf course practice area
+Golf course rough
+Golf course tee box
+Golf course water hazard
+Government building
+Graduation ceremony stage
+Grass outfield
+Group exercise class setting
+Gym
+Gym floor
+Health club
+High school weight room
+Historical reenactment area
+Home exterior
+Home gym
+Home interior
+Home or residential setting
+Home workout room
+Hospital emergency room
+Hotel gym
+Hotel room
+Hotel room or fitness area
+Indoor axe-throwing venue
+Indoor cycling studio
+Indoor gym
+Indoor tennis facility
+Indoor volleyball court
+Industrial facility
+Infield dirt
+Lagoon
+Lake
+Lakeside
+Lakeside area
+Lawn bowling green
+Lawn bowls green
+Library
+Little league field
+Living room
+Martial arts studio
+Memorial site
+Military base
+Mountain overlook
+Mountain path
+Music festival
+Nature reserve
+Neighborhood street
+Nightclub
+Office
+Office building
+Office or workplace setting
+Official meeting
+Official meeting room
+Olympic venue
+Open field
+Orchard
+Orchard or farm
+Outdoor badminton court
+Outdoor concert
+Outdoor court
+Outdoor festival stage
+Outdoor park
+Outdoor performance space
+Outdoor range
+Outdoor sand court
+Outdoor track
+Outdoor training area
+Parade ground
+Parade route
+Park lawn
+Park or open green space
+Park running path
+Park trail
+Parking lot
+Performance auditorium
+Performing arts center
+Performing arts stage
+Physical therapy clinic
+Picnic area
+Pond
+Public square
+Putting green
+Recreation center
+Recreational center field
+Recreational club grounds
+Recreational park court
+Regatta course
+Religious temple or shrine
+Reservoir
+Residential street
+Resort facility
+Resort tennis facility
+Retreat center
+River
+Riverfront path
+Riverside path
+Road race starting line
+Roller rink
+Rooftop
+Rooftop access area
+Rural path
+Sandlot
+Scenic golf course landscape
+School assembly
+School gym
+School playground
+Schoolyard
+Ship deck
+Shopping mall
+Skate park
+Spin studio
+Sports club
+Sports court
+Sports event
+Sports facility
+Sports field or stadium
+Sports field sidelines
+Sports hall
+Street corner
+Suburban cul-de-sac
+Suburban road
+Tennis academy
+Tennis club
+Tennis court
+Theater
+Track and field arena
+Train station platform
+Training camp
+Training camp field
+Training facility
+Trampoline park
+University athletic center
+University campus court
+University gymnasium
+University sports ground
+Urban bike lane
+Urban court
+Urban plaza
+Urban street
+Warehouse
+Wedding venue
+Wetland
+Wilderness area
+Wooded area
+acrobatics training facility
+ballet class
+ballet rehearsal space
+beach party
+beach workout area
+boot camp class
+coastal shore
+concert
+contemporary dance venue
+country club grounds
+cultural festival
+dockside
+entertainment venue
+exercise studio
+festival grounds
+fishing pier
+golf course
+golf resort
+gymnasium
+gymnastics floor
+gymnastics gym
+harbor area
+indoor sports arena
+indoor track facility
+lake shore
+lakeside or riverside
+mangrove area
+meditation center
+mountain top
+music video set
+party
+party venue
+personal training space
+playground court
+rehearsal space
+riverbank
+soccer field
+social media video backdrop
+sports center
+stadium
+stage
+street festival
+street performance
+street performance area
+talent show
+television set
+television show set
+tidal flats
+track
+traditional ceremony setting
+wedding reception
+wellness retreat
+yoga studio

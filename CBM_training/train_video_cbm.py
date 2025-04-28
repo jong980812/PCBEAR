@@ -223,6 +223,7 @@ parser.add_argument('--use_mlp',action='store_true')
 parser.add_argument('--debug',default=None)
 parser.add_argument('--loss_mode',default='concept',choices=['concept','sample','second','first_concept','first_sample'])
 #!
+#!
 parser.add_argument('--backbone_features',type=str,default=None)
 parser.add_argument('--learn_each_cls',action='store_true')
 parser.add_argument('--with_cls_attr',action='store_true')
@@ -230,7 +231,15 @@ parser.add_argument('--vlm_features',type=str,default=None)
 # parser.add_argument('--train_mode', default='pose',type=str, help='set concept type')
 parser.add_argument('--train_mode', nargs='+', default=['pose'], choices=['pose', 'spatial', 'temporal', 'place'],
                     help='Concept types to train on')
-
+#!
+parser.add_argument('--no_cbm',action='store_true')
+parser.add_argument('--dump_concept_num', type=int, default=None, help='Number of concepts to dump when no_cbm is set. Must be a positive integer.')
+parser.add_argument('--mode_no_cbm', type=str, default='only_cls', choices=['only_cls', 'only_sparse_cls', 'dump_linear_cls', 'dump_linear_sparse_cls'],
+                    help='Mode to run when no_cbm is enabled')
+parser.add_argument('--no_cbm_epochs', type=int, default=30, help='Number of epochs for no_cbm mode')
+parser.add_argument('--no_cbm_batchsize', type=int, default=256, help='Batch size for no_cbm mode')
+parser.add_argument('--no_cbm_lr', type=float, default=1e-3, help='Learning rate for no_cbm mode')
+parser.add_argument('--no_cbm_weight_decay', type=float, default=0.05, help='Weight decay for no_cbm mode')
 def setup_seed(seed):
     import random, numpy as np, torch
     random.seed(seed)
@@ -277,17 +286,27 @@ def train_cbm_and_save(args):
     #! To check consistency between backbone features and target_data. 
     assert args.data_set in args.backbone_features, f"Error: '{args.data_set}' not found in args.backbone_features ('{args.backbone_features}')"
     
+    backbone_features = torch.load(args.backbone_features,map_location="cpu").float()
+    val_backbone_features=torch.load(args.backbone_features.replace(f'{args.data_set}_train',f'{args.data_set}_val'),map_location="cpu").float()
 
-    save_name = get_dynamic_save_name(args)
-    os.makedirs(save_name,exist_ok=True)
+    if args.no_cbm:
+        timestamp = datetime.now().strftime("%m-%d_%H-%M-%S")
+        save_name = os.path.join(args.save_dir, f"nocbm_{timestamp}_dump{args.dump_concept_num}")
+        os.makedirs(save_name, exist_ok=True)
+        from learning_dump_concept_layer import train_non_cbm
+        train_non_cbm(args, backbone_features, val_backbone_features, save_name)
+        return
+    else:
+        save_name = get_dynamic_save_name(args)
+        os.makedirs(save_name, exist_ok=True)
     cbm_utils.save_args(args,save_name)
 
     # aggregated_train_c_features = []
     # aggregated_val_c_features = []
     
-    backbone_features = torch.load(args.backbone_features,map_location="cpu").float()
-    val_backbone_features=torch.load(args.backbone_features.replace(f'{args.data_set}_train',f'{args.data_set}_val'),map_location="cpu").float()
 
+
+        
 
     
     concept_save_paths = {}

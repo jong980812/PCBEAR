@@ -1,50 +1,41 @@
-Athletic center
 Athletic club
 Backyard
-Backyard tennis court
+Backyard court
 Batting cage
 Beach
 Beach boardwalk
 Beach promenade
 Beach sand
-Beach tennis area
 Bedroom
 Boot camp class
-Boot camp training area
 Bowling alley
-Clubhouse
-Coastal golf course
-Coastal path
-College baseball stadium
-College campus court
-Community center court
-Competition stage
-Country club grounds
-Countryside road
+College campus field
+Country club
+Country road
 CrossFit box
 Cycling track
-Dance studio
 Driving range
 Entertainment venue
 Fitness center
-Fitness class setting
 Forest trail
 Golf course bunker
+Golf course clubhouse area
 Golf course fairway
 Golf course green
 Golf course practice area
 Golf course rough
+Golf course scenic view
 Golf course tee box
-Golf resort landscape
+Golf course water hazard
 Gym
 Gym floor
 Health club
+High school weight room
 Home gym
 Home workout room
 Hotel room
-Indoor tennis facility
+Little league field
 Living room
-Military training ground
 Mountain path
 Neighborhood street
 Olympic training center
@@ -52,41 +43,37 @@ Open field
 Outdoor park
 Park grass
 Park trail
-Personal training studio
+Personal training session
 Physical therapy clinic
-Public park with tennis courts
 Putting green
 Recreation center
+Resort facility
 Resort tennis area
 Riverfront path
 Riverside path
 Rooftop terrace
-Rural countryside
+School gymnasium
 School playground
 School sports ground
 Schoolyard
 Sidewalk
+Sports court
 Sports training facility
 Stadium
-Suburban cul-de-sac
 Suburban road
 Tennis academy
 Tennis club
 Tennis court
 University campus
-University gymnasium
-University or school gymnasium
+University sports complex
 Urban bike lane
-Urban road
-Weightlifting club
 Yoga studio
 campfire setting
 classroom
 coffee shop
+community center
 concert stage
 music studio
-outdoor festival
 recording booth
-school music room
-sports field
+school auditorium
 street corner
