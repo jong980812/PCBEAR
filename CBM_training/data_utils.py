@@ -32,7 +32,8 @@ LABEL_FILES = {"places365":"data/categories_places365_clean.txt",
                "kth":"/data/lwi2765/repos/XAI/Video-CBM-two-stream/data/video_annotation/kth/class_list.txt",
                "kth-5":"/data/lwi2765/repos/XAI/Video-CBM-two-stream/data/video_annotation/kth-5/class_list.txt",
                "kth-2":"/data/lwi2765/repos/XAI/Video-CBM-two-stream/data/video_annotation/kth-2/class_list.txt",
-               "penn-action": "/data/lwi2765/repos/XAI/Video-CBM-two-stream/data/video_annotation/Penn_Action/class_list.txt"
+               "penn-action": "/data/lwi2765/repos/XAI/Video-CBM-two-stream/data/video_annotation/Penn_Action/class_list.txt",
+               "mimetics":"/data/lwi2765/repos/XAI/PCBEAR/dataset/Mimetics/class_list.txt"
                }
 
 def get_resnet_imagenet_preprocess():
