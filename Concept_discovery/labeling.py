@@ -32,6 +32,8 @@ def make_attribute(args, result_gt,save_path,output_path,num_concept):
                 no_prefix = video_id[2:]
                 # 클래스 이름만 추출: ApplyEyeMakeup
                 class_name = no_prefix.split('_')[0]
+                if class_name == "HandStandPushups":
+                    class_name = "HandstandPushups"
                 video_name = f"{class_name}/{video_id}.avi"
             else:
                 video_name = f"{video_id}.avi"  # fallback
