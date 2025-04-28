@@ -29,4 +29,9 @@ experiments/
 *.gif
 *.jpg
 *.npy
+<<<<<<< HEAD
 *.pkl
+=======
+result_concept_video/
+Final_pose_label/
+>>>>>>> 8e110c9ff42edbe7ce486c5d257aab505542ce3f

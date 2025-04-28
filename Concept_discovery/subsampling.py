@@ -462,7 +462,7 @@ def subsampling_considering_cos_sim(args, json_files):
                 '''
                 clip_normalized = normalized_keypoints(clip, scaler)
                 all_clips.append(clip_normalized)
-                class_metadata.append(video_id)
+                class_metadata.append(f"{video_id}[{start},{end}]")
             else:
                 missing_video.append(video_id)
 
@@ -588,7 +588,7 @@ def subsampling_wo_cos_sim(args, json_files):
                 '''
                 clip_normalized = normalized_keypoints(clip, scaler)
                 all_clips.append(clip_normalized)
-                class_metadata.append(video_id)
+                class_metadata.append(f"{video_id}[{start},{end}]")
             else:
                 missing_video.append(video_id)
 
