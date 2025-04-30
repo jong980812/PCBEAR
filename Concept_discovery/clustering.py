@@ -80,7 +80,7 @@ def run_finch_clustering(data, labels, args, output_path):
     result_gt = c[:, use_partition_num]
     num_concept = num_clust[use_partition_num]
     selected_score = nmi(labels, result_gt)
-    output_txt_path = os.path.join(output_path, f"{num_concept}_output.txt")
+    output_txt_path = os.path.join(output_path, f"L{args.len_subsequence}N{args.num_subsequence}_{num_concept}_output.txt")
 
     with open(output_txt_path, 'w') as f:
         text = 'Selected Partition: {}, num_concept :{} NMI Score: {:.2f}'.format(use_partition_num, num_concept, selected_score * 100)

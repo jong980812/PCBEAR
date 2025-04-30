@@ -166,6 +166,8 @@ def concept_visualize_video(args, data, result_gt, closest_sample_indices, save_
         elif args.dataset == "UCF101":
             no_prefix = video_id[2:]
             class_name = no_prefix.split('_')[0]
+            if class_name == "HandStandPushups":
+                class_name = "HandstandPushups"
             json_path = os.path.join(args.json_path, f'{class_name}/{video_id}_result.json')
         elif args.dataset == "HAA100":
             json_path = os.path.join(args.json_path,f"{video_id.rsplit('_', 1)[0]}/{video_id}_result.json")
