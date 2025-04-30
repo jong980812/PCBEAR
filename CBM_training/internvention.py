@@ -1,5 +1,47 @@
 import torch
+def analyze_intervention_effect(original_pred, modified_pred, val_y):
+    """
+    original_pred: intervention 전 logits (N, num_classes)
+    modified_pred: intervention 후 logits (N, num_classes)
+    val_y: 정답 labels (N,)
+    """
 
+    original_labels = original_pred.argmax(dim=1)
+    modified_labels = modified_pred.argmax(dim=1)
+
+    # 상태별 구분
+    matched_before = (original_labels == val_y)  # intervention 전 맞음
+    matched_after = (modified_labels == val_y)   # intervention 후 맞음
+
+    # 케이스 분류
+    A_keep_correct = matched_before & matched_after
+    B_fix_incorrect = (~matched_before) & matched_after
+    C_break_correct = matched_before & (~matched_after)
+    D_keep_wrong = (~matched_before) & (~matched_after)
+
+    print("\nIntervention Result Summary:")
+    print(f" - A. 유지 (맞던 것 계속 맞음): {A_keep_correct.sum().item()} samples")
+    print(f" - B. 개선 (틀리던 것 맞춤): {B_fix_incorrect.sum().item()} samples")
+    print(f" - C. 악화 (맞던 것 틀림): {C_break_correct.sum().item()} samples")
+    print(f" - D. 무효 (틀리던 것 계속 틀림): {D_keep_wrong.sum().item()} samples")
+
+    total = val_y.size(0)
+    print(f" - 전체 sample: {total}")
+
+    # 성능 변화 분석
+    original_acc = matched_before.float().mean().item()
+    modified_acc = matched_after.float().mean().item()
+    print(f"\nAccuracy:")
+    print(f" - Before: {original_acc*100:.2f}%")
+    print(f" - After : {modified_acc*100:.2f}%")
+    print(f" - Change: {(modified_acc - original_acc)*100:+.2f}%")
+
+    return {
+        "A_keep_correct": A_keep_correct,
+        "B_fix_incorrect": B_fix_incorrect,
+        "C_break_correct": C_break_correct,
+        "D_keep_wrong": D_keep_wrong
+    }
 def compare_predictions(original_pred, modified_pred, val_y, gt_class_idx, intervene_class_idx):
     """
     original_pred: intervention 전 (N, num_classes)

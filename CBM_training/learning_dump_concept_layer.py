@@ -70,8 +70,14 @@ def train_only_cls(args, backbone_features, val_backbone_features, train_y, val_
     best_acc = 0
     best_model_state = None
 
+    # Logging
+    log_file = open(os.path.join(save_name, "train_only_cls_log.txt"), "w")
+
     for epoch in range(args.no_cbm_epochs):
         model.train()
+        correct = 0
+        total = 0
+        total_loss = 0.0
         for x, y in train_loader:
             x = x.to(args.device)
             y = y.to(args.device)
@@ -80,22 +86,36 @@ def train_only_cls(args, backbone_features, val_backbone_features, train_y, val_
             loss = criterion(out, y)
             loss.backward()
             optimizer.step()
+            total_loss += loss.item() * y.size(0)
+            preds = torch.argmax(out, dim=1)
+            correct += (preds == y).sum().item()
+            total += y.size(0)
         scheduler.step()
+        train_loss_epoch = total_loss / total if total > 0 else 0.0
+        train_acc_epoch = correct / total if total > 0 else 0.0
 
         # validation
         model.eval()
         correct = 0
         total = 0
+        val_loss = 0.0
+        val_total = 0
         with torch.no_grad():
             for x, y in val_loader:
                 x = x.to(args.device)
                 y = y.to(args.device)
                 out = model(x)
+                loss = criterion(out, y)
                 preds = torch.argmax(out, dim=1)
                 correct += (preds == y).sum().item()
                 total += y.size(0)
-        acc = correct / total
+                val_loss += loss.item() * y.size(0)
+                val_total += y.size(0)
+        acc = correct / total if total > 0 else 0.0
+        val_loss_epoch = val_loss / val_total if val_total > 0 else 0.0
         print(f"[only_cls] Epoch {epoch}: val acc {acc:.4f}")
+        log_file.write(f"Epoch {epoch}: train_loss={train_loss_epoch:.4f}, train_acc={train_acc_epoch:.4f}, val_loss={val_loss_epoch:.4f}, val_acc={acc:.4f}\n")
+        log_file.flush()
         if acc > best_acc:
             best_acc = acc
             best_model_state = model.state_dict()
@@ -104,6 +124,7 @@ def train_only_cls(args, backbone_features, val_backbone_features, train_y, val_
     save_path = os.path.join(save_name, "only_cls_linear.pt")
     torch.save(best_model_state, save_path)
     print(f"[only_cls] Best val acc: {best_acc:.4f}, model saved to {save_path}")
+    log_file.close()
 
 
 # New function: train_only_sparse_cls
@@ -185,9 +206,15 @@ def train_dump_linear_cls(args, backbone_features, val_backbone_features, train_
     best_acc = 0
     best_state = None
 
+    # Logging
+    log_file = open(os.path.join(save_name, "train_dump_linear_cls_log.txt"), "w")
+
     for epoch in range(args.no_cbm_epochs):
         dump_linear.train()
         classifier.train()
+        correct = 0
+        total = 0
+        total_loss = 0.0
         for x, y in train_loader:
             x = x.to(args.device)
             y = y.to(args.device)
@@ -197,24 +224,38 @@ def train_dump_linear_cls(args, backbone_features, val_backbone_features, train_
             loss = criterion(out, y)
             loss.backward()
             optimizer.step()
+            total_loss += loss.item() * y.size(0)
+            preds = torch.argmax(out, dim=1)
+            correct += (preds == y).sum().item()
+            total += y.size(0)
         scheduler.step()
+        train_loss_epoch = total_loss / total if total > 0 else 0.0
+        train_acc_epoch = correct / total if total > 0 else 0.0
 
         # validation
         dump_linear.eval()
         classifier.eval()
         correct = 0
         total = 0
+        val_loss = 0.0
+        val_total = 0
         with torch.no_grad():
             for x, y in val_loader:
                 x = x.to(args.device)
                 y = y.to(args.device)
                 feat = dump_linear(x)
                 out = classifier(feat)
+                loss = criterion(out, y)
                 preds = torch.argmax(out, dim=1)
                 correct += (preds == y).sum().item()
                 total += y.size(0)
-        acc = correct / total
+                val_loss += loss.item() * y.size(0)
+                val_total += y.size(0)
+        acc = correct / total if total > 0 else 0.0
+        val_loss_epoch = val_loss / val_total if val_total > 0 else 0.0
         print(f"[dump_linear_cls] Epoch {epoch}: val acc {acc:.4f}")
+        log_file.write(f"Epoch {epoch}: train_loss={train_loss_epoch:.4f}, train_acc={train_acc_epoch:.4f}, val_loss={val_loss_epoch:.4f}, val_acc={acc:.4f}\n")
+        log_file.flush()
         if acc > best_acc:
             best_acc = acc
             best_state = {
@@ -239,6 +280,7 @@ def train_dump_linear_cls(args, backbone_features, val_backbone_features, train_
         json.dump(metrics, f, indent=2)
 
     print(f"[dump_linear_cls] Best val acc: {best_acc:.4f}, model and metrics saved to {save_name}")
+    log_file.close()
 
 
 # New function: train_dump_linear_sparse_cls
