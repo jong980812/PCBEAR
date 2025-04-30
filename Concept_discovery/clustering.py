@@ -63,32 +63,45 @@ def extract_label(args,json_data, class_map):
 
 def run_finch_clustering(data, labels, args, output_path):
     """FINCH 클러스터링 후 원하는 partition의 결과로 NMI 계산."""
-    use_partition_num = args.use_partition_num
-    c, num_clust, req_c = FINCH(
-        data,
-        req_clust=None,
-        use_ann_above_samples=(data.shape[0]-1000),
-        verbose=True,
-        seed=655
-    )
+    if args.clustering_mode == "partition":
+        use_partition_num = args.use_partition_num
+        c, num_clust, req_c = FINCH(
+            data,
+            req_clust=None,
+            use_ann_above_samples=(data.shape[0]-1000),
+            verbose=True,
+            seed=655
+        )
+        
+
+        for i in range(c.shape[1]):
+            score = nmi(labels, c[:, i])
+            print('NMI Score {}: {:.2f}'.format(i, score * 100))
+
+        result_gt = c[:, use_partition_num]
+        num_concept = num_clust[use_partition_num]
+        selected_score = nmi(labels, result_gt)
+        output_txt_path = os.path.join(output_path, f"L{args.len_subsequence}N{args.num_subsequence}_{num_concept}_output.txt")
+        with open(output_txt_path, 'w') as f:
+            text = 'Selected Partition: {}, num_concept :{} NMI Score: {:.2f}'.format(use_partition_num, num_concept, selected_score * 100)
+            f.write(text + '\n')
+
+        return result_gt, num_concept
+    elif args.clustering_mode == "req":
+        c, num_clust, req_c = FINCH(data, req_clust=args.req_cluster, use_ann_above_samples=(data.shape[0]-1000), verbose=True, seed=655)
+        req_score = nmi(labels, req_c)
+        output_txt_path = os.path.join(output_path, f"L{args.len_subsequence}N{args.num_subsequence}_{args.req_cluster}_output.txt")
+        with open(output_txt_path, 'w') as f:
+            text = 'num_concept :{} NMI Score: {:.2f}'.format(args.req_cluster, req_score * 100)
+            f.write(text + '\n')
+        
+        return req_c, args.req_cluster
+
     
 
-    for i in range(c.shape[1]):
-        score = nmi(labels, c[:, i])
-        print('NMI Score {}: {:.2f}'.format(i, score * 100))
-
-    result_gt = c[:, use_partition_num]
-    num_concept = num_clust[use_partition_num]
-    selected_score = nmi(labels, result_gt)
-    output_txt_path = os.path.join(output_path, f"L{args.len_subsequence}N{args.num_subsequence}_{num_concept}_output.txt")
-
-    with open(output_txt_path, 'w') as f:
-        text = 'Selected Partition: {}, num_concept :{} NMI Score: {:.2f}'.format(use_partition_num, num_concept, selected_score * 100)
-        f.write(text + '\n')
-
     
     
-    return result_gt, num_concept
+    
 def clustering(args,output_path):
     """메인 실행 함수."""
     util.set_seed(42)  # 랜덤 시드 설정

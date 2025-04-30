@@ -26,6 +26,8 @@ parser.add_argument('--use_partition_num',  type=int, default=1)
 parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","sim+conf","wo_cos_sim"])
 parser.add_argument('--confidence', type=float, default="0.5")
 parser.add_argument('--save_fps', type=int, default=20)
+parser.add_argument('--clustering_mode', type=str, default="partition", choices=["req","partition"])
+parser.add_argument('--req_cluster', type=int, default = 0)
 
 def concept_decovery(args):
     output_path = os.path.join(args.output_path,args.subsampling_mode,f"L{args.len_subsequence}N{args.num_subsequence}")
