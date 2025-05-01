@@ -6,6 +6,8 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 import util
+import random
+from collections import defaultdict
 
 def get_keypoints(json_file, confidence_threshold=0.1):
     """JSON 파일에서 keypoints를 추출하고 정규화."""
@@ -597,6 +599,61 @@ def subsampling_wo_cos_sim(args, json_files):
     # print(missing_video)
     print(f"Number of missing video : {cnt}")
     return class_data, class_metadata
+
+# def subsampling_random(args, json_files):
+#     """
+#     클래스별로 일정 개수의 비디오를 랜덤으로 선택하고,
+#     각 비디오에서 랜덤 중심 기반의 T프레임 클립 1개만 생성
+#     """
+#     scaler = MinMaxScaler(feature_range=(0, 1))
+#     T = args.len_subsequence
+#     half_T = T // 2
+#     num_per_class = args.num_per_class
+
+#     class_video_dict = defaultdict(list)
+#     class_data = []
+#     class_metadata = []
+
+#     # 1. 비디오를 클래스별로 그룹핑
+#     for json_file in json_files:
+#         class_name = os.path.basename(os.path.dirname(json_file))
+#         class_video_dict[class_name].append(json_file)
+
+#     # 2. 클래스별로 num_per_class개 랜덤 선택 후 clip 생성
+#     for class_name, videos in class_video_dict.items():
+#         selected_videos = random.sample(videos, min(num_per_class, len(videos)))
+
+#         for json_file in selected_videos:
+#             video_id = os.path.basename(json_file).replace("_result.json", "")
+#             frames_data = process_keypoints(json_file, scaler)
+#             num_frames = len(frames_data)
+
+#             if num_frames == 0:
+#                 print(f"Skipping {json_file} (No valid frames)")
+#                 continue
+
+#             if num_frames < T:
+#                 expanded = util.expand_array(frames_data, T)
+#                 if expanded is None:
+#                     print(f"Skipping {json_file} (Cannot expand)")
+#                     continue
+#                 frames_data = expanded
+#                 num_frames = len(frames_data)
+
+#             # 중심 프레임 선택
+#             center_idx = random.randint(half_T, num_frames - half_T - 1)
+#             start_idx = center_idx - half_T
+#             end_idx = start_idx + T
+
+#             clip = np.array(frames_data[start_idx:end_idx])
+
+#             if len(clip) == T:
+#                 class_data.append(clip)
+#                 class_metadata.append(f"{class_name}/{video_id}[{start_idx},{end_idx}]")
+#             else:
+#                 print(f"Skipping {json_file} (Clip length mismatch)")
+
+#     return class_data, class_metadata
 
 def Keypointset(args, output_path):
     processed_keypoints_path = os.path.join(output_path, "processed_keypoints.npy")

@@ -257,7 +257,7 @@ class VisionTransformer(nn.Module):
     def reset_classifier(self, num_classes, global_pool=''):
         self.num_classes = num_classes
         self.head = nn.Linear(self.embed_dim, num_classes) if num_classes > 0 else nn.Identity()
-
+    
     def forward_features(self, x):
         x = self.patch_embed(x)
         B, _, _ = x.size()
@@ -274,6 +274,10 @@ class VisionTransformer(nn.Module):
                 x = blk(x)
 
         x = self.norm(x)
+        #1, TL, D
+        #1, T, L, D
+        # 1, T, 1, 1
+        # top k 
         if self.fc_norm is not None:
             return self.fc_norm(x.mean(1))
         else:
