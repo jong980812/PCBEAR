@@ -172,7 +172,7 @@ def get_target_model(target_name, device,args=None):
                 adapter_layers=[0,1,2,3,4,5,6,7,8,9,10,11],
                 args=args
             )
-        checkpoint = torch.load('/data/dataset/video_checkpoint/kinetics400/AIM_finetune.pth','cpu')
+        checkpoint = torch.load(args.finetune,'cpu')
         # checkpoint = checkpoint['module']
         if args.data_set=='kinetics400':
             all_keys = list(checkpoint.keys())
@@ -194,7 +194,7 @@ def get_target_model(target_name, device,args=None):
             print('AIM succesfully is loaded')
         else:
             preprocess=None
-            checkpoint = checkpoint['module']
+            checkpoint = checkpoint['model']
             print(target_model.load_state_dict(checkpoint))
             print('AIM succesfully is loaded')
             

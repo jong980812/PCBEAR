@@ -614,7 +614,8 @@ def get_intervid(args,device):
     clip = clip.to(device)
     clip = clip.eval()
     return clip, tokenizer
-    
+
+
 def save_vmae_video_features(model, dataloader, save_name, batch_size=1000 , device = "cuda",args = None):
     _make_save_dir(save_name)
     
