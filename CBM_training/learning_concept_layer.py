@@ -71,7 +71,7 @@ def train_pose_cocept_layer(args,target_features, val_target_features,save_name)
             val_result_tensor[val_result_tensor == 0.] = 0.05
             val_result_tensor[val_result_tensor == 1.] = 0.3
         if args.with_cls_attr:
-            train_result_tensor[train_result_tensor == -1.] = 0.01
+            train_result_tensor[train_result_tensor == -1.] = 0.001
             val_result_tensor[val_result_tensor == -1.] = 0.01
 
     

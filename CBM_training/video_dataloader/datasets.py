@@ -311,10 +311,10 @@ def build_dataset(is_train, test_mode, args):
             anno_path = os.path.join(args.video_anno_path, 'train.csv')
         elif test_mode is True:
             mode = 'validation'
-            anno_path = os.path.join(args.video_anno_path, 'test.csv') 
+            anno_path = os.path.join(args.video_anno_path, 'val.csv') 
         else:  
             mode = 'validation'
-            anno_path = os.path.join(args.video_anno_path, 'test.csv') 
+            anno_path = os.path.join(args.video_anno_path, 'val.csv') 
 
         dataset = UCFVideoClsDataset(
             anno_path=anno_path,

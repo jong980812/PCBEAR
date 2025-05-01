@@ -154,32 +154,32 @@ class SpaceTimeBlock(nn.Module):
         self.attn = VarAttention(
             dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop)
 
-        self.temporal_attn = VarAttention(
+        self.timeattn = VarAttention(
             dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop,
             initialize=time_init)
 
         if is_tanh_gating:
-            self.alpha_temporal_attn = nn.Parameter(torch.zeros([]))
+            self.alpha_timeattn = nn.Parameter(torch.zeros([]))
 
         # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
-        self.temporal_norm1 = norm_layer(dim)
-        self.temporal_fc = nn.Linear(dim, dim)
+        self.norm3 = norm_layer(dim)
+
         self.attention_style = attention_style
 
     def forward(self, x, einops_from_space, einops_to_space, einops_from_time, einops_to_time,
                 time_n, space_f, use_checkpoint=False):
         if use_checkpoint:
             time_output = checkpoint.checkpoint(
-                self.temporal_attn, self.temporal_norm1(x), einops_from_time, einops_to_time, {"n": time_n}
+                self.timeattn, self.norm3(x), einops_from_time, einops_to_time, {"n": time_n}
             )
         else:
-            time_output = self.temporal_attn(self.temporal_norm1(x), einops_from_time, einops_to_time, {"n": time_n})
-        if hasattr(self, "alpha_temporal_attn"):
-            time_output = torch.tanh(self.alpha_temporal_attn) * time_output
+            time_output = self.timeattn(self.norm3(x), einops_from_time, einops_to_time, {"n": time_n})
+        if hasattr(self, "alpha_timeattn"):
+            time_output = torch.tanh(self.alpha_timeattn) * time_output
         time_residual = x + time_output
         if use_checkpoint:
             space_output = checkpoint.checkpoint(
@@ -258,7 +258,7 @@ class SpaceTimeTransformer(nn.Module):
         self.pos_embed = nn.Parameter(
             torch.zeros(1, self.patches_per_frame + 1,
                         embed_dim))  # remember to take pos_embed[1:] for tiling over time
-        self.time_embeded = nn.Parameter(torch.zeros(1, num_frames, embed_dim))
+        self.temporal_embed = nn.Parameter(torch.zeros(1, num_frames, embed_dim))
 
         if ln_pre:
             self.ln_pre = nn.LayerNorm(embed_dim)
@@ -325,7 +325,7 @@ class SpaceTimeTransformer(nn.Module):
     def freeze_spatial_weights(self):
         freeze_list = []
         for n, p in self.named_parameters():
-            if 'temporal_embed' in n or 'temporal_attn' in n or 'norm3' in n:
+            if 'temporal_embed' in n or 'timeattn' in n or 'norm3' in n:
                 pass
             else:
                 p.requires_grad = False
@@ -335,7 +335,7 @@ class SpaceTimeTransformer(nn.Module):
     def freeze_temporal_weights(self):
         freeze_list = []
         for n, p in self.named_parameters():
-            if 'temporal_embed' in n or 'temporal_attn' in n or 'norm3' in n:
+            if 'temporal_embed' in n or 'timeattn' in n or 'norm3' in n:
                 p.requires_grad = False
                 freeze_list.append(n)
             else:
@@ -388,5 +388,3 @@ class SpaceTimeTransformer(nn.Module):
         x = self.forward_features(x, use_checkpoint=use_checkpoint)
         x = self.head(x)
         return x
-    
-

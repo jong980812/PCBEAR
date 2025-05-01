@@ -127,7 +127,7 @@ class UCFVideoClsDataset(Dataset):
 
         elif self.mode == 'validation':
             
-            sample = os.path.join(self.data_path,self.dataset_samples[index])
+            sample = os.path.join(self.data_path,self.dataset_samples[index]) if not self.dataset_samples[index].startswith('/') else self.dataset_samples[index]
             # sample = os.path.join(self.data_path,self.dataset_samples[index]+".avi")
             if self.visualize:
                 buffers=[]

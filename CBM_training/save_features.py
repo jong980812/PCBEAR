@@ -189,6 +189,8 @@ parser.add_argument('--dual_encoder', default='clip', choices=['clip', 'lavila',
 parser.add_argument('--dual_encoder_frames',type=int,default=16)
 parser.add_argument('--lavila_ckpt',type=str,default=None)
 parser.add_argument('--internvid_version',type=str,default='200m')
+parser.add_argument('--only_backbone',action='store_true')
+parser.add_argument('--only_vlm',action='store_true')
 
 
 
@@ -236,6 +238,9 @@ def get_video_encoder(args,device):
         drop_path_rate=0.,)
         finetune = torch.load(args.finetune, map_location='cpu')['model_state']
         msg = target_model.load_state_dict(finetune,True)
+    elif args.backbone =='r3d':
+        from torchvision.models.video import r3d_18
+        target_model = r3d_18(pretrained=True)
     else:#! VideoMAE는 여기로.
         target_model, target_preprocess = data_utils.get_target_model(args.backbone, device,args)
     return target_model
@@ -264,7 +269,7 @@ def main(args):
         torch.cuda.manual_seed_all(seed)  # 모든 GPU에 적용
         
     #! Load model
-    dual_encoder = get_multi_modal_encoder(args,device).to(device).eval()
+    dual_encoder = get_multi_modal_encoder(args,device).to(device).eval() 
     video_encoder = get_video_encoder(args,device).to(device).eval()
     frozen_all_parameters(dual_encoder,args.dual_encoder);frozen_all_parameters(video_encoder,args.backbone)
     
@@ -280,19 +285,28 @@ def main(args):
         video_dataset, nb_classes = datasets.build_dataset(is_train, test_mode, args)
         video_dataloader = DataLoader(video_dataset, args.batch_size, num_workers=args.num_workers, pin_memory=True,shuffle=False)
         print(f"Extractin features from VLM {args.dual_encoder}")
-        if args.dual_encoder =='clip':
-            save_clip_image_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
-        elif args.dual_encoder =='lavila':
-            save_lavila_video_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
-        elif 'internvid' in args.dual_encoder:
-            save_internvid_video_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
-
+        if not args.only_backbone:
+            if args.dual_encoder =='clip':
+                save_clip_image_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
+            elif args.dual_encoder =='lavila':
+                save_lavila_video_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
+            elif 'internvid' in args.dual_encoder:
+                save_internvid_video_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
+        if args.only_vlm:
+            continue
         print(f"Extractin features from Video backbone {args.backbone}")
 
         if args.backbone.startswith("clip_"):
             save_clip_image_features(video_encoder, video_dataloader, target_save_name, args.batch_size, device,args)
         elif args.backbone.startswith("vmae_") or args.backbone=='AIM':
             save_vmae_video_features(video_encoder,video_dataloader,target_save_name,args.batch_size,device,args)
+        elif args.backbone.startswith("r3d"):
+            args.short_side_size=112
+            args.input_size=112
+            video_dataset, nb_classes = datasets.build_dataset(is_train, test_mode, args)
+            video_dataloader = DataLoader(video_dataset, args.batch_size, num_workers=args.num_workers, pin_memory=True,shuffle=False)
+            save_r3d_video_features(video_encoder, video_dataloader, target_save_name,args.batch_size,device)
+    
         #!Now we have only VMAE video backbone. Has to be added more Backbone.
 
     return

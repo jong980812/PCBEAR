@@ -1,0 +1,16 @@
+tennis_forehand:TennisSwing
+bowling:Bowling
+basketball_dunk:BasketballDunk
+baseball_pitch:BaseballPitch
+javelin_throw:JavelinThrow
+hammer_throw:HammerThrow
+jumping_jack:JumpingJack
+golf_swing:GolfSwing
+jump rope:JumpRope
+pull_ups:PullUps
+basketball_dunk:BasketballDunk
+gym_lunges:Lunges
+punching_sandbag:BoxingPunchingBag
+pushup:PushUps
+handstand:HandstandPushups
+frisbee_throw:FrisbeeCatch

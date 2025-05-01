@@ -640,7 +640,32 @@ def save_vmae_video_features(model, dataloader, save_name, batch_size=1000 , dev
     del all_features
     torch.cuda.empty_cache()
     return
+def save_r3d_video_features(model, dataloader, save_name, batch_size=1000, device="cuda"):
+    model.eval()
+    model.to(device)
 
+    # fc 제거하고 feature만 받기
+    model.fc = torch.nn.Identity()
+
+    if os.path.exists(save_name):
+        return
+
+    save_dir = os.path.dirname(save_name)
+    os.makedirs(save_dir, exist_ok=True)
+
+    all_features = []
+
+    with torch.no_grad():
+        for videos, _ in dataloader:
+            videos = videos.to(device)
+            features = model(videos)  # (B, 512)
+            all_features.append(features.cpu())
+
+    torch.save(torch.cat(all_features), save_name)
+
+    del all_features
+    torch.cuda.empty_cache()
+    return
 def save_lavila_video_features(model, dataloader, save_name, batch_size=1000 , device = "cuda",args = None):
     _make_save_dir(save_name)
     all_features = []
@@ -749,15 +774,12 @@ def save_args(args,save_name):
         json.dump(args.__dict__, f, indent=2)
     
 
-<<<<<<< HEAD
 import torch
 import numpy as np
 from PIL import Image
 from IPython.display import display, Image as IPImage
 # Dataloader로부터 얻은 tensor (C, T, H, W)
 
-=======
->>>>>>> 5b32ea31240b8eea64aa20407fa0dd058e9718cc
 def visualize_gif(image,label,path,index,img_ind):
     tensor = image
     if len(tensor.shape)>4:
