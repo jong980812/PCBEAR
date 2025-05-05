@@ -52,7 +52,7 @@ def save_target_activations(target_model, dataset, save_name, target_layers = ["
     torch.cuda.empty_cache()
     return
 
-def save_clip_image_features(model, dataset, save_name, batch_size=1000 , device = "cuda",args = None):
+def save_clip_image_features(model, dataloader, save_name, batch_size=1000 , device = "cuda",args = None):
     _make_save_dir(save_name)
     all_features = []
 
@@ -63,14 +63,42 @@ def save_clip_image_features(model, dataset, save_name, batch_size=1000 , device
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     with torch.no_grad():
-        for images, labels in tqdm(DataLoader(dataset, batch_size, num_workers=8, pin_memory=True)):
+        for images, labels in (dataloader):
             # t = (images.shape)[2]
-            # if args.center_frame:
+            # if args.center_frame:'
+            '''
+            로더에서 나온 비디오 센터 프레임을 골라 고를떄 
+            '''
             #     images = images.squeeze(2)
             features = model.encode_video(images.to(device))# B,T, D
+            features = features.mean(dim=1)  
             all_features.append(features.cpu())
 
     torch.save(torch.cat(all_features), save_name)
+    #free memory
+    del all_features
+    torch.cuda.empty_cache()
+    return
+
+def save_clip_video_features(model, dataloader, save_name, batch_size=1000 , device = "cuda",args = None):
+    _make_save_dir(save_name)
+    all_features = []
+
+    if os.path.exists(save_name):
+        return
+    
+    save_dir = save_name[:save_name.rfind("/")]
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    with torch.no_grad():
+        for videos, labels in (dataloader):
+            # t = (images.shape)[2]
+            # if args.center_frame:
+            #     images = images.squeeze(2)
+            features = model.forward_features(videos.to(device))
+            all_features.append(features.cpu())
+    torch.save(torch.cat(all_features), save_name)
+
     #free memory
     del all_features
     torch.cuda.empty_cache()
@@ -172,9 +200,9 @@ def save_activations(clip_name, target_name, target_layers, d_probe,
         if not args.saved_features:
             save_lavila_video_features(dual_encoder_model, data_c, clip_save_name, batch_size, device=device,args=args)
     elif 'internvid' in args.dual_encoder:
-        s_text = clip.tokenize(["A photo of {}.".format(word) for word in s_words]).to(device)
+        s_text = clip.tokenize(["A video in which a {} object is present.".format(word) for word in s_words]).to(device)
         t_text = dual_encoder_model.text_encoder.tokenize(["{}".format(word) for word in t_words], context_length=32).to(device)
-        p_text = clip.tokenize(["A person {}.".format(word) for word in p_words]).to(device)
+        p_text = clip.tokenize(["A scene set in a {}".format(word) for word in p_words]).to(device)
         # save_internvid_text_features(dual_encoder_model , s_text, s_text_save_name, batch_size)
         save_clip_text_features(clip_model , s_text, s_text_save_name, batch_size)
         
@@ -198,21 +226,25 @@ def save_activations(clip_name, target_name, target_layers, d_probe,
     
 
 
-def save_text_features(concept_set, args, dual_encoder_model):
+def save_text_features(concept_set, args, dual_encoder_model,key):
     concept_set_name = (concept_set.split("/")[-1]).split(".")[0] if concept_set is not None else None
     concepts_save_name = "{}/{}_{}.pt".format(args.activation_dir, concept_set_name, args.dual_encoder)    
     with open(concept_set, 'r') as f: 
         words = (f.read()).split('\n')
     if args.dual_encoder =='clip':
-        concepts = clip.tokenize(["{}".format(word) for word in words]).to(args.device)
+        concepts = clip.tokenize(["A photo of {}".format(word) for word in words]).to(args.device)
         save_clip_text_features(dual_encoder_model , concepts, concepts_save_name, args.batch_size)
     elif args.dual_encoder =='lavila':
-        concepts = clip.tokenize(["{}".format(word) for word in words]).to(args.device)
+        concepts = clip.tokenize(["A video of {}".format(word) for word in words]).to(args.device)
         save_clip_text_features(dual_encoder_model , concepts, concepts_save_name, args.batch_size)
     elif 'internvid' in args.dual_encoder:
         # concepts = clip.tokenize(["A photo of {}.".format(word) for word in words]).to(args.device)
-        concepts = dual_encoder_model.text_encoder.tokenize(["{}".format(word) for word in words], context_length=32).to(args.device)
-
+        if key == "spatial":
+            concepts = dual_encoder_model.text_encoder.tokenize(["A video of {}".format(word) for word in words], context_length=32).to(args.device)
+        elif key == "place":
+            concepts = dual_encoder_model.text_encoder.tokenize(["A video of {}".format(word) for word in words], context_length=32).to(args.device)
+        elif key == "temporal":
+            concepts = dual_encoder_model.text_encoder.tokenize(["A video of {}".format(word) for word in words], context_length=32).to(args.device)
         save_internvid_text_features(dual_encoder_model , concepts, concepts_save_name, args.batch_size)
 
     return concepts_save_name

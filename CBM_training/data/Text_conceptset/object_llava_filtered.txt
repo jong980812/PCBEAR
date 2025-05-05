@@ -1,0 +1,523 @@
+700
+album
+apple
+arm
+arrow
+audience
+baby
+back
+backpack
+bag
+balloons
+band
+band member
+bar
+barbell
+barber
+barre
+barrier
+base
+baseball bat
+baseball batter
+baseball catcher
+baseball fans
+baseball glove
+baseball helmets
+baseball pitcher
+baseball player
+baseball seats
+baseball stadium
+baseball stands
+baseball umpire
+baseball uniforms
+basketball net
+basketball players on bench
+basketball players on court
+bat
+batter
+bed
+bedding
+belt
+benches
+bird
+black
+black and white uniforms
+black bench cushion
+black box
+black hat
+black man's arm
+black man's hand
+black man's head
+black man's leg
+black man's torso
+black pants
+black shirt
+black shoe
+black skirt
+blanket
+blue
+blue and white uniforms
+blue bench
+blue box
+blue chair
+blue heart
+blue lane divider
+blue mat
+blue pants
+blue pole
+blue shirt
+blue shoe
+blue wall
+board
+boat
+book
+bookshelf
+bottle
+bow
+bowl
+bowling pins
+box
+boxer
+boxing glove
+boxing ring
+boy
+bridge
+broom
+brown
+bucket
+building
+bus
+bushes
+butter
+cabinet
+cabinet door
+cabinet drawer
+cabinet shelf
+cake
+camera
+can
+candle
+canoe
+car
+carpet
+carrots
+catcher
+ceiling
+cell phone
+cello
+chair
+chalk
+chalkboard
+child
+clock
+clouds
+club
+coffee mug
+comb
+computer
+computer mouse
+cone
+cords
+couch
+counter
+cricket ball
+cricket bat
+crowd
+cue
+cue stick
+cup
+cupboard
+cupcake
+curtain
+cutting board
+cymbal
+dance floor
+desk
+desk lamp
+dining table
+dirt
+dirt road
+dishes
+dishwasher
+dog
+doll
+donut
+door
+dough
+doughnut
+drawer
+dress
+dresser
+drill
+drum major
+drum major's baton
+drum major's boots
+drum major's coat
+drum major's gloves
+drum major's hat
+drum major's pants
+drum major's uniform
+drumstick
+dumbbell
+earphones
+easel
+eggs
+elbow
+eye
+eye shadow
+face
+fan
+faucet
+feet
+fence post
+field
+fielders
+finger
+fire truck
+flag
+floor
+flour
+flowers
+flute
+foot
+football field
+fork
+frame
+garage door
+girl
+glass
+glasses
+glove
+goal
+goalie
+golf bag
+golf ball
+golf cart
+grass
+gray
+green
+green bench
+green chair
+green gloves
+green mat
+green pants
+green pole
+green shirt
+green wall
+guitar
+guitar body
+guitar case
+guitar head
+guitar neck
+guitar stand
+guitar strings
+gym
+gym bar
+gym bench
+gym equipment
+gym mat
+gym rack
+gym workout station
+gymnast
+gymnastics bar
+gymnastics beam
+gymnastics floor
+gymnastics mat
+gymnastics ring
+hair brush
+hair clippers
+hair trimmer
+hairdryer
+hand
+handbag
+hat
+head
+headphones
+helmet
+hockey stick
+house
+hula hoop
+jacket
+jeans
+jewelry
+jockey
+judge
+kite
+knee
+knife
+knives
+ladder
+lamp
+lane
+laptop
+leash
+leaves
+leg
+light
+lipstick
+machine
+makeup
+man
+man's gym bench press barbell
+man's gym bench press dumbbell
+man's gym bench press machine
+man's gym bench press weight
+marker
+mat
+mattress
+men
+microphone
+microphone boom arm pole
+microwave
+mirror
+monitor
+mound
+mouse
+mouth
+music stand
+nails
+neck
+needle
+net
+nose
+number
+number 10
+number 100
+number 8
+nuts
+oar
+olive oil
+onion
+orange box
+oven
+paddle
+paddleboard
+pads
+pan
+pants
+paper
+parachute
+pen
+pencil
+people
+person
+phone
+piano
+picture
+picture frame
+pillow
+pine tree
+ping pong table
+pink shirt
+pink wall
+pins
+pipe
+pitcher
+pizza box
+plate
+player
+pliers
+pole
+pole,
+ponytail
+pool
+pool balls
+poster
+pot
+potato
+potted plant
+punching bag stand
+purple and white uniforms
+race
+rack
+racket
+ramp
+razor
+red
+red and white boxing gloves
+red ball
+red bench
+red bench cushion
+red bow
+red box
+red chair
+red cone
+red gloves
+red hat
+red heart
+red mat
+red pillow
+red pole
+red shirt
+red shoe
+red shoe laces
+red wall
+referee
+refrigerator
+remote
+rider
+ring
+river
+road
+rock
+rug
+runner
+saddle
+sand
+sandals
+sandwich
+saw
+scissors
+score
+scoreboard
+screen
+screwdriver
+shaving cream
+sheet music
+shelf
+shirt
+shirtless
+shoe
+shorts
+shoulder
+shower curtain
+sidewalk
+sign
+sink
+skates
+skirt
+snow
+snowboard
+snowboarder
+soccer ball
+soccer field
+soccer goalie
+soccer net
+soccer player
+soccer team members' uniforms
+soldiers
+speaker
+spectator
+spoon
+spray bottle
+stadium
+stage
+stairs
+statue
+step
+stick
+stool
+stove
+street
+students
+sugar
+suit
+suitcase
+swimmer
+swimming pool
+swimsuit
+sword
+t-shirt
+table
+tablecloth
+tape dispenser
+tape measure
+tape reel
+tape spool
+team
+teddy bear
+tennis ball
+tennis court
+tennis racket
+tent
+tie
+tile floor
+time
+tire
+toaster
+toothpaste
+torso
+towel
+toy
+toy car
+toy car track
+toy car track pieces
+toy train
+toy train tracks
+track
+traffic light
+trash can
+treadmill
+tree
+trombone
+truck
+truck bed
+trumpet
+tuba
+tv
+umbrella
+umpire
+uniform
+vacuum
+vase
+vice grip clamp pliers
+violin
+wall
+watch
+water
+water bottle
+water ski
+waterfall
+wave
+weight
+weight machine
+weightlifting
+whisk
+white
+white bench cushion
+white box
+white gloves
+white hat
+white heart
+white man's arm
+white man's hand
+white man's head
+white man's leg
+white man's torso
+white pants
+white shirt
+white shoe laces
+white shoes
+white shorts
+whiteboard
+wicket
+wii controller
+window
+wine glasses
+woman
+woman's arm
+woman's chin
+woman's ear
+woman's elbow
+woman's eyes
+woman's face
+woman's hair
+woman's hand
+woman's mouth
+woman's neck
+woman's nose
+woman's shoulder
+woman's wrist
+wood
+wrestler
+wrestling ring
+yellow
+yellow and white uniforms
+yellow bench
+yellow chair
+yellow mat
+yellow pole
+yellow shoes
+yellow wall
+yoga mat
+york

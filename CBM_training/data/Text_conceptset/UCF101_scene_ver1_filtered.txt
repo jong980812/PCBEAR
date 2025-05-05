@@ -1,0 +1,418 @@
+Abandoned warehouse
+Agricultural fields
+Airport lounge
+Alleyway
+Alpine slope
+Amusement park
+Aquatic center
+Arena
+Art studio
+Athletic club
+Athletic track
+Backcountry terrain
+Backstage area
+Backyard
+Backyard lawn
+Backyard with a tennis setup
+Bakery
+Balcony
+Ballroom
+Bar or pub
+Barbershop
+Basement or home game room
+Bathroom
+Bathroom mirror
+Bay
+Bay area
+Beach boardwalk
+Beach court
+Beach or open sandy area
+Beach promenade
+Beach sand
+Beach shoreline
+Beach volleyball court
+Beachfront area
+Beauty school
+Bedroom
+Bedroom carpet
+Bedroom vanity
+Boxing ring
+Building site
+Campfire setting
+Campground
+Canal
+Canyon
+Canyon or gorge
+Car mirror
+Carpentry shop
+Carpeted hallway
+Casino
+Ceremonial grounds
+Church
+Church or cathedral
+Church or chapel
+Church or place of worship
+Circus tent
+City sidewalk
+City skyline
+Civic plaza
+Classroom
+Classroom or science lab
+Cliffside
+Climbing facility
+Clubhouse
+Co-working space
+Coastal area
+Coastal lagoon
+Coastal path
+Coastal reef
+Coastal waters
+Coffee shop
+College campus court
+College campus lawn
+College student union
+Commercial kitchen
+Community center court
+Community center grounds
+Community center gym
+Community event
+Community gathering
+Competition arena
+Concert hall
+Concert stage
+Construction site
+Cooking class setting
+Cooking competition
+Cooking show set
+Country club grounds
+Countryside
+Countryside path
+Countryside road
+Countryside track
+Cozy café
+Craft room
+Cross-country trail
+CrossFit box
+Cruise ship ballroom
+Cruise ship entertainment area
+Culinary school
+Cultural event
+Cycling track
+DIY project area
+Dance competition
+Dance competition venue
+Dance festival
+Dance studio
+Dance workshop
+Daycare center
+Demonstration arena
+Desert expanse
+Desert landscape
+Desert trail
+Dining room
+Dirt track
+Dojo
+Dormitory bathroom
+Dressing room
+Driveway
+Driveway court
+Driving range
+Empty parking lot
+Entertainment venue
+Equestrian center
+Equestrian track
+Estuary
+Event hall
+Fairgrounds
+Family gathering
+Family room
+Festival grounds
+Field hockey pitch
+Film set
+Fitness boot camp location
+Fitness facility
+Fjords
+Folk music event
+Food festival
+Forest canopy
+Forest clearing
+Forest trail
+Forested riverbanks
+Forested snow trail
+Frozen lake
+Game room
+Garage
+Garage or basement
+Garden or backyard
+Garden or courtyard
+Garden or park setting
+Garden path
+Glacier
+Golf course bunker
+Golf course fairway
+Golf course green
+Golf course practice area
+Golf course rough
+Golf course tee box
+Gorge passages
+Gorge waterways
+Government buildings
+Grass field
+Grassland
+Gym
+Gym locker room
+Gymnastics training facility
+Hair salon
+Harbor
+Health club
+Health retreat
+High ropes course
+Hiking trail or nature path
+Historical landmarks
+Home
+Home gym
+Home living room or backyard
+Home office
+Home renovation area
+Home workout room
+Hospital corridor
+Hospital room bathroom
+Hotel lobby
+Hotel lounge
+Hotel room
+Hotel room bathroom
+Hotel room or gym
+Hunting grounds
+Ice rink
+Ice skating stadium
+Indoor adventure park
+Indoor basketball court
+Indoor climbing gym
+Industrial area
+Island cliffs
+Island cove
+Jazz club
+Kitchen
+Kitchen floor
+Knitting class or workshop
+Laboratory
+Lagoon
+Lake
+Lake or pond
+Lake surface
+Lakeside area
+Lakeside cliffs
+Latin dance party
+Lecture hall
+Library
+Living room
+Living room floor
+Maintenance room
+Makeup studio
+Mangrove forest
+Marina
+Marina area
+Martial arts dojo
+Martial arts tournament arena
+Massage parlor
+Massage therapy clinic
+Meadow
+Meeting room
+Memorial sites
+Military bases
+Mobile hair studio
+Mountain range
+Mountain streams
+Mountain trail
+Movie set or stage
+Music concert
+Music festival setting
+Music school
+Music studio
+National capitals
+National park rivers
+Nature reserve
+Neighborhood street
+Nightclub
+Nordic ski area
+Nordic trail
+Nursery
+Obstacle course
+Ocean
+Ocean coastline
+Ocean or sea
+Ocean reef
+Ocean shore
+Ocean view
+Oceanfront bluffs
+Office
+Office break room
+Office cubicle
+Office restroom
+Office space
+Olympic arena
+Olympic training center
+Open field
+Open plaza
+Open sky
+Open water
+Open-air stage or amphitheater
+Orchestra pit
+Outdoor basketball court
+Outdoor climbing wall
+Outdoor festival
+Outdoor field
+Outdoor kitchen
+Outdoor market
+Outdoor park
+Outdoor performance space
+Outdoor plaza
+Outdoor sand court
+Outdoor stage
+Outdoor swimming facility
+Over a cityscape
+Over a festival or event
+Parade grounds
+Parade route
+Park lawn
+Park pathway
+Park trail
+Parking lot
+Party venue
+Physical therapy center
+Picnic area
+Pizzeria kitchen
+Playground
+Playground court
+Playroom
+Point break
+Pool hall
+Porch or patio
+Private event or gathering
+Private garden
+Public restroom
+Public square
+Putting green
+Quarry
+Quarry cliffs
+Racecourse
+Ranch
+Recreational center
+Recreational water park
+Reef break
+Regatta course
+Rehearsal space
+Religious ceremony
+Religious gathering
+Religious procession
+Remote wilderness rivers
+Reservoir
+Resort
+Resort waterfront
+Restaurant
+Restaurant dining area
+Restaurant kitchen
+Retail store floor
+River
+River expanse
+River gorges
+River mouth
+River rapids
+Riverbank
+Riverbank trail
+Riverside path
+Rocky seaside
+Rocky shorelines
+Rooftop court
+Rooftop terrace
+Rowing club venue
+Rural farmland
+Rural highway
+Salon
+Sandy shore
+School band room
+School gym
+School hallway
+School or college auditorium
+School or college event
+School talent show
+Schoolyard
+Self-defense class
+Seminar room
+Shipwreck site
+Shower
+Snow-covered mountain
+Snowy forest
+Social club
+Spa
+Sparring area
+Sports club
+Sports facility
+Sports field or track
+Sports hall
+Stadium
+Stadiums
+Stadiums or large open fields
+Street corner
+Street parade
+Street performance area
+Suburban area
+Suburban cul-de-sac
+Suburban road
+Sumo arena
+Supermarket aisle
+Swim meet or competition venue
+Swimming pool
+Table tennis club
+Talent show stage
+Talent show venue
+Temple courtyard
+Temple grounds
+Temple or spiritual gathering
+Tennis academy grounds
+Tennis court
+Theater dressing room
+Tournament venue
+Track and field arena
+Traditional Indian setting
+Traditional dance event
+Traditional music gathering
+Training camp
+Training facility
+Trampoline park
+Tropical coves
+Tropical islands
+Tropical lagoon
+Turf track
+Underwater cave
+University athletic grounds
+University campus
+University quad
+Urban bike lane
+Urban plaza
+Urban square
+Urban street
+Vanity area
+Village square
+Waiting room
+Water sports zone
+Waterfall edges
+Waterfalls
+Wedding procession
+Wedding reception
+Wellness center
+Wetland
+Whitewater rapids
+Whitewater sections
+Winter festival setting
+Winter sports park
+Workshop
+Workshop or garage
+Workshop space
+Wrestling arena
+Yoga or pilates studio
+Yoga studio
+beach
+cricket field
+fitness class
+gymnasium

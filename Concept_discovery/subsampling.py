@@ -600,60 +600,137 @@ def subsampling_wo_cos_sim(args, json_files):
     print(f"Number of missing video : {cnt}")
     return class_data, class_metadata
 
-# def subsampling_random(args, json_files):
-#     """
-#     클래스별로 일정 개수의 비디오를 랜덤으로 선택하고,
-#     각 비디오에서 랜덤 중심 기반의 T프레임 클립 1개만 생성
-#     """
-#     scaler = MinMaxScaler(feature_range=(0, 1))
-#     T = args.len_subsequence
-#     half_T = T // 2
-#     num_per_class = args.num_per_class
+def subsampling_sliding_window(args, json_files):
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    
+    class_data = []
+    class_metadata = []
+    missing_video = []
+    cnt_invalid = 0
+    
+    L, T, stride = args.num_subsequence, args.len_subsequence, 1
 
-#     class_video_dict = defaultdict(list)
-#     class_data = []
-#     class_metadata = []
+    for json_file in tqdm(json_files, desc="Processing JSON files", leave=True):
+        video_id = os.path.basename(json_file).replace("_result.json", "")
+        frames_data, missing_index, og_num_frames = get_keypoints(json_file)
 
-#     # 1. 비디오를 클래스별로 그룹핑
-#     for json_file in json_files:
-#         class_name = os.path.basename(os.path.dirname(json_file))
-#         class_video_dict[class_name].append(json_file)
+        if len(frames_data) == 0:
+            print(f"Skipping {json_file} (No valid frames)")
+            missing_video.append(json_file)
+            cnt_invalid += 1
+            continue
 
-#     # 2. 클래스별로 num_per_class개 랜덤 선택 후 clip 생성
-#     for class_name, videos in class_video_dict.items():
-#         selected_videos = random.sample(videos, min(num_per_class, len(videos)))
+        pose = np.array(frames_data)[:, :, :2]       # (F, 17, 2)
+        confidence = np.array(frames_data)[:, :, 2]  # (F, 17)
+        num_frames = len(pose)
 
-#         for json_file in selected_videos:
-#             video_id = os.path.basename(json_file).replace("_result.json", "")
-#             frames_data = process_keypoints(json_file, scaler)
-#             num_frames = len(frames_data)
+        if num_frames < T:
+            pose = util.repeat_to_min_length(pose, T)
+            confidence = util.repeat_to_min_length(confidence, T)
+            print(f"Expanded {video_id}: {num_frames} → {len(pose)} frames")
+            num_frames = len(pose)
 
-#             if num_frames == 0:
-#                 print(f"Skipping {json_file} (No valid frames)")
-#                 continue
+        accepted_clips = []
 
-#             if num_frames < T:
-#                 expanded = util.expand_array(frames_data, T)
-#                 if expanded is None:
-#                     print(f"Skipping {json_file} (Cannot expand)")
-#                     continue
-#                 frames_data = expanded
-#                 num_frames = len(frames_data)
+        for i in range(0, num_frames - T + 1, stride):
+            clip = pose[i:i+T]
+            clip_conf = confidence[i:i+T]
 
-#             # 중심 프레임 선택
-#             center_idx = random.randint(half_T, num_frames - half_T - 1)
-#             start_idx = center_idx - half_T
-#             end_idx = start_idx + T
+            mean_conf = np.mean(clip_conf)
+            cos_sim = util.compute_pose_cosine_similarity(clip)
 
-#             clip = np.array(frames_data[start_idx:end_idx])
+            if np.any(cos_sim < 0.92):
+                print(f"[cos_sim<0.92] {video_id}: [{i},{i+T}]")
+                continue
 
-#             if len(clip) == T:
-#                 class_data.append(clip)
-#                 class_metadata.append(f"{class_name}/{video_id}[{start_idx},{end_idx}]")
-#             else:
-#                 print(f"Skipping {json_file} (Clip length mismatch)")
+            if mean_conf < args.confidence:
+                print(f"[confidence<{args.confidence}] {video_id}")
+                continue
 
-#     return class_data, class_metadata
+            clip_normalized = normalized_keypoints(clip, scaler)
+            accepted_clips.append(clip_normalized)
+            class_metadata.append(f"{video_id}[{i},{i+T}]")
+
+        if len(accepted_clips) == 0:
+            cnt_invalid += 1
+            missing_video.append(video_id)
+
+        class_data.extend(accepted_clips)
+
+    print(f"Number of invalid/missing videos: {cnt_invalid}")
+    return class_data, class_metadata
+
+def subsampling_non_overlapping(args, json_files):
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    class_data = []
+    class_metadata = []
+    missing_video = []
+    cnt = 0
+    
+    L, T = args.num_subsequence, args.len_subsequence
+    threshold_conf = args.confidence  # ex. 0.9
+
+    for json_file in tqdm(json_files, desc="Processing JSON files", leave=True):
+        class_name = os.path.basename(os.path.dirname(json_file))
+        video_id = os.path.basename(json_file).replace("_result.json", "")
+        frames_data, missing_index,og_num_frames = get_keypoints(json_file)
+
+        if len(frames_data) == 0:
+            print(f"Skipping {json_file} (No valid frames)")
+            missing_video.append(json_file)
+            cnt += 1
+            continue
+        
+        num_frames = len(frames_data)
+
+
+        # 부족한 경우 확장
+        if num_frames < L * T:
+            expanded_frames = util.expand_array(frames_data, L * T)
+            if expanded_frames is not None:
+                frames_data = expanded_frames
+                num_frames = len(frames_data)
+            else:
+                print(f"Skipping {json_file} (Unable to expand frames)")
+                continue
+
+        pose = np.array(frames_data)[:, :,:2]
+        confidence = np.array(frames_data)[:, :, 2] 
+        
+
+        segment_length = num_frames // L
+        all_clips = []
+
+        for i in range(L):
+            segment_start = i * segment_length
+            segment_end = (i + 1) * segment_length
+
+            sub_segment_length = max(segment_length // T, 1)
+            sampled_indices = [
+                segment_start + j * sub_segment_length + np.random.randint(0, sub_segment_length)
+                for j in range(T)
+            ]
+
+            clip = pose[sampled_indices]
+            clip_conf = confidence[sampled_indices]
+
+            mean_conf = np.mean(clip_conf)
+            cos_sim = util.compute_pose_cosine_similarity(clip)
+
+            if np.any(cos_sim < 0.92):
+                print(f"[cos_sim<0.92] {video_id} seg#{i}")
+                continue
+            if mean_conf < threshold_conf:
+                print(f"[conf<{threshold_conf}] {video_id} seg#{i}")
+                continue
+
+            clip_normalized = normalized_keypoints(clip, scaler)
+            all_clips.append(clip_normalized)
+            class_metadata.append(f"{video_id}[{min(sampled_indices)},{max(sampled_indices)}]")
+
+        class_data.extend(all_clips)
+
+    return class_data, class_metadata
 
 def Keypointset(args, output_path):
     processed_keypoints_path = os.path.join(output_path, "processed_keypoints.npy")
@@ -676,6 +753,10 @@ def Keypointset(args, output_path):
         class_data, class_metadata = subsampling_considering_cos_sim(args, json_files)
     elif args.subsampling_mode == "wo_cos_sim":
         class_data, class_metadata = subsampling_wo_cos_sim(args, json_files)
+    elif args.subsampling_mode == "sliding_window":
+        class_data, class_metadata = subsampling_sliding_window(args, json_files)
+    elif args.subsampling_mode == "non-overlapping":
+        class_data, class_metadata = subsampling_non_overlapping(args, json_files)
     print(np.array(class_data).shape)
     print(np.array(class_metadata).shape)
     util.save_data(output_path, class_data, class_metadata)

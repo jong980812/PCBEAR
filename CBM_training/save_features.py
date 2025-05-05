@@ -15,6 +15,7 @@ from video_dataloader import video_utils
 import torch.distributed as dist
 from cbm_utils import *
 from video_dataloader import datasets
+from modeling_clip import CLIP
 parser = argparse.ArgumentParser(description='Settings for creating CBM')
 
 # Model parameters
@@ -191,6 +192,7 @@ parser.add_argument('--lavila_ckpt',type=str,default=None)
 parser.add_argument('--internvid_version',type=str,default='200m')
 parser.add_argument('--only_backbone',action='store_true')
 parser.add_argument('--only_vlm',action='store_true')
+parser.add_argument('--TA', action='store_true', default=False)
 
 
 
@@ -223,8 +225,22 @@ def get_multi_modal_encoder(args,device):
     return dual_encoder_model
 
 def get_video_encoder(args,device):
-    if args.backbone.startswith("clip_"):
-        target_model, target_preprocess = clip.load(args.backbone[5:], device=device)
+    if args.backbone.startswith("clip"):
+        # target_model, target_preprocess = clip.load(args.backbone[5:], device=device)
+        target_model=CLIP(
+            input_resolution=224,
+            patch_size=16,
+            num_frames=args.num_frames,
+            width=768,
+            layers=12,
+            heads=12,
+            drop_path_rate=args.drop_path,
+            num_classes=args.nb_classes,
+            args=args
+        )
+        finetune = torch.load(args.finetune, map_location='cpu')['model']
+        print(target_model.load_state_dict(finetune))
+        
     elif args.backbone =='timesformer':
         target_model = Timesformer(
             img_size=224, patch_size=16,
@@ -284,8 +300,8 @@ def main(args):
         # Load video dataset
         video_dataset, nb_classes = datasets.build_dataset(is_train, test_mode, args)
         video_dataloader = DataLoader(video_dataset, args.batch_size, num_workers=args.num_workers, pin_memory=True,shuffle=False)
-        print(f"Extractin features from VLM {args.dual_encoder}")
         if not args.only_backbone:
+            print(f"Extractin features from VLM {args.dual_encoder}")
             if args.dual_encoder =='clip':
                 save_clip_image_features(dual_encoder, video_dataloader, vlm_save_name, args.batch_size, device=device,args=args)
             elif args.dual_encoder =='lavila':
@@ -296,8 +312,8 @@ def main(args):
             continue
         print(f"Extractin features from Video backbone {args.backbone}")
 
-        if args.backbone.startswith("clip_"):
-            save_clip_image_features(video_encoder, video_dataloader, target_save_name, args.batch_size, device,args)
+        if args.backbone.startswith("clip"):
+            save_clip_video_features(video_encoder, video_dataloader, target_save_name, args.batch_size, device,args)
         elif args.backbone.startswith("vmae_") or args.backbone=='AIM':
             save_vmae_video_features(video_encoder,video_dataloader,target_save_name,args.batch_size,device,args)
         elif args.backbone.startswith("r3d"):

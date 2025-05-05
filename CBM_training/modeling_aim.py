@@ -97,10 +97,7 @@ class ResidualAttentionBlock(nn.Module):
     def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None, scale=1., num_tadapter=1, num_frames=8, drop_path=0.,dim_mlp=192,adapter=True):
         super().__init__()
         self.num_tadapter = num_tadapter
-        # self.attn = nn.MultiheadAttention(d_model, n_head)
-        self.attn = Attention(
-            d_model, num_heads=n_head, qkv_bias=True, qk_scale=None,
-            attn_drop=0., proj_drop=0., attn_head_dim=None)
+        self.attn = nn.MultiheadAttention(d_model, n_head)
         self.ln_1 = LayerNorm(d_model)
         self.mlp = nn.Sequential(OrderedDict([
             ("c_fc", nn.Linear(d_model, d_model * 4)),
@@ -108,7 +105,7 @@ class ResidualAttentionBlock(nn.Module):
             ("c_proj", nn.Linear(d_model * 4, d_model))
         ]))
         self.ln_2 = LayerNorm(d_model)
-        # self.attn_mask = attn_mask
+        self.attn_mask = attn_mask
         self.n_head = n_head
         self.adapter = adapter
         if self.adapter:
@@ -121,11 +118,10 @@ class ResidualAttentionBlock(nn.Module):
                 self.T_Adapter_in = Adapter(d_model,dim_mlp=dim_mlp)
         self.num_frames = num_frames
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
-        # self.attn_drop = nn.Dropout(0.)
 
-    # def attention(self, x: torch.Tensor):
-    #     self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-    #     return self.attn(x, x, x, need_weights=True, attn_mask=self.attn_mask)
+    def attention(self, x: torch.Tensor):
+        self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
+        return self.attn(x, x, x, need_weights=False, attn_mask=self.attn_mask)[0]
 
     def forward(self, x: torch.Tensor):
         if self.adapter:
@@ -135,21 +131,20 @@ class ResidualAttentionBlock(nn.Module):
             ## temporal adaptation
             xt = rearrange(x, 'n (b t) d -> t (b n) d', t=self.num_frames)
             if self.num_tadapter == 2:
-                xt = self.T_Adapter(self.attn(self.T_Adapter_in(self.ln_1(xt))))
+                xt = self.T_Adapter(self.attention(self.T_Adapter_in(self.ln_1(xt))))
             else:
-                xt = self.T_Adapter(self.attn(self.ln_1(xt)))
+                xt = self.T_Adapter(self.attention(self.ln_1(xt)))
             xt = rearrange(xt, 't (b n) d -> n (b t) d', n=n)
             x = x + self.drop_path(xt)
             ## spatial adaptation
-            x = x + self.S_Adapter(self.attn(self.ln_1(x)))
+            x = x + self.S_Adapter(self.attention(self.ln_1(x)))
             ## joint adaptation
             xn = self.ln_2(x)
             x = x + self.mlp(xn) + self.drop_path(self.scale * self.MLP_Adapter(xn))
         else:
-            x = x + self.attn(self.ln_1(x))
+            x = x + self.attention(self.ln_1(x))
             x = x + self.mlp(self.ln_2(x))
         return x
-
 
 class Transformer(nn.Module):
     def __init__(self, num_frames, width: int, layers: int, heads: int, attn_mask: torch.Tensor = None, num_tadapter=1, scale=1., drop_path=0.1,dim_mlp=192,adapter_layers=[]):
