@@ -226,7 +226,7 @@ parser.add_argument('--loss_mode',default='concept',choices=['concept','sample',
 #!
 parser.add_argument('--backbone_features',type=str,default=None)
 parser.add_argument('--learn_each_cls',action='store_true')
-parser.add_argument('--with_cls_attr',action='store_true')
+parser.add_argument('--no_filter_out',action='store_true')
 parser.add_argument('--vlm_features',type=str,default=None)
 # parser.add_argument('--train_mode', default='pose',type=str, help='set concept type')
 parser.add_argument('--train_mode', nargs='+', default=['pose'], choices=['pose', 'spatial', 'temporal', 'place'],
@@ -380,7 +380,7 @@ def train_cbm_and_save(args):
             concept_names[key] = f.read().split('\n')
 
         print(f"📚 Encoding text features for {key} concepts...")
-        concept_save_paths[key] = cbm_utils.save_text_features(set_path, args, dual_encoder)
+        concept_save_paths[key] = cbm_utils.save_text_features(set_path, args, dual_encoder,key)
 
     # Compute concept matrices
     with torch.no_grad():

@@ -24,7 +24,7 @@ parser.add_argument('--len_subsequence', type=int, default=16)
 parser.add_argument('--dataset', default='Penn_action', 
                     choices=['Penn_action','KTH','HAA100','UCF101'],type=str)
 parser.add_argument('--use_partition_num',  type=int, default=1)
-parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","sim+conf","wo_cos_sim","random"])
+parser.add_argument('--subsampling_mode', type=str, default="ver1", choices=["ver1","ver2","ver3","ver4","ver5","sim+conf","wo_cos_sim","sliding_window","non-overlapping"])
 parser.add_argument('--confidence', type=float, default="0.5")
 parser.add_argument('--save_fps', type=int, default=20)
 parser.add_argument('--clustering_mode', type=str, default="partition", choices=["req","partition","k-means","som"])

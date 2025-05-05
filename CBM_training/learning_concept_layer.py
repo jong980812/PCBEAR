@@ -70,9 +70,10 @@ def train_pose_cocept_layer(args,target_features, val_target_features,save_name)
             train_result_tensor[train_result_tensor == 1.] = 0.3
             val_result_tensor[val_result_tensor == 0.] = 0.05
             val_result_tensor[val_result_tensor == 1.] = 0.3
-        if args.with_cls_attr:
+        if args.no_filter_out:
             train_result_tensor[train_result_tensor == -1.] = 1e-8
             val_result_tensor[val_result_tensor == -1.] = 1e-8
+            print("----------------Using Noisy sample----------------------")
 
     
     '''
