@@ -431,9 +431,13 @@ def get_detailed_metrics_cbm(model, dataset, device, batch_size=250, num_workers
 
     # 전체 confusion matrix
     cm = confusion_matrix(all_labels, all_preds)
+    correct = sum([pred == label for pred, label in zip(all_preds, all_labels)])
+    total = len(all_labels)
+    accuracy = correct / total
 
+    print(f"Accuracy: {accuracy:.4f}")
     # classification report
-    report = classification_report(all_labels, all_preds, target_names=class_names, digits=3)
+    report = classification_report(all_labels, all_preds,labels=[i for i in range(dataloader.dataset.nb_classes)],target_names=class_names, digits=3)
 
     # 클래스별 accuracy 계산
     class_accuracies = cm.diagonal() / cm.sum(axis=1)

@@ -14,7 +14,7 @@ from video_dataloader import video_utils
 import train_video_cbm
 from video_dataloader import datasets
 import cbm_utils
-
+from video_dataloader.dataset_information import DATASET_CONFIG
 def load_all_concepts_by_type(load_dir, train_mode):
     concept_dict = {}
     for concept_type in train_mode:
@@ -30,6 +30,7 @@ def load_all_concepts_by_type(load_dir, train_mode):
 
 parser = argparse.ArgumentParser(description='Evaluatin ours')
 parser.add_argument('--load_dir',required=True,type=str, default='', help='Trained model path')
+parser.add_argument('--other_dataset',type=str, default=None, help='Name of other dataset')
 parser.add_argument('--batch_size',type=int, default=32, help='Inference batch size')
 parser.add_argument('--subset_labels', nargs='*', default=None, help='List of class labels to evaluate subset metrics')
 def main(train_args, test_args):
@@ -60,8 +61,19 @@ def main(train_args, test_args):
         with open(report_path, "r") as f:
             report = f.read()
     else:
+        if test_args.other_dataset is not None:
+            config = DATASET_CONFIG.get(test_args.other_dataset)
+            if config is None:
+                raise ValueError(f"Unknown dataset: {test_args.other_dataset}")
+            
+            train_args.data_set = config['data_set']
+            train_args.data_path = config['data_path']
+            train_args.video_anno_path = config['video_anno_path']
+            train_args.test_num_crop = 1
+            train_args.test_num_segment = 1
         # inference 수행
         val_video_dataset,_ =   datasets.build_dataset(False, False, train_args)
+        a = val_video_dataset[0]
         # accuracy = cbm_utils.get_accuracy_cbm(model, val_video_dataset, device,test_args.batch_size,8)
         report, cm, all_labels, all_preds,class_acc = cbm_utils.get_detailed_metrics_cbm(model, val_video_dataset, device, batch_size=test_args.batch_size, class_names=class_names,return_raw=True)
             # 저장

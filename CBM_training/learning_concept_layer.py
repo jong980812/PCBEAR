@@ -316,7 +316,7 @@ def train_classification_layer(args=None,W_c=None,pre_concepts=None,concepts=Non
     linear.bias.data.zero_()
     
     STEP_SIZE = 0.05
-    ALPHA = 0.99
+    ALPHA = 0.5
     metadata = {}
     metadata['max_reg'] = {}
     metadata['max_reg']['nongrouped'] = args.lam
@@ -411,7 +411,7 @@ def train_aggregated_classification_layer(
 
     # GLM 설정
     STEP_SIZE = 0.05
-    ALPHA = 0.99
+    ALPHA = 0.
     metadata = {'max_reg': {'nongrouped': args.lam}}
 
     output_proj = glm_saga(
